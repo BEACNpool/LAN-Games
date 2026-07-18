@@ -257,6 +257,7 @@ class Fab5FeudSession(GameSession):
         ctrl = r["control"]
         r["turn_order"] = list(self.g["roster"][ctrl])
         r["turn_idx"] = 0
+        self._seat_answerer(r)
         r["stage"] = "play"
         self.phase = "play"
         self._bump(time.time() + TURN_SECONDS)
@@ -264,19 +265,33 @@ class Fab5FeudSession(GameSession):
                         passed=not play)]
 
     def _current_answerer(self, r):
+        """READ-ONLY: the first connected player from turn_idx. Never mutates —
+        it runs on the game_state serialization path once per viewer."""
         order = r["turn_order"]
         n = len(order)
+        if not n:
+            return None
         for k in range(n):
             tok = order[(r["turn_idx"] + k) % n]
             p = self.players.get(tok)
             if p and p.connected:
-                r["turn_idx"] = (r["turn_idx"] + k) % n
                 return tok
-        return order[r["turn_idx"] % n] if order else None
+        return order[r["turn_idx"] % n]
+
+    def _seat_answerer(self, r):
+        """Write turn_idx to the first connected seat from where it points."""
+        order = r["turn_order"]
+        n = len(order)
+        for k in range(n):
+            idx = (r["turn_idx"] + k) % n
+            p = self.players.get(order[idx])
+            if p and p.connected:
+                r["turn_idx"] = idx
+                return
 
     def _advance_turn(self, r):
         r["turn_idx"] = (r["turn_idx"] + 1) % len(r["turn_order"])
-        self._current_answerer(r)
+        self._seat_answerer(r)
         self._bump(time.time() + TURN_SECONDS)
 
     # ---- play ----
@@ -363,6 +378,26 @@ class Fab5FeudSession(GameSession):
                       for s in SIDES],
         }
         return self.end_game()
+
+    def game_player_left(self, token):
+        # if the SEATED answerer drops mid-turn, hand the turn to the next
+        # connected teammate with a FRESH clock (not the departed's leftover)
+        g = self.g
+        if g and self.phase == "play":
+            r = g["round"]
+            order = r["turn_order"]
+            if order and order[r["turn_idx"] % len(order)] == token:
+                r["turn_idx"] = (r["turn_idx"] + 1) % len(order)
+                self._seat_answerer(r)
+                if self._current_answerer(r) is not None:
+                    self._bump(time.time() + TURN_SECONDS)
+        return []
+
+    def to_lobby(self):
+        # clear the finished match so the lobby team picker recomputes from the
+        # CURRENT players (otherwise it shows the previous game's stale roster)
+        self.g = None
+        return super().to_lobby()
 
     def game_tick(self):
         if self.g is None:

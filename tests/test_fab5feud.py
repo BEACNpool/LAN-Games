@@ -51,6 +51,17 @@ def test_match_normalizes():
     assert surveys.match_answer("grape", ans) is None
 
 
+def test_match_exact_beats_shorter_containment():
+    # the review's case: "toilet paper" must hit "Toilet Paper", not "Toilet"
+    ans = [
+        {"text": "Toilet", "pts": 40, "aliases": ["toilet"]},
+        {"text": "Toilet Paper", "pts": 20, "aliases": ["toilet paper", "tp"]},
+    ]
+    assert surveys.match_answer("toilet paper", ans) == 1
+    assert surveys.match_answer("the toilet", ans) == 0
+    assert surveys.match_answer("i need some toilet paper", ans) == 1   # longest phrase wins
+
+
 # ---------------- teams ----------------
 
 def test_head_to_head_names_are_players():
@@ -200,6 +211,44 @@ def test_bot_free_min_players():
 
 
 # ---------------- the shipped survey bank ----------------
+
+def test_game_state_read_is_pure():
+    # serializing (called per-viewer every push) must NOT move turn_idx
+    s, toks = make(4, teams=["A", "A", "B", "B"])
+    _win_faceoff_and_play(s, "A")
+    r = s.g["round"]
+    before = r["turn_idx"]
+    for _ in range(6):
+        s.state_for(None)
+        s.state_for(toks[0])
+    assert r["turn_idx"] == before
+
+
+def test_to_lobby_clears_stale_roster():
+    s, toks = make(2, rounds=1)
+    _win_faceoff_and_play(s, "A")
+    for w in ["banana", "cherry", "date"]:
+        guess(s, toks[0], w)                 # sweep -> reveal
+    s.tick(s.gen)                            # reveal -> podium -> game_end
+    assert s.phase == "game_end"
+    s.tick(s.gen)                            # game_end -> to_lobby
+    assert s.phase == "lobby" and s.g is None
+    # a third player joins; the picker counts must reflect all 3, not the stale 1v1
+    s.join("feudtok900", "New", None)
+    s.set_ready("feudtok900", True)
+    st = s.state_for("feudtok900")
+    assert sum(st["ff"]["counts"].values()) == 3
+
+
+def test_answerer_disconnect_reseats_with_fresh_clock():
+    s, toks = make(4, teams=["A", "A", "B", "B"])
+    _win_faceoff_and_play(s, "A")
+    r = s.g["round"]
+    seated = r["turn_order"][r["turn_idx"]]
+    s.leave(seated)                          # the current answerer drops
+    nxt = s.g["round"]["turn_order"][s.g["round"]["turn_idx"]]
+    assert nxt != seated and s.players[nxt].connected
+
 
 def test_real_bank_integrity():
     from games.fab5feud._surveys_data import SURVEYS

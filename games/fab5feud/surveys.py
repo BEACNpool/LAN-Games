@@ -52,21 +52,34 @@ def _candidates(answer) -> list:
 
 
 def match_answer(guess, answers):
-    """Index of the answer the guess matches, or None. Highest-ranked wins."""
+    """Index of the answer the guess matches, or None.
+
+    An EXACT normalized match always wins (so 'toilet paper' hits "Toilet Paper",
+    not "Toilet"). Otherwise the BEST containment match wins — the longest, most
+    specific candidate — never merely the first one scanned. Ties break to the
+    higher-ranked (lower-index) answer.
+    """
     g = norm(guess)
     if not g:
         return None
+    # 1) exact match — highest-ranked among exact hits
+    for i, a in enumerate(answers):
+        if g in _candidates(a):
+            return i
+    # 2) best fuzzy match: prefer the longest matching candidate
     gp = " %s " % g
     gtoks = set(g.split())
+    best_i, best_score = None, 0
     for i, a in enumerate(answers):
         for nc in _candidates(a):
-            if g == nc:
-                return i
-            if len(nc) >= 4 and (" %s " % nc in gp or g in nc.split()):
-                return i
-            if " " not in nc and len(nc) >= 4 and nc in gtoks:
-                return i
-    return None
+            score = 0
+            if " " in nc and len(nc) >= 4 and (" %s " % nc in gp or nc in g):
+                score = 2 * len(nc)          # multi-word phrase — strong + specific
+            elif " " not in nc and len(nc) >= 4 and nc in gtoks:
+                score = len(nc)              # single distinctive word — weaker
+            if score > best_score:           # strictly greater -> ties keep lower index
+                best_score, best_i = score, i
+    return best_i
 
 
 def load() -> list:
