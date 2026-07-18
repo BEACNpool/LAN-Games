@@ -2,7 +2,8 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const IS_TV = new URLSearchParams(location.search).get("tv") === "1";
+const IS_TV = location.pathname.endsWith("/tv.html")
+  || new URLSearchParams(location.search).get("tv") === "1";
 const WORLD = { w: 1200, h: 675 };
 
 const S = {
@@ -16,7 +17,7 @@ const S = {
 
 const game = () => S.st?.game || null;
 const playerByPid = (pid) => (S.st?.players || []).find((p) => p.pid === pid) || null;
-const now = () => IS_TV ? Date.now() + S.tv.offset : (S.conn ? S.conn.now() : Date.now());
+const now = () => S.conn ? S.conn.now() : Date.now();
 const remainMs = () => S.st?.deadline ? Math.max(0, S.st.deadline - now()) : 0;
 const myRoster = () => game()?.roster?.find((r) => r.pid === S.pid) || null;
 
@@ -454,29 +455,19 @@ function onPhoneFx(fx) {
 
 /* ---------- TV spectator connection and lobby ---------- */
 function connectTV() {
-  const scheme = location.protocol === "https:" ? "wss" : "ws";
-  const ws = new WebSocket(`${scheme}://${location.host}/games/orbitriot/ws`);
-  S.tv.ws = ws;
-  ws.onopen = () => { S.tv.retry = 0; $("tv-conn").hidden = true;
-    ws.send(JSON.stringify({ t: "hello", watch: true })); };
-  ws.onmessage = (event) => {
-    let msg; try { msg = JSON.parse(event.data); } catch (error) { return; }
-    if (msg.type === "state") {
-      S.st = msg; S.tv.offset = msg.now - Date.now(); renderTVState(msg);
-    } else if (msg.type === "fx" && msg.kind === "launch") {
-      showLaunchFlash(`${msg.heat}-${Date.now()}`);
-    }
-  };
-  ws.onclose = () => { $("tv-conn").hidden = false;
-    setTimeout(connectTV, Math.min(5000, 600 + S.tv.retry++ * 700)); };
-  ws.onerror = () => { try { ws.close(); } catch (error) {} };
+  S.conn = Hub.connect("/games/orbitriot/ws", {
+    onState: (st) => { S.st = st; renderTVState(st); },
+    onFx: (fx) => { if (fx.kind === "launch") showLaunchFlash(`${fx.heat}-${Date.now()}`); },
+  }, { watch: true });
 }
 
 let qrDrawn = false;
 function renderTVLobby(st) {
   if (!qrDrawn) {
     qrDrawn = true;
-    const url = new URL(location.href); url.searchParams.delete("tv");
+    const url = location.pathname.endsWith("/tv.html")
+      ? new URL(".", location.href) : new URL(location.href);
+    url.searchParams.delete("tv");
     $("tv-url").textContent = `${location.host}${url.pathname}`;
     try { renderQR($("tv-qr"), url.toString()); } catch (error) { console.error("QR failed", error); }
   }

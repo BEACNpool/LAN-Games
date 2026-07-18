@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ORBIT RIOT · Big Screen</title>
+<meta name="theme-color" content="#050711">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/bigscreen.css">
+<link rel="stylesheet" href="orbitriot.css">
+</head>
+<body class="tv-mode">
+<div class="cosmos" aria-hidden="true"><i></i><i></i><i></i></div>
+<main id="tv-app">
+  <section id="tv-lobby" class="tv-scene" hidden>
+    <div class="tv-lobby-main">
+      <div class="tv-brand">
+        <p>FAB5.GAMES PRESENTS</p>
+        <h1><span>ORBIT</span><em>RIOT</em></h1>
+        <h2>POOL MEETS PINBALL.<br>EVERYBODY LAUNCHES AT ONCE.</h2>
+      </div>
+      <div class="tv-how">
+        <div><b>1</b><span>AIM<br><small>ON YOUR PHONE</small></span></div><i>→</i>
+        <div><b>2</b><span>LAUNCH<br><small>ALL AT ONCE</small></span></div><i>→</i>
+        <div><b>3</b><span>SCORE<br><small>STARS + KNOCKOUTS</small></span></div>
+      </div>
+      <div id="tv-pilots" class="tv-pilots"></div>
+      <p id="tv-hint" class="tv-hint">SCAN TO JOIN · READY UP ON YOUR PHONE</p>
+    </div>
+    <aside class="tv-join-panel">
+      <div class="qr-eyebrow">SCAN WITH YOUR PHONE</div>
+      <div id="tv-qr" class="tv-qr"></div>
+      <b id="tv-url"></b><span>NO APP · SAME WI-FI</span>
+    </aside>
+  </section>
+
+  <section id="tv-arena" class="tv-scene" hidden>
+    <canvas id="tv-canvas" width="1200" height="675"></canvas>
+    <header class="tv-hud-top">
+      <div class="tv-mini-brand">ORBIT <b>RIOT</b></div>
+      <div id="tv-phase" class="tv-phase">AIM IN SECRET</div>
+      <div id="tv-clock" class="tv-clock">20</div>
+    </header>
+    <aside id="tv-leaderboard" class="tv-leaderboard"></aside>
+    <div id="tv-launch-flash" class="tv-launch-flash" hidden><span>TRAJECTORIES LOCKED</span><b>RIOT!</b></div>
+    <div id="tv-callout" class="tv-callout">LOCK YOUR SHOT ON YOUR PHONE</div>
+  </section>
+
+  <section id="tv-podium" class="tv-scene" hidden>
+    <div class="podium-head"><p>THE GRAVITY HAS SPOKEN</p><h1>RIOT CHAMPION</h1></div>
+    <div id="tv-podium-blocks" class="tv-podium-blocks"></div>
+    <p id="tv-podium-auto"></p>
+  </section>
+</main>
+<div id="toasts" class="toasts"></div>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/qr.js"></script>
+<script src="orbitriot.js"></script>
+</body>
+</html>

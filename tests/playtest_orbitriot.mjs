@@ -60,7 +60,7 @@ try {
   step = "open TV";
   const tvContext = await newContext(), tv = await tvContext.newPage();
   await tv.setViewport(TV); watchErrors(tv,"TV");
-  await tv.goto(`${BASE}/games/orbitriot/?tv=1`, { waitUntil: "networkidle2" });
+  await tv.goto(`${BASE}/games/orbitriot/tv.html`, { waitUntil: "networkidle2" });
   await tv.waitForSelector("#tv-lobby:not([hidden])", { timeout: 7000 });
   const tvIdentity = await tv.evaluate(() => ({ tv: ORBIT_RIOT_DEV.isTV(), you: ORBIT_RIOT_DEV.state()?.you }));
   if (!tvIdentity.tv || tvIdentity.you !== null) throw new Error("TV did not connect as read-only spectator");
