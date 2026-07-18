@@ -5,6 +5,8 @@
 // Usage: node tests/playtest_trivia.mjs [baseURL] [shotdir]
 
 import { createRequire } from "module";
+import { execFileSync } from "child_process";
+import { fileURLToPath } from "url";
 import os from "os";
 import fs from "fs";
 const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
@@ -15,6 +17,12 @@ const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
 fs.mkdirSync(OUT, { recursive: true });
 
 const PHONE = { width: +(process.env.SHOT_W || 390), height: +(process.env.SHOT_H || 844), deviceScaleFactor: 2 };
+const ROOT = fileURLToPath(new URL("..", import.meta.url));
+const ANSWERS = JSON.parse(execFileSync("python3", ["-c", [
+  "import json",
+  "from games.trivia.questions import BANK",
+  "print(json.dumps({q['q']: q['choices'][q['a']] for q in BANK}))",
+].join("; ")], { cwd: ROOT, encoding: "utf8" }));
 const errors = [];
 let step = "boot";
 const log = (m) => console.log(`[${new Date().toISOString().slice(11, 19)}] ${m}`);
@@ -50,7 +58,12 @@ async function mkPlayer(name, avatarIdx) {
   return page;
 }
 
-const answerPeek = async () => (await (await fetch(BASE + "/debug/answer")).json());
+const answerPeek = async (page) => page.evaluate((answers) => {
+  const question = document.getElementById("q-text").textContent;
+  const choices = [...document.querySelectorAll("#choices .choice")]
+    .map((choice) => choice.lastElementChild.textContent);
+  return { correct: choices.indexOf(answers[question]) };
+}, ANSWERS);
 
 async function waitQuestion(page, qno, t = 30000) {
   const t0 = Date.now();
@@ -114,8 +127,8 @@ try {
   for (let q = 1; q <= 4; q++) {
     if (!(await waitQuestion(ava, q))) { fail(`race q${q} never appeared`); break; }
     await waitQuestion(rex, q);
-    const peek = await answerPeek();
-    if (peek.correct === null) { fail(`no live question at q${q}`); break; }
+    const peek = await answerPeek(ava);
+    if (peek.correct < 0) { fail(`could not resolve answer at q${q}`); break; }
     if (q === 1) await shot(ava, "81-trivia-race-question");
     await clickChoice(ava, peek.correct);
     await sleep(250);
@@ -183,7 +196,7 @@ try {
   // q1: Rex buzzes first, answers wrong (lockout), Ava steals it
   if (!(await waitQuestion(rex, 1))) fail("buzzer q1 never appeared");
   await waitQuestion(ava, 1);
-  let peek = await answerPeek();
+  let peek = await answerPeek(rex);
   await buzz(rex);
   await sleep(400);
   const avaSees = await ava.$eval("#rb-title", (e) => e.textContent).catch(() => "");
@@ -208,7 +221,7 @@ try {
 
   // q2: Ava buzzes and answers correctly straight away
   if (!(await waitQuestion(ava, 2))) fail("buzzer q2 never appeared");
-  peek = await answerPeek();
+  peek = await answerPeek(ava);
   await buzz(ava);
   await sleep(350);
   const youBuzzed = await ava.$eval("#rb-title", (e) => e.textContent).catch(() => "");
@@ -222,7 +235,7 @@ try {
   // q3+q4: play out fast so the match ends (Rex takes them)
   for (let q = 3; q <= 4; q++) {
     if (!(await waitQuestion(rex, q))) { fail(`buzzer q${q} never appeared`); break; }
-    peek = await answerPeek();
+    peek = await answerPeek(rex);
     await buzz(rex);
     await sleep(300);
     await clickChoice(rex, peek.correct);
