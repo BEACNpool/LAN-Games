@@ -69,6 +69,7 @@ BOOM_IMPULSE = 620.0
 
 CHUTE_W, CHUTE_H = 150, 76      # a swinging crate needs a generous mouth
 DELIVER_POINTS = 3
+STEAL_POINTS = 1
 WIPE_POINTS = 1
 
 RESTITUTION = 1.9               # equal-circle impulse coefficient
@@ -830,10 +831,12 @@ class SmelterSkelterSession(GameSession):
             cargo["carrier"] = thief
             cargo["last_carrier"] = thief
             cargo["last_carrier_tick"] = g["tick"]
+            g["stats"][thief]["score"] += STEAL_POINTS
             g["stats"][thief]["steals"] += 1
             fx.append(self.fx("steal", pid=self._pid(thief),
                               pid2=self._pid(victim),
-                              x=round(cargo["x"], 1), y=round(cargo["y"], 1)))
+                              x=round(cargo["x"], 1), y=round(cargo["y"], 1),
+                              points=STEAL_POINTS))
         else:
             cargo["grab_cd"] = g["tick"] + CARGO_GRAB_CD_TICKS
 

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>SMELTER SKELTER — FAB5.GAMES</title>
+<meta name="theme-color" content="#090b0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23090b0f"/><path d="M13 11h38M32 11v17" stroke="%23ffb020" stroke-width="5" stroke-linecap="round"/><path d="M32 28c-7 7-11 14-10 21 8 5 15 5 22 0 0-8-4-15-12-21Z" fill="%23ff4d1a"/></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="smelterskelter.css">
+</head>
+<body class="phone-body">
+<div class="steel-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main id="phone-app">
+  <section id="scr-join" class="phone-screen join-screen" hidden>
+    <div class="join-scroll">
+      <div class="brand-lockup">
+        <div class="chain-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p class="hazard-kicker">BIG SCREEN ACTION GAME</p>
+        <h1><span>SMELTER</span><b>SKELTER</b></h1>
+        <p class="brand-tag">HOOK. SWING. STEAL THE CARGO.</p>
+      </div>
+      <div class="join-card steel-card">
+        <label class="field-label" for="name-input">WORKER NAME</label>
+        <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+        <label class="field-label">PICK A HARD HAT</label>
+        <div id="avatar-grid" class="avatar-grid"></div>
+        <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+        <button id="join-btn" class="btn forge-btn btn-big">CLOCK IN</button>
+        <a class="tv-launch" href="tv.html" target="_blank" rel="noopener">📺 OPEN THE BIG-SCREEN VIEW</a>
+      </div>
+      <p class="join-foot">2–8 PHONES · ONE TV · NO APP</p>
+    </div>
+  </section>
+
+  <section id="scr-lobby" class="phone-screen lobby-screen" hidden>
+    <header class="phone-topbar">
+      <a href="/" class="icon-btn home-btn" aria-label="Game hub">🕹</a>
+      <div class="mini-lockup"><b>SMELTER SKELTER</b><small>NIGHT CREW</small></div>
+      <button id="pfp-btn2" class="icon-btn" aria-label="Change photo">📷</button>
+    </header>
+    <div class="lobby-scroll">
+      <a class="tv-nudge steel-card" href="tv.html" target="_blank" rel="noopener">
+        <span>📺</span><p><b>PUT THE GANTRY ON A TV</b><small>Phones are controllers. All the action is up there.</small></p><em>OPEN</em>
+      </a>
+      <div class="section-head"><span>NIGHT CREW</span><b id="ready-count">0 READY</b></div>
+      <div id="player-grid" class="crew-grid"></div>
+      <p id="seat-note" class="lobby-note"></p>
+
+      <div class="how-card steel-card">
+        <div><b>HOLD</b><span>HOOK</span><small>grab an anchor or another worker</small></div>
+        <div><b>PUMP</b><span>REEL</span><small>shorten the chain to build speed</small></div>
+        <div><b>SLAM</b><span>STEAL</span><small>rip the glowing cargo loose</small></div>
+      </div>
+      <div class="settings-card steel-card">
+        <div class="setting-row"><span><b>SHIFTS</b><small>new gantry each shift</small></span><div id="opt-shifts" class="seg"></div></div>
+        <div class="setting-row"><span><b>SHIFT CLOCK</b><small>overload in the final 15s</small></span><div id="opt-clock" class="seg"></div></div>
+      </div>
+    </div>
+    <footer class="lobby-actions">
+      <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+      <button id="go-btn" class="btn forge-btn btn-big" hidden>START THE SHIFT</button>
+      <p id="lobby-hint"></p>
+    </footer>
+  </section>
+
+  <section id="scr-pad" class="phone-screen pad-screen" hidden>
+    <header class="pad-head">
+      <div><small id="shift-label">SHIFT 1/3</small><b id="worker-name">WORKER</b></div>
+      <div class="pad-score"><small>SCORE</small><b id="my-score">0</b></div>
+      <div id="shift-clock" class="pad-clock">45</div>
+    </header>
+    <div id="status-ribbon" class="status-ribbon"><i></i><span id="status-copy">AIM FOR AN ANCHOR</span><b id="rank-copy">#1</b></div>
+    <div class="tension-wrap">
+      <div class="tension-label"><span>CHAIN TENSION</span><b id="tension-copy">SLACK</b></div>
+      <div class="tension-rail"><i id="tension-fill"></i><em></em></div>
+    </div>
+    <div id="aim-pad" class="aim-pad" aria-label="Aim your hook">
+      <div class="aim-rings" aria-hidden="true"></div>
+      <canvas id="aim-canvas" width="720" height="720"></canvas>
+      <div id="aim-knob" class="aim-knob"><span>⛓</span></div>
+      <p><b>AIM</b><small>drag toward a hook point</small></p>
+    </div>
+    <div class="face-row">
+      <button id="hook-btn" class="face-btn hook-btn" type="button"><span>⛓</span><b>HOOK</b><small>HOLD</small></button>
+      <button id="reel-btn" class="face-btn reel-btn" type="button"><span>↟</span><b>REEL</b><small>HOLD · PUMP</small></button>
+    </div>
+    <p id="pad-hint" class="pad-hint">HOOK AN ANCHOR · SWING LOW · REEL AT THE BOTTOM</p>
+  </section>
+
+  <section id="scr-watch" class="phone-screen watch-screen" hidden>
+    <div class="look-up-mark">📺</div>
+    <p>THE GANTRY IS LIVE</p>
+    <h2>LOOK AT THE<br>BIG SCREEN</h2>
+    <small id="watch-copy">YOU'RE IN THE NEXT SHIFT</small>
+  </section>
+
+  <div id="gameover" class="modal result-modal" hidden>
+    <div class="modal-card result-card">
+      <p class="hazard-kicker">SHIFT COMPLETE</p>
+      <h2 id="go-title">TOP WORKER</h2>
+      <p id="go-line"></p>
+      <div id="go-rows" class="go-rows"></div>
+      <button id="rematch-btn" class="btn forge-btn btn-big">RUN ANOTHER SHIFT</button>
+      <p id="go-auto" class="auto-note"></p>
+    </div>
+  </div>
+
+  <div id="countdown-overlay" class="countdown-overlay industrial-countdown" hidden>
+    <small>GANTRY POWERING UP</small><span id="countdown-num">3</span><b>LOOK UP</b>
+  </div>
+</main>
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="phone.js"></script>
+</body>
+</html>

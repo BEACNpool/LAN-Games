@@ -634,8 +634,10 @@ def test_a_hard_enough_slam_steals_the_crate_from_its_carrier():
     steal = next(e for e in fx if e["kind"] == "steal")
     assert steal["pid"] == session.players[thief].pid
     assert steal["pid2"] == session.players[victim].pid
+    assert steal["points"] == 1
     assert g["cargo"]["carrier"] == thief
     assert g["stats"][thief]["steals"] == 1
+    assert g["stats"][thief]["score"] == 1
     assert g["stats"][victim]["steals"] == 0
     finite_world(session)
 
