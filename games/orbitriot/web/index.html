@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>ORBIT RIOT — LAN GAMES</title>
+<meta name="theme-color" content="#050711">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="%23050711"/><circle cx="32" cy="32" r="13" fill="%23ff3dbb"/><path d="M7 39Q31 3 57 27" fill="none" stroke="%234cf7ff" stroke-width="5" stroke-linecap="round"/></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="orbitriot.css">
+</head>
+<body>
+<div class="cosmos" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<!-- PHONE: profile / lobby -->
+<main id="phone-app" hidden>
+  <section id="scr-join" class="phone-screen" hidden>
+    <div class="join-shell">
+      <div class="brand-lockup">
+        <div class="brand-orbit" aria-hidden="true"><span>●</span></div>
+        <p class="eyebrow">BIG SCREEN PARTY GAME</p>
+        <h1><span>ORBIT</span> <em>RIOT</em></h1>
+        <p class="brand-tag">POOL MEETS PINBALL. EVERYBODY LAUNCHES AT ONCE.</p>
+      </div>
+      <div class="join-card glass">
+        <label class="field-label" for="name-input">YOUR CALL SIGN</label>
+        <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+        <label class="field-label">PICK YOUR COMET PILOT</label>
+        <div id="avatar-grid" class="avatar-grid"></div>
+        <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+        <button id="join-btn" class="btn btn-primary btn-big">JOIN THE RIOT</button>
+        <a class="tv-launch" href="?tv=1" target="_blank" rel="noopener">📺 OPEN THE BIG-SCREEN VIEW</a>
+      </div>
+      <p class="join-foot">2–8 PHONES · ONE TV · ZERO APP DOWNLOADS</p>
+    </div>
+  </section>
+
+  <section id="scr-lobby" class="phone-screen" hidden>
+    <header class="phone-topbar">
+      <a href="/" class="icon-btn home-btn" aria-label="Game hub">🕹</a>
+      <div><span class="mini-brand">ORBIT <b>RIOT</b></span><small>LAUNCH BAY</small></div>
+      <button id="pfp-btn2" class="icon-btn" aria-label="Change photo">📷</button>
+    </header>
+    <div class="lobby-scroll">
+      <div class="tv-nudge glass">
+        <span class="tv-nudge-icon">📺</span>
+        <div><b>PUT THIS ONE ON THE BIG SCREEN</b><small>The TV shows the arena. Phones keep every trajectory secret.</small></div>
+        <a href="?tv=1" target="_blank" rel="noopener">OPEN</a>
+      </div>
+      <div class="section-title"><span>PILOTS</span><b id="ready-count">0/8 READY</b></div>
+      <div id="player-grid" class="pilot-grid"></div>
+      <p id="seat-note" class="lobby-note"></p>
+
+      <div class="rules-card glass">
+        <div class="rule"><span>①</span><p><b>AIM IN SECRET</b><small>Drag your phone's gravity sling.</small></p></div>
+        <div class="rule"><span>②</span><p><b>ALL LAUNCH</b><small>Every comet fires simultaneously.</small></p></div>
+        <div class="rule"><span>③</span><p><b>SCORE CHAOS</b><small>Stars +1 · safe orbit +2 · knockout +3.</small></p></div>
+      </div>
+
+      <div class="settings-card glass">
+        <div class="setting-row"><span><b>HEATS</b><small>most points wins</small></span><div id="opt-heats" class="seg"></div></div>
+        <div class="setting-row"><span><b>AIM CLOCK</b><small>autopilot on timeout</small></span><div id="opt-aim" class="seg"></div></div>
+      </div>
+    </div>
+    <footer class="lobby-actions">
+      <button id="ready-btn" class="btn btn-secondary btn-big">READY UP</button>
+      <button id="go-btn" class="btn btn-go btn-big" hidden>LAUNCH GAME</button>
+      <p id="lobby-hint"></p>
+    </footer>
+  </section>
+
+  <!-- PHONE: private controller -->
+  <section id="scr-aim" class="phone-screen game-phone" hidden>
+    <header class="game-head">
+      <span id="heat-chip">HEAT 1/5</span>
+      <div class="score-pill"><small>YOUR SCORE</small><b id="my-score">0</b></div>
+      <div id="aim-clock" class="clock-orb">20</div>
+    </header>
+    <div class="controller-scroll">
+      <div class="controller-title">
+        <p id="aim-kicker">TRAJECTORY OPEN</p>
+        <h2 id="aim-title">DRAG TO AIM</h2>
+        <p id="aim-copy">Point the comet where you want it to fly. The farther you drag, the harder it launches.</p>
+      </div>
+      <div class="radar-shell glass">
+        <canvas id="phone-radar" width="960" height="540" aria-label="Arena map"></canvas>
+        <span class="radar-label">LIVE ARENA MAP</span>
+      </div>
+      <div id="sling-pad" class="sling-pad" aria-label="Drag to choose trajectory">
+        <canvas id="sling-canvas" width="600" height="600"></canvas>
+        <div class="sling-readout"><span id="aim-angle">0°</span><b id="aim-power">65%</b></div>
+      </div>
+      <div class="powerups">
+        <p class="power-title">CHOOSE A ONE-HEAT POWER-UP <span>OPTIONAL</span></p>
+        <div id="ability-row" class="ability-row">
+          <button data-ability="boost"><span>⚡</span><b>BOOST</b><small>hotter launch</small><i></i></button>
+          <button data-ability="anchor"><span>⚓</span><b>HEAVY</b><small>win collisions</small><i></i></button>
+          <button data-ability="shield"><span>◉</span><b>SHIELD</b><small>escape the void</small><i></i></button>
+        </div>
+      </div>
+    </div>
+    <footer class="lock-bar">
+      <button id="lock-btn" class="btn lock-btn">LOCK TRAJECTORY</button>
+      <p id="lock-note">You cannot change it after locking.</p>
+    </footer>
+  </section>
+
+  <!-- PHONE: watch the shared display -->
+  <section id="scr-watch" class="phone-screen watch-screen" hidden>
+    <header class="game-head">
+      <span id="watch-heat">HEAT 1/5</span>
+      <div class="score-pill"><small>YOUR SCORE</small><b id="watch-score">0</b></div>
+      <div class="live-dot"><i></i> LIVE</div>
+    </header>
+    <div class="watch-center">
+      <div class="look-up-icon"><span>●</span></div>
+      <p>COMETS AWAY</p>
+      <h2>LOOK AT THE<br>BIG SCREEN</h2>
+      <div id="phone-event" class="phone-event">GRAVITY IS LIVE</div>
+      <div id="phone-scoreboard" class="phone-scoreboard glass"></div>
+    </div>
+  </section>
+
+  <div id="gameover" class="modal" hidden>
+    <div class="modal-card result-card">
+      <p class="eyebrow">FINAL ORBIT</p>
+      <h2 id="go-title">RIOT CHAMPION</h2>
+      <p id="go-line"></p>
+      <div id="go-rows" class="go-rows"></div>
+      <button id="rematch-btn" class="btn btn-go btn-big">RUN IT BACK</button>
+      <p id="go-auto" class="auto-note"></p>
+    </div>
+  </div>
+
+  <div id="countdown-overlay" class="countdown-overlay" hidden>
+    <span>ALL SYSTEMS LIVE</span><b id="countdown-num">3</b><em>LOOK UP</em>
+  </div>
+</main>
+
+<!-- TV: read-only spectator socket -->
+<main id="tv-app" hidden>
+  <div id="tv-conn" class="tv-conn" hidden>RECONNECTING TO ORBIT…</div>
+
+  <section id="tv-lobby" class="tv-scene" hidden>
+    <div class="tv-lobby-main">
+      <div class="tv-brand">
+        <p>FAB5.GAMES PRESENTS</p>
+        <h1><span>ORBIT</span><em>RIOT</em></h1>
+        <h2>POOL MEETS PINBALL.<br>EVERYBODY LAUNCHES AT ONCE.</h2>
+      </div>
+      <div class="tv-how">
+        <div><b>1</b><span>AIM<br><small>ON YOUR PHONE</small></span></div>
+        <i>→</i>
+        <div><b>2</b><span>LAUNCH<br><small>ALL AT ONCE</small></span></div>
+        <i>→</i>
+        <div><b>3</b><span>SCORE<br><small>STARS + KNOCKOUTS</small></span></div>
+      </div>
+      <div id="tv-pilots" class="tv-pilots"></div>
+      <p id="tv-hint" class="tv-hint">SCAN TO JOIN · READY UP ON YOUR PHONE</p>
+    </div>
+    <aside class="tv-join-panel">
+      <div class="qr-eyebrow">SCAN WITH YOUR PHONE</div>
+      <div id="tv-qr" class="tv-qr"></div>
+      <b id="tv-url"></b>
+      <span>NO APP · SAME WI-FI</span>
+    </aside>
+  </section>
+
+  <section id="tv-arena" class="tv-scene" hidden>
+    <canvas id="tv-canvas" width="1200" height="675"></canvas>
+    <header class="tv-hud-top">
+      <div class="tv-mini-brand">ORBIT <b>RIOT</b></div>
+      <div id="tv-phase" class="tv-phase">AIM IN SECRET</div>
+      <div id="tv-clock" class="tv-clock">20</div>
+    </header>
+    <aside id="tv-leaderboard" class="tv-leaderboard"></aside>
+    <div id="tv-launch-flash" class="tv-launch-flash" hidden><span>TRAJECTORIES LOCKED</span><b>RIOT!</b></div>
+    <div id="tv-callout" class="tv-callout">LOCK YOUR SHOT ON YOUR PHONE</div>
+  </section>
+
+  <section id="tv-podium" class="tv-scene" hidden>
+    <div class="podium-head"><p>THE GRAVITY HAS SPOKEN</p><h1>RIOT CHAMPION</h1></div>
+    <div id="tv-podium-blocks" class="tv-podium-blocks"></div>
+    <p id="tv-podium-auto"></p>
+  </section>
+</main>
+
+<div id="toasts" class="toasts"></div>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/qr.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="orbitriot.js"></script>
+</body>
+</html>

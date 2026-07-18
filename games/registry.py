@@ -20,6 +20,7 @@ from games.checkers.game import CheckersSession
 from games.backgammon.game import BackgammonSession
 from games.tanks.game import TanksSession
 from games.fortfling.game import FortFlingSession
+from games.orbitriot.game import OrbitRiotSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -34,6 +35,22 @@ from games._template.game import HighCardSession
 GAMES_DIR = Path(__file__).parent
 
 REGISTRY = [
+    {
+        "slug": "orbitriot",
+        "category": "bigscreen", "accent": "#ff3dbb", "tv": True,
+        "tagline": "Pool meets pinball. Everybody launches at once.",
+        "min_p": 2, "max_p": 8, "solo": False,
+        "title": "ORBIT RIOT",
+        "icon": "🪐",
+        "art": "◎",
+        "blurb": "Aim a neon comet in secret, then everybody launches at "
+                 "once. Curve around the black hole, smash rivals through the "
+                 "void, and bank stars in a server-physics spectacle on the TV.",
+        "players": "2–8 + TV",
+        "session": OrbitRiotSession,
+        "web": GAMES_DIR / "orbitriot" / "web",
+        "hidden": False,
+    },
     {
         "slug": "poker",
         "category": "cards", "accent": "#10c96e",
