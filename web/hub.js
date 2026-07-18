@@ -4,6 +4,7 @@
   const $ = (id) => document.getElementById(id);
 
   const RAILS = [
+    { key: "bigscreen", title: "BIG SCREEN", sub: "One screen · everyone's phone is the controller" },
     { key: "party",  title: "PARTY NIGHT" },
     { key: "cards",  title: "CARDS & TILES" },
     { key: "board",  title: "BOARD CLASSICS" },
@@ -73,6 +74,7 @@
         style="color:${rgba(accent, 0.95)};filter:drop-shadow(0 10px 22px rgba(0,0,0,0.55)) drop-shadow(0 0 30px ${rgba(accent, 0.85)})">${g.art || g.icon}</span>
       <div class="tile-scrim"></div>
       ${isSoon ? '<span class="tile-ribbon">SOON</span>' : ""}
+      ${!isSoon && g.tv ? '<span class="tile-tv-badge">📺 TV</span>' : ""}
       <div class="tile-body">
         <span class="tile-title">${esc(g.title)}</span>
         <span class="tile-sub">${esc(isSoon ? g.blurb : String(g.players).toUpperCase())}</span>
@@ -90,12 +92,13 @@
     return el;
   }
 
-  function railEl(title, list, isSoon) {
+  function railEl(title, list, isSoon, sub) {
     const rail = document.createElement("section");
-    rail.className = "rail";
+    rail.className = "rail" + (sub ? " rail-feature" : "");
     rail.innerHTML = `
       <div class="rail-head">
         <span class="rail-title">${title}</span>
+        ${sub ? `<span class="rail-sub">${esc(sub)}</span>` : ""}
         <span class="rail-count">${list.length} TITLE${list.length === 1 ? "" : "S"}</span>
       </div>`;
     const track = document.createElement("div");
@@ -112,7 +115,7 @@
     const f = FILTERS.find((x) => x.key === filter).fn;
     for (const r of RAILS) {
       const list = games.filter((g) => (g.category || "battle") === r.key && f(g));
-      if (list.length) host.appendChild(railEl(r.title, list, false));
+      if (list.length) host.appendChild(railEl(r.title, list, false, r.sub));
     }
     if (soon.length) host.appendChild(railEl("COMING SOON", soon, true));
   }

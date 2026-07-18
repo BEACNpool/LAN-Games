@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BINGO · Big Screen</title>
+<meta name="theme-color" content="#070b14">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/bigscreen.css">
+<style>
+  /* BINGO-specific big-screen bits */
+  .bg-call { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bg-call .chip { font-family: var(--mono); font-weight: 800; font-size: clamp(56px, 13vw, 172px);
+                   line-height: 1; color: var(--yellow); text-shadow: 0 0 40px rgba(234,179,8,0.4); }
+  .bg-call .chip.pics { font-family: var(--font); }
+  .board75 { display: grid; grid-template-rows: repeat(5, 1fr); gap: clamp(4px, 0.7vh, 9px); width: 100%;
+             max-width: 900px; }
+  .b75-row { display: grid; grid-template-columns: auto repeat(15, 1fr); gap: clamp(3px, 0.5vw, 7px); align-items: stretch; }
+  .b75-lab { font-family: var(--mono); font-weight: 800; font-size: clamp(13px, 1.6vw, 24px); color: var(--muted);
+             display: grid; place-items: center; width: clamp(20px, 2vw, 34px); }
+  .b75 { aspect-ratio: 1/1; border-radius: 6px; background: var(--surface); border: 1px solid var(--line);
+         display: grid; place-items: center; font-family: var(--mono); font-weight: 700;
+         font-size: clamp(9px, 1vw, 15px); color: var(--faint); }
+  .b75.lit { background: var(--grad); color: #05070e; border-color: transparent; }
+  .b75.now { outline: 3px solid var(--yellow); outline-offset: 1px; }
+  .picwrap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 900px; }
+  .piccall { font-size: clamp(22px, 3vw, 40px); opacity: 0.4; }
+  .piccall.lit { opacity: 1; }
+</style>
+</head>
+<body class="tv-body">
+<div class="tv">
+  <header class="tv-head">
+    <span class="tv-wordmark">📺 BIG SCREEN · <b>BINGO</b></span>
+    <span id="tv-online" class="tv-online">connecting…</span>
+  </header>
+  <main class="tv-main">
+    <section class="tv-stage" id="tv-stage"></section>
+    <aside class="tv-rail">
+      <div class="tv-join">
+        <p class="tv-join-h">📱 SCAN TO PLAY</p>
+        <div class="tv-qr" id="tv-qr"></div>
+        <p class="tv-join-url" id="tv-url"></p>
+      </div>
+      <div class="tv-roster" id="tv-roster"></div>
+    </aside>
+  </main>
+  <div class="tv-banner" id="tv-banner" hidden></div>
+</div>
+<canvas id="confetti"></canvas>
+<script src="/shared/qr.js"></script>
+<script src="/shared/hubnet.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

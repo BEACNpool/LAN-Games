@@ -266,10 +266,12 @@ const Hub = (() => {
     setTimeout(() => t.remove(), 3200);
   }
 
-  /* connect(gamePath, handlers) -> conn
+  /* connect(gamePath, handlers, opts) -> conn
      handlers: onState(st), onFx(fx), onWelcome(msg)
+     opts.watch: connect as a read-only spectator (the big-screen / TV view) —
+       no token, no join; the server pushes the masked spectator state.
      conn: send(obj), now() (server-synced ms), alive */
-  function connect(wsPath, handlers) {
+  function connect(wsPath, handlers, opts = {}) {
     const conn = { ws: null, offset: 0, retry: 0, closedByUs: false,
                    send(obj) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(obj)); },
                    now() { return Date.now() + this.offset; } };
@@ -291,11 +293,15 @@ const Hub = (() => {
       ws.onopen = () => {
         conn.retry = 0;
         banner.hidden = true;
-        ws.send(JSON.stringify({
-          t: "hello", token: identity.token || undefined,
-          name: identity.name || undefined,
-          avatar: identity.avatar || undefined,
-        }));
+        if (opts.watch) {
+          ws.send(JSON.stringify({ t: "hello", watch: true }));
+        } else {
+          ws.send(JSON.stringify({
+            t: "hello", token: identity.token || undefined,
+            name: identity.name || undefined,
+            avatar: identity.avatar || undefined,
+          }));
+        }
       };
       ws.onmessage = (ev) => {
         let msg;

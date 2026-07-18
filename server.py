@@ -57,7 +57,7 @@ async def api_games():
             "blurb": e["blurb"], "players": e["players"],
             "category": e.get("category"), "accent": e.get("accent"),
             "art": e.get("art"),
-            "tagline": e.get("tagline"),
+            "tagline": e.get("tagline"), "tv": e.get("tv", False),
             "min_p": e.get("min_p"), "max_p": e.get("max_p"),
             "solo": e.get("solo", False),
             "hidden": e.get("hidden", False),
