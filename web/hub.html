@@ -13,33 +13,59 @@
 <link rel="icon" href="/shared/app-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/shared/shared.css">
 <style>
-  :root { --rail-tile-w: clamp(138px, 24vw, 196px); }
+  :root { --rail-tile-w: clamp(150px, 25vw, 200px); }
 
   .hub-wrap { position: relative; z-index: 1; height: 100dvh; overflow-y: auto;
-              overflow-x: hidden; padding-bottom: calc(30px + var(--sab)); }
-  .hub-inner { max-width: 1080px; margin: 0 auto; }
+              overflow-x: hidden; padding-bottom: calc(30px + var(--sab));
+              scroll-behavior: smooth; }
+  .hub-inner { max-width: 1120px; margin: 0 auto; }
 
   /* ---------- top bar ---------- */
   .hub-top { display: flex; align-items: center; justify-content: space-between;
-             padding: calc(14px + var(--sat)) 20px 10px; }
-  .hub-brand { font-weight: 800; font-style: italic; font-size: 24px;
-               letter-spacing: 0.02em; }
-  .hub-brand .b1 { color: var(--text); }
-  .hub-brand .b2 { background: var(--grad); -webkit-background-clip: text;
-                   background-clip: text; color: transparent;
-                   filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.5)); }
+             gap: 10px; padding: calc(14px + var(--sat)) 20px 10px; }
+  .hub-brand { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
+  .hub-logo { font-weight: 800; font-style: italic; font-size: 25px;
+              letter-spacing: 0.01em; line-height: 1; white-space: nowrap; }
+  .hub-logo .b1 { color: var(--text); }
+  .hub-logo .b2 { margin-left: 0.3em; background: var(--grad);
+                  -webkit-background-clip: text;
+                  background-clip: text; color: transparent;
+                  filter: drop-shadow(0 0 14px rgba(129, 140, 248, 0.55)); }
+  .hub-plate { font-family: var(--mono); font-size: 9px; font-weight: 800;
+               letter-spacing: 0.26em; color: var(--faint);
+               border: 1px solid var(--line); border-radius: 6px;
+               padding: 3px 7px; white-space: nowrap; }
   .hub-actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .hub-share { width: 44px; height: 44px; flex: none; border-radius: 50%;
-               border: 1px solid var(--line); background: var(--surface);
-               color: var(--text); font-size: 20px; cursor: pointer; }
-  .hub-share:active { transform: scale(0.95); }
-  .hub-share:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  /* round console-style toolbar buttons */
+  .hub-btn { width: 44px; height: 44px; flex: none; border-radius: 13px;
+             border: 1px solid var(--line); background: var(--surface);
+             color: var(--text); font-size: 19px; cursor: pointer;
+             display: grid; place-items: center; position: relative;
+             transition: transform 0.08s ease, border-color 0.15s ease,
+                         box-shadow 0.15s ease; }
+  .hub-btn:hover { border-color: rgba(34, 211, 238, 0.5); }
+  .hub-btn:active { transform: scale(0.93); }
+  .hub-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .hub-btn.on { border-color: var(--cyan); color: var(--cyan);
+                box-shadow: 0 0 0 1px var(--cyan), 0 0 18px rgba(34, 211, 238, 0.28); }
+  .hub-btn .pip { position: absolute; top: -4px; right: -4px; min-width: 17px;
+                  height: 17px; padding: 0 4px; border-radius: 999px;
+                  background: var(--pink); color: #180310; font-family: var(--mono);
+                  font-size: 10px; font-weight: 800; display: none;
+                  align-items: center; justify-content: center;
+                  box-shadow: 0 0 12px rgba(244, 114, 182, 0.7); }
+  .hub-btn.has-unread .pip { display: flex; }
+
   /* profile chip */
   .hub-profile { display: flex; align-items: center; gap: 8px; cursor: pointer;
                  background: var(--surface); border: 1px solid var(--line);
                  border-radius: 999px; padding: 5px 13px 5px 5px; color: var(--text);
-                 max-width: 48vw; transition: border-color 0.15s ease; }
+                 max-width: 44vw; height: 44px;
+                 transition: border-color 0.15s ease, transform 0.08s ease; }
+  .hub-profile:hover { border-color: rgba(34, 211, 238, 0.5); }
   .hub-profile:active { transform: scale(0.97); }
+  .hub-profile:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   .hp-av { width: 30px; height: 30px; border-radius: 50%; display: grid;
            place-items: center; font-size: 17px; background: var(--bg);
            border: 1px solid var(--line); flex: none; overflow: hidden; }
@@ -81,18 +107,215 @@
 
   @keyframes pulse { 50% { opacity: 0.35; } }
 
-  /* ---------- lobby chat ---------- */
-  .lchat { margin: 6px 16px 14px; border: 1px solid var(--line); border-radius: 20px;
+  /* ---------- section heading (shared by spotlight + rails) ---------- */
+  .sec-eyebrow { display: flex; align-items: center; gap: 9px;
+                 padding: 16px 20px 2px; }
+  .sec-eyebrow .dot { width: 7px; height: 7px; border-radius: 2px;
+                      background: var(--grad); flex: none;
+                      box-shadow: 0 0 10px rgba(34, 211, 238, 0.6); }
+  .sec-eyebrow .lbl { font-family: var(--mono); font-size: 10.5px; font-weight: 800;
+                      letter-spacing: 0.22em; color: var(--muted); }
+
+  /* ---------- featured spotlight ---------- */
+  .spot-wrap { padding: 4px 16px 10px; }
+  .spot { position: relative; display: block; border-radius: 22px;
+          overflow: hidden; border: 1px solid var(--line);
+          background: #0c1226; min-height: 208px; isolation: isolate;
+          box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .spot:hover { border-color: rgba(34, 211, 238, 0.45); }
+  .spot-art { position: absolute; inset: 0; z-index: 0; }
+  .spot-scan { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+               background: repeating-linear-gradient(0deg,
+                 rgba(0, 0, 0, 0.10) 0 1px, transparent 1px 3px);
+               mix-blend-mode: overlay; opacity: 0.5; }
+  .spot-glyph { position: absolute; z-index: 1; right: 3%; top: 50%;
+                transform: translateY(-50%) rotate(-8deg);
+                font-size: 150px; line-height: 1;
+                filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.6)); }
+  .spot-scrim { position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(88deg, rgba(7,11,20,0.94) 30%,
+                rgba(7,11,20,0.62) 56%, rgba(7,11,20,0.08) 92%); }
+  .spot-body { position: relative; z-index: 3; padding: 20px 22px 22px;
+               display: flex; flex-direction: column; align-items: flex-start;
+               gap: 9px; max-width: min(78%, 560px); }
+  .spot-kicker { display: inline-flex; align-items: center; gap: 7px;
+                 font-family: var(--mono); font-size: 9.5px; font-weight: 800;
+                 letter-spacing: 0.16em; color: #05070e; border-radius: 999px;
+                 padding: 4px 11px; }
+  .spot-title { font-weight: 800; font-style: italic; letter-spacing: 0.01em;
+                font-size: clamp(30px, 8vw, 44px); line-height: 0.98;
+                text-shadow: 0 3px 20px rgba(0, 0, 0, 0.5); }
+  .spot-tag { font-size: 13.5px; color: #cfd8ef; line-height: 1.4;
+              font-weight: 500; max-width: 42ch; }
+  .spot-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1px; }
+  .spot-cta { margin-top: 8px; display: inline-flex; align-items: center; gap: 9px;
+              font-family: var(--font); font-weight: 800; letter-spacing: 0.06em;
+              font-size: 15px; color: #05070e; border: none; border-radius: 13px;
+              padding: 12px 22px; background: var(--grad); cursor: pointer;
+              text-decoration: none;
+              box-shadow: 0 8px 26px rgba(129, 140, 248, 0.4);
+              transition: transform 0.09s ease, box-shadow 0.2s ease; }
+  .spot-cta:hover { box-shadow: 0 10px 34px rgba(129, 140, 248, 0.6); }
+  .spot { cursor: pointer; } /* whole card launches (JS) — CTA stays keyboard-focusable */
+  .spot:hover .spot-cta { transform: translateY(-1px); }
+  .spot-cta .arw { font-size: 12px; transition: transform 0.15s ease; }
+  .spot:hover .spot-cta .arw { transform: translateX(3px); }
+  .spot-dots { position: absolute; z-index: 4; right: 16px; bottom: 16px;
+               display: flex; gap: 7px; }
+  .spot-dot { width: 9px; height: 9px; border-radius: 999px; cursor: pointer;
+              border: 1px solid rgba(232, 237, 249, 0.5); background: transparent;
+              padding: 0; transition: all 0.18s ease; }
+  .spot-dot.on { background: var(--text); border-color: var(--text);
+                 width: 22px; box-shadow: 0 0 12px rgba(232, 237, 249, 0.6); }
+
+  /* ---------- filters ---------- */
+  .filters { display: flex; gap: 8px; padding: 6px 16px 12px;
+             overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .fchip { flex: none; border: 1px solid var(--line); background: var(--surface);
+           color: var(--muted); border-radius: 12px; padding: 9px 15px;
+           font-family: var(--mono); font-size: 11px; font-weight: 800;
+           letter-spacing: 0.1em; cursor: pointer;
+           display: inline-flex; align-items: center; gap: 7px;
+           transition: color 0.15s ease, border-color 0.15s ease,
+                       background 0.15s ease, box-shadow 0.15s ease; }
+  .fchip:hover { border-color: rgba(34, 211, 238, 0.45); color: var(--text); }
+  .fchip .fc-n { font-size: 9.5px; opacity: 0.7; }
+  .fchip.sel { color: #05070e; background: var(--grad); border-color: transparent;
+               box-shadow: 0 4px 18px rgba(129, 140, 248, 0.4); }
+  .fchip.sel .fc-n { opacity: 0.85; }
+  .fchip:disabled { opacity: 0.35; cursor: default; }
+  .fchip:disabled:hover { border-color: var(--line); color: var(--muted); }
+
+  /* ---------- rails ---------- */
+  .rail { margin-bottom: 8px; }
+  .rail-head { display: flex; align-items: center; gap: 10px;
+               padding: 10px 20px 10px; }
+  .rail-ico { font-size: 15px; filter: saturate(1.2); }
+  .rail-title { font-size: 13px; font-weight: 800; letter-spacing: 0.16em;
+                color: var(--text); }
+  .rail-count { font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+                border: 1px solid var(--line); border-radius: 999px;
+                padding: 2px 8px; }
+  .rail-track { display: flex; gap: 13px; overflow-x: auto; padding: 4px 16px 18px;
+                scrollbar-width: none; scroll-snap-type: x proximity; }
+  .rail-track::-webkit-scrollbar { display: none; }
+
+  /* ---------- tiles ---------- */
+  .tile { position: relative; flex: none; width: var(--rail-tile-w);
+          aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden;
+          border: 1px solid var(--line); cursor: pointer;
+          scroll-snap-align: start; text-align: left;
+          background: #0d1326; color: var(--text); padding: 0;
+          text-decoration: none; isolation: isolate;
+          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34);
+          transition: transform 0.16s ease, box-shadow 0.16s ease,
+                      border-color 0.16s ease;
+          animation: tile-in 0.4s ease backwards; }
+  .tile:hover, .tile:focus-visible, .tile.hot {
+    transform: translateY(-5px) scale(1.035);
+    border-color: var(--tile-accent, var(--cyan));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px var(--tile-accent, var(--cyan)),
+                0 0 34px -6px var(--tile-accent, rgba(34, 211, 238, 0.6));
+    z-index: 3; outline: none; }
+  @keyframes tile-in { from { opacity: 0; transform: translateY(14px); } }
+  .tile-art { position: absolute; inset: 0; z-index: 0; }
+  .tile-scan { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+               background: repeating-linear-gradient(0deg,
+                 rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+               mix-blend-mode: overlay; opacity: 0.5; }
+  .tile-gloss { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+                background: radial-gradient(130% 80% at 20% -12%,
+                  rgba(255, 255, 255, 0.16), transparent 46%); }
+  .tile-glyph { position: absolute; z-index: 1; right: -8%; top: 13%;
+                font-size: calc(var(--rail-tile-w) * 0.66); line-height: 1;
+                transform: rotate(-9deg);
+                transition: transform 0.22s ease; }
+  .tile:hover .tile-glyph, .tile:focus-visible .tile-glyph, .tile.hot .tile-glyph {
+    transform: rotate(-9deg) scale(1.07) translateY(-2px); }
+  .tile-glyph-ghost { position: absolute; z-index: 0; left: -14%; top: -10%;
+                      font-size: calc(var(--rail-tile-w) * 0.62);
+                      transform: rotate(16deg); opacity: 0.09; filter: blur(1px); }
+  .tile-scrim { position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(3deg, rgba(7,11,20,0.98) 24%,
+                rgba(7,11,20,0.45) 56%, transparent 82%); }
+  /* top badges row */
+  .tile-badges { position: absolute; z-index: 3; top: 9px; left: 9px; right: 9px;
+                 display: flex; align-items: flex-start; justify-content: space-between;
+                 gap: 6px; pointer-events: none; }
+  .tile-live { font-family: var(--mono); font-size: 9px; font-weight: 800;
+               letter-spacing: 0.06em; color: var(--green);
+               background: rgba(7, 11, 20, 0.74);
+               border: 1px solid rgba(16, 201, 110, 0.5);
+               border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
+  .tile-live::before { content: "●"; margin-right: 5px;
+                       animation: pulse 1.4s ease infinite; }
+  .tile-tv-badge { font-family: var(--mono); font-size: 9px; font-weight: 800;
+                 letter-spacing: 0.06em; color: var(--text);
+                 background: rgba(7,11,20,0.74); border: 1px solid var(--line);
+                 padding: 4px 8px; border-radius: 999px; margin-left: auto; }
+  .tile-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+               padding: 12px 13px 13px; display: flex; flex-direction: column;
+               gap: 7px; }
+  .tile-title { font-weight: 800; font-size: 15px; font-style: italic;
+                letter-spacing: 0.01em; line-height: 1.05; }
+  .tile-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-family: var(--mono); font-size: 9px; font-weight: 700;
+         letter-spacing: 0.04em; color: #c3cdea; padding: 3px 7px;
+         border-radius: 7px; border: 1px solid var(--line);
+         background: rgba(7, 11, 20, 0.5); white-space: nowrap; }
+  .tag.players { color: var(--text); border-color: rgba(232, 237, 249, 0.22); }
+  .tag.bots { color: var(--cyan); border-color: rgba(34, 211, 238, 0.4); }
+  .tag.solo { color: var(--green); border-color: rgba(16, 201, 110, 0.4); }
+  /* PLAY affordance — a bar that slides up over the metadata on hover/focus
+     (never overlaps the tags at rest; touch devices tap the whole tile) */
+  .tile-play { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0;
+               display: flex; align-items: center; justify-content: center; gap: 8px;
+               font-family: var(--mono); font-size: 12px; font-weight: 800;
+               letter-spacing: 0.14em; color: #05070e;
+               padding: 13px 10px; background: var(--tile-accent, var(--cyan));
+               transform: translateY(101%); transition: transform 0.18s ease; }
+  .tile:hover .tile-play, .tile:focus-visible .tile-play, .tile.hot .tile-play {
+    transform: translateY(0); }
+
+  /* coming soon */
+  .tile.soon { cursor: default; border-style: dashed; box-shadow: none; }
+  .tile.soon .tile-glyph { filter: grayscale(0.7); opacity: 0.5; }
+  .tile.soon .tile-title { color: var(--muted); font-size: 13px; font-style: normal;
+                           display: -webkit-box; -webkit-line-clamp: 2;
+                           -webkit-box-orient: vertical; overflow: hidden; }
+  .tile.soon .tile-sub { font-family: var(--mono); font-size: 9.5px;
+                         color: var(--faint); display: -webkit-box;
+                         -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+                         overflow: hidden; letter-spacing: 0.02em; line-height: 1.45; }
+  .tile-ribbon { position: absolute; top: 12px; right: -30px; z-index: 3;
+                 transform: rotate(38deg);
+                 font-family: var(--mono); font-size: 9px; font-weight: 800;
+                 letter-spacing: 0.22em; color: #05070e;
+                 background: var(--yellow); padding: 4px 34px; }
+
+  /* ---------- lobby chat (now a compact dock below the games) ---------- */
+  .lchat { margin: 8px 16px 6px; border: 1px solid var(--line); border-radius: 20px;
            background: var(--surface); overflow: hidden; display: flex;
-           flex-direction: column; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4); }
-  .lc-head { display: flex; align-items: center; justify-content: space-between;
-             padding: 11px 16px 9px; border-bottom: 1px solid var(--line); }
-  .lc-title { font-size: 12px; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); }
+           flex-direction: column; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+           scroll-margin-top: 12px; }
+  .lc-head { display: flex; align-items: center; gap: 10px;
+             padding: 12px 16px; cursor: pointer; user-select: none; }
+  .lc-head-ico { font-size: 15px; }
+  .lc-title { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; color: var(--text); }
   .lc-online { font-family: var(--mono); font-size: 10.5px; color: var(--faint);
-               letter-spacing: 0.06em; }
+               letter-spacing: 0.06em; margin-left: auto; }
   .lc-online.on { color: var(--green); }
-  .lc-msgs { height: clamp(176px, 32vh, 300px); overflow-y: auto; padding: 12px 14px;
-             display: flex; flex-direction: column; gap: 9px; }
+  .lc-chev { font-size: 12px; color: var(--muted); transition: transform 0.2s ease;
+             width: 20px; text-align: center; }
+  .lchat.collapsed .lc-chev { transform: rotate(-90deg); }
+  .lc-fold { display: flex; flex-direction: column; overflow: hidden; }
+  .lchat.collapsed .lc-fold { display: none; }
+  .lc-msgs { height: clamp(150px, 26vh, 260px); overflow-y: auto; padding: 8px 14px 12px;
+             display: flex; flex-direction: column; gap: 9px;
+             border-top: 1px solid var(--line); }
   .lc-empty { margin: auto; text-align: center; font-family: var(--mono);
               font-size: 11px; color: var(--faint); line-height: 1.7; }
   .lc-row { display: flex; gap: 9px; align-items: flex-end; max-width: 88%; }
@@ -133,125 +356,87 @@
                  background: rgba(7, 11, 20, 0.9); padding: 20px; }
   .lc-lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; }
 
-  /* ---------- filters ---------- */
-  .filters { display: flex; gap: 8px; padding: 2px 16px 14px;
-             overflow-x: auto; scrollbar-width: none; }
-  .filters::-webkit-scrollbar { display: none; }
-  .fchip { flex: none; border: 1px solid var(--line); background: var(--surface);
-           color: var(--muted); border-radius: 999px; padding: 9px 16px;
-           font-family: var(--mono); font-size: 11.5px; font-weight: 800;
-           letter-spacing: 0.1em; cursor: pointer;
-           transition: all 0.15s ease; }
-  .fchip.sel { color: #05070e; background: var(--grad); border-color: transparent;
-               box-shadow: 0 4px 18px rgba(129, 140, 248, 0.4); }
-
-  /* ---------- rails ---------- */
-  .rail { margin-bottom: 6px; }
-  .rail-head { display: flex; align-items: baseline; gap: 10px;
-               padding: 8px 20px 10px; }
-  .rail-title { font-size: 13px; font-weight: 800; letter-spacing: 0.2em;
-                color: var(--muted); }
-  .rail-count { font-family: var(--mono); font-size: 11px; color: var(--faint); }
-  .rail-track { display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 18px;
-                scrollbar-width: none; scroll-snap-type: x proximity; }
-  .rail-track::-webkit-scrollbar { display: none; }
-
-  /* ---------- tiles ---------- */
-  .tile { position: relative; flex: none; width: var(--rail-tile-w);
-          aspect-ratio: 3 / 4; border-radius: 20px; overflow: hidden;
-          border: 1px solid var(--line); cursor: pointer;
-          scroll-snap-align: start; text-align: left;
-          background: #0d1326; color: var(--text); padding: 0;
-          transition: transform 0.16s ease, box-shadow 0.16s ease,
-                      border-color 0.16s ease;
-          animation: tile-in 0.4s ease backwards; }
-  .tile:hover, .tile:focus-visible, .tile.hot {
-    transform: translateY(-4px) scale(1.03);
-    z-index: 2; outline: none; }
-  @keyframes tile-in { from { opacity: 0; transform: translateY(14px); } }
-  .tile-art { position: absolute; inset: 0; }
-  .tile-glyph { position: absolute; right: -9%; top: 12%;
-                font-size: calc(var(--rail-tile-w) * 0.68); line-height: 1;
-                transform: rotate(-10deg);
-                filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55)); }
-  .tile-glyph-ghost { position: absolute; left: -14%; top: -10%;
-                      font-size: calc(var(--rail-tile-w) * 0.62);
-                      transform: rotate(16deg); opacity: 0.09; filter: blur(1px); }
-  .tile-scrim { position: absolute; inset: 0;
-    background: linear-gradient(4deg, rgba(7,11,20,0.97) 26%, rgba(7,11,20,0.4) 58%, transparent 80%); }
-  .tile-live { position: absolute; top: 10px; left: 10px; z-index: 3;
-               font-family: var(--mono); font-size: 9.5px; font-weight: 800;
-               letter-spacing: 0.08em; color: var(--green);
-               background: rgba(7, 11, 20, 0.72);
-               border: 1px solid rgba(16, 201, 110, 0.5);
-               border-radius: 999px; padding: 4px 9px; }
-  .tile-live::before { content: "●"; margin-right: 5px;
-                       animation: pulse 1.4s ease infinite; }
-  .tile-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-               padding: 12px 13px; display: flex; flex-direction: column; gap: 4px; }
-  .tile-title { font-weight: 800; font-size: 14.5px; font-style: italic;
-                letter-spacing: 0.02em; }
-  .tile-sub { font-family: var(--mono); font-size: 9.5px; color: #aab6d4;
-              letter-spacing: 0.06em; }
-  .tile.soon { cursor: default; border-style: dashed; }
-  .tile.soon .tile-glyph { filter: grayscale(0.7) drop-shadow(0 10px 22px rgba(0,0,0,0.5));
-                           opacity: 0.55; }
-  .tile.soon .tile-title { color: var(--muted); font-size: 13px; font-style: normal;
-                           display: -webkit-box; -webkit-line-clamp: 2;
-                           -webkit-box-orient: vertical; overflow: hidden; }
-  .tile.soon .tile-sub { display: -webkit-box; -webkit-line-clamp: 3;
-                         -webkit-box-orient: vertical; overflow: hidden;
-                         letter-spacing: 0.02em; line-height: 1.45; }
-  .tile-ribbon { position: absolute; top: 12px; right: -30px; z-index: 3;
-                 transform: rotate(38deg);
-                 font-family: var(--mono); font-size: 9px; font-weight: 800;
-                 letter-spacing: 0.22em; color: #05070e;
-                 background: var(--yellow); padding: 4px 34px; }
-  /* BIG SCREEN feature rail + TV badge */
-  .rail-feature .rail-head { flex-wrap: wrap; }
-  .rail-feature .rail-title { background: var(--grad); -webkit-background-clip: text;
-                 background-clip: text; color: transparent; }
-  .rail-sub { order: 1; flex-basis: 100%; font-size: 11px; color: var(--muted);
-              font-weight: 600; letter-spacing: 0.01em; margin-top: 2px; }
-  .tile-tv-badge { position: absolute; top: 10px; left: 10px; z-index: 3;
-                 font-family: var(--mono); font-size: 10px; font-weight: 800;
-                 letter-spacing: 0.06em; color: var(--text);
-                 background: rgba(7,11,20,0.72); border: 1px solid var(--line);
-                 padding: 4px 8px; border-radius: 999px; }
-
   .hub-foot { text-align: center; font-family: var(--mono); font-size: 11px;
-              color: var(--faint); padding: 22px 20px 4px; letter-spacing: 0.08em; }
+              color: var(--faint); padding: 20px 20px 4px; letter-spacing: 0.08em; }
   .hub-foot b { background: var(--grad); -webkit-background-clip: text;
                 background-clip: text; color: transparent; font-style: italic; }
 
+  /* ---------- CRT overlay (toggle) ---------- */
+  .crt { position: fixed; inset: 0; z-index: 30; pointer-events: none;
+         display: none; }
+  body.crt-on .crt { display: block; }
+  .crt::before { content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      rgba(0, 0, 0, 0.22) 0 1px, rgba(0, 0, 0, 0) 1px 3px);
+    opacity: 0.55; }
+  .crt::after { content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.45) 100%),
+      linear-gradient(90deg, rgba(255, 0, 60, 0.05), transparent 8% 92%, rgba(0, 120, 255, 0.05));
+    animation: crt-flick 6s steps(60) infinite; }
+  @keyframes crt-flick { 0%, 96%, 100% { opacity: 1; } 97% { opacity: 0.86; } 98% { opacity: 0.97; } }
+
+  /* ---------- power-on boot sweep ---------- */
+  .boot { position: fixed; inset: 0; z-index: 90; pointer-events: none;
+          background: #05070e; animation: boot-fade 0.6s ease 0.34s forwards; }
+  .boot::before { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+                  height: 3px; background: rgba(232, 237, 249, 0.95);
+                  box-shadow: 0 0 26px 6px rgba(34, 211, 238, 0.8);
+                  transform: translateY(-50%) scaleY(1);
+                  animation: boot-line 0.34s ease forwards; }
+  @keyframes boot-line { 0% { transform: translateY(-50%) scaleY(1); opacity: 1; }
+                         70% { opacity: 1; }
+                         100% { transform: translateY(-50%) scaleY(80); opacity: 0; } }
+  @keyframes boot-fade { to { opacity: 0; visibility: hidden; } }
+
   @media (min-width: 760px) {
-    .hero { margin: 8px 20px 18px; }
-    .hero-body { padding: 30px; }
+    .spot { min-height: 268px; }
+    .spot-glyph { font-size: 210px; right: 5%; }
+    .spot-body { padding: 30px 34px; }
   }
   @media (max-width: 420px) {
     .hub-top { padding-left: 14px; padding-right: 14px; }
-    .hub-brand { font-size: 20px; }
-    .hub-profile { max-width: 34vw; padding-right: 9px; }
+    .hub-logo { font-size: 21px; }
+    .hub-plate { display: none; }
+    .hub-profile { max-width: 32vw; padding-right: 9px; }
     .hp-name { font-size: 10.5px; }
     .pf-close { top: 4px; right: 4px; }
+    .spot-glyph { font-size: 118px; right: -4%; }
   }
   @media (pointer: coarse) {
-    .hub-profile, .lc-icon, .lc-send, .lc-emoji button, .fchip { min-height: 44px; }
+    .hub-profile, .lc-icon, .lc-send, .lc-emoji button, .fchip, .hub-btn { min-height: 44px; }
     .lc-icon, .lc-send, .lc-emoji button { width: 44px; height: 44px; }
+    /* touch has no hover — the whole tile is the button, so drop the bar */
+    .tile-play { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .tile, .hero { animation: none; transition: none; }
+    .tile, .spot, .spot-cta .arw { animation: none; transition: none; }
+    .crt::after { animation: none; }
+    .boot { display: none; }
   }
 </style>
 </head>
 <body>
 <div class="bg-fx" aria-hidden="true"></div>
+<div class="crt" id="crt-layer" aria-hidden="true"></div>
 <div class="hub-wrap">
   <div class="hub-inner">
     <header class="hub-top">
-      <span class="hub-brand"><span class="b1">LAN</span><span class="b2"> GAMES</span></span>
+      <div class="hub-brand">
+        <span class="hub-logo"><span class="b1">LAN</span><span class="b2">GAMES</span></span>
+        <span class="hub-plate">GAME&nbsp;NIGHT&nbsp;OS</span>
+      </div>
       <div class="hub-actions">
-        <button class="hub-share" id="share-open" aria-label="share join link">⌁</button>
+        <button class="hub-btn" id="chat-jump" aria-label="jump to lobby chat" title="lobby chat">
+          <span aria-hidden="true">💬</span><span class="pip" id="chat-pip">0</span>
+        </button>
+        <button class="hub-btn" id="crt-toggle" aria-label="toggle CRT scanlines"
+                aria-pressed="false" title="CRT mode">
+          <span aria-hidden="true">📺</span>
+        </button>
+        <button class="hub-btn" id="share-open" aria-label="share join link" title="join link">
+          <span aria-hidden="true">⌁</span>
+        </button>
         <button class="hub-profile" id="profile-chip" aria-label="your profile">
           <span class="hp-av" id="hp-av">🎮</span>
           <span class="hp-name" id="hp-name">SET UP</span>
@@ -259,24 +444,34 @@
       </div>
     </header>
 
-    <section class="lchat" aria-label="lobby chat">
-      <div class="lc-head">
-        <span class="lc-title">LOBBY CHAT</span>
-        <span class="lc-online" id="lc-online">connecting…</span>
-      </div>
-      <div class="lc-msgs" id="lc-msgs"></div>
-      <div class="lc-emoji" id="lc-emoji" hidden></div>
-      <form class="lc-input" id="lc-form" autocomplete="off">
-        <button type="button" class="lc-icon" id="lc-emoji-btn" aria-label="emoji">😀</button>
-        <button type="button" class="lc-icon" id="lc-gif-btn" aria-label="meme or gif">🖼️</button>
-        <input id="lc-text" maxlength="400" placeholder="say something…" aria-label="message">
-        <button type="submit" class="lc-send" id="lc-send" aria-label="send">➤</button>
-      </form>
+    <section class="spot-wrap" aria-label="featured game">
+      <div class="sec-eyebrow"><span class="dot"></span><span class="lbl">FEATURED</span></div>
+      <div id="spotlight"></div>
     </section>
 
     <nav id="filters" class="filters" aria-label="party size"></nav>
 
     <main id="rails"></main>
+
+    <section class="lchat" id="chat-section" aria-label="lobby chat">
+      <div class="lc-head" id="lc-head" role="button" tabindex="0"
+           aria-expanded="true" aria-controls="lc-fold">
+        <span class="lc-head-ico" aria-hidden="true">💬</span>
+        <span class="lc-title">LOBBY CHAT</span>
+        <span class="lc-online" id="lc-online">connecting…</span>
+        <span class="lc-chev" aria-hidden="true">▾</span>
+      </div>
+      <div class="lc-fold" id="lc-fold">
+        <div class="lc-msgs" id="lc-msgs"></div>
+        <div class="lc-emoji" id="lc-emoji" hidden></div>
+        <form class="lc-input" id="lc-form" autocomplete="off">
+          <button type="button" class="lc-icon" id="lc-emoji-btn" aria-label="emoji">😀</button>
+          <button type="button" class="lc-icon" id="lc-gif-btn" aria-label="meme or gif">🖼️</button>
+          <input id="lc-text" maxlength="400" placeholder="say something…" aria-label="message">
+          <button type="submit" class="lc-send" id="lc-send" aria-label="send">➤</button>
+        </form>
+      </div>
+    </section>
 
     <p class="hub-foot">no accounts · no cloud · winners get brag rights ·
       <b>LAN Games</b></p>
