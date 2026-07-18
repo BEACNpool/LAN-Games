@@ -258,6 +258,9 @@ img.pfp {
 /* Phone ergonomics: keep repeated pickers comfortably tappable without
    forcing game boards (which have their own sizing rules) to grow. */
 @media (max-width: 480px) {
+  /* Long one-line game titles (notably CONNECT FOUR) need a little more
+     breathing room on 360px and narrower phones. */
+  .wordmark { font-size: clamp(32px, 10vw, 54px); letter-spacing: 0; }
   .avatar-grid { grid-template-columns: repeat(5, minmax(44px, 1fr)); }
   .modal, .crop-ov { padding: 12px; }
 }
