@@ -471,7 +471,9 @@ shared game (the "caller", the item, the board) and each player's **phone is a
 lean controller**. It's built entirely on machinery that already exists — a game
 is a normal `GameSession`; there is **no room-code system** (one room per slug,
 same as every other game). Reference implementations: `games/bingo` (caller +
-cards), `games/pricecheck` (item + number keypad + reveal).
+cards), `games/pricecheck` (item + number keypad + reveal), and
+`games/orbitriot` (custom full-bleed canvas, private aim controllers, and a
+server-authoritative physics replay).
 
 **What makes a game "BIG SCREEN" — three things:**
 

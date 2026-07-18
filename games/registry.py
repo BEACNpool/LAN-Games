@@ -19,6 +19,8 @@ from games.connect4.game import Connect4Session
 from games.checkers.game import CheckersSession
 from games.backgammon.game import BackgammonSession
 from games.tanks.game import TanksSession
+from games.fortfling.game import FortFlingSession
+from games.orbitriot.game import OrbitRiotSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -65,6 +67,22 @@ REGISTRY = [
         "players": "1–12 + TV",
         "session": PriceCheckSession,
         "web": GAMES_DIR / "pricecheck" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "orbitriot",
+        "category": "bigscreen", "accent": "#ff3dbb", "tv": True,
+        "tagline": "Pool meets pinball. Everybody launches at once.",
+        "min_p": 2, "max_p": 8, "solo": False,
+        "title": "ORBIT RIOT",
+        "icon": "🪐",
+        "art": "◎",
+        "blurb": "Aim a neon comet in secret, then everybody launches at "
+                 "once. Curve around the black hole, smash rivals through the "
+                 "void, and bank stars in a server-physics spectacle on the TV.",
+        "players": "2–8 + TV",
+        "session": OrbitRiotSession,
+        "web": GAMES_DIR / "orbitriot" / "web",
         "hidden": False,
     },
     {
@@ -251,6 +269,22 @@ REGISTRY = [
         "players": "1–2 + bot",
         "session": Connect4Session,
         "web": GAMES_DIR / "connect4" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "fortfling",
+        "category": "battle", "accent": "#fb7185",
+        "tagline": "Pull back. Pick a weapon. Wreck their fort.",
+        "min_p": 2, "max_p": 2, "solo": False,
+        "title": "FORT FLING",
+        "icon": "🏰",
+        "art": "⚔",
+        "blurb": "A two-player slingshot showdown built for phones. Take "
+                 "turns flinging boulders, bombs, clusters, rockets, and "
+                 "ricochets from a limited weapon belt.",
+        "players": "2 players",
+        "session": FortFlingSession,
+        "web": GAMES_DIR / "fortfling" / "web",
         "hidden": False,
     },
     {
