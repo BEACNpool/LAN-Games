@@ -1,3 +1,4 @@
+<img width="1630" height="1106" alt="image" src="https://github.com/user-attachments/assets/b1105395-0bff-46c8-af46-e8d7f5a74617" />
 # LAN Games
 
 A self-hosted **game hub for your local network**. One page, ~18 games, bots to
