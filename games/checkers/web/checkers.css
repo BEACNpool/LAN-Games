@@ -1,0 +1,49 @@
+/* checkers — 8x8 board grid (self-contained) + CSS discs */
+
+.ck-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(94vw, 520px, 62vh);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+.ck-board .sq {
+  position: relative;
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+.ck-board .sq.light { background: #8b9cc2; }
+.ck-board .sq.dark { background: #46557d; }
+.ck-board .sq.sel { outline: 3px solid var(--cyan); outline-offset: -3px; z-index: 2; }
+
+.disc {
+  width: 76%; height: 76%; border-radius: 50%;
+  pointer-events: none; position: relative;
+  display: grid; place-items: center;
+}
+.disc.w { background: radial-gradient(circle at 35% 30%, #fffdf4, #d9cdb4 70%);
+          box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.35),
+                      0 2px 6px rgba(0, 0, 0, 0.5); }
+.disc.b { background: radial-gradient(circle at 35% 30%, #4d5a7c, #1c2438 70%);
+          box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.5),
+                      0 2px 6px rgba(0, 0, 0, 0.5); }
+.disc::after { content: ""; position: absolute; inset: 18%;
+               border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.18); }
+.disc.b::after { border-color: rgba(255, 255, 255, 0.12); }
+.disc.king::before { content: "👑"; position: absolute; font-size: 55%;
+                     z-index: 2; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+
+.sq .hopmark {
+  position: absolute; width: 26%; height: 26%;
+  border-radius: 50%; background: rgba(34, 211, 238, 0.6);
+  pointer-events: none;
+}
+.sq .hopnum {
+  position: absolute; right: 4%; bottom: 2%;
+  font-family: var(--mono); font-size: 10px; font-weight: 800;
+  color: var(--cyan); pointer-events: none;
+}

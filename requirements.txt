@@ -1,0 +1,10 @@
+# LAN Games — runtime dependencies (Python 3.10+)
+fastapi==0.139.2
+uvicorn==0.51.0
+websockets==16.1
+pillow==12.3.0
+chess==1.11.2
+
+# Dev/test only (not needed to run the games):
+#   pip install pytest        # unit tests:  python -m pytest -q
+#   npm i puppeteer-core       # headless browser playtests (tests/playtest_*.mjs)

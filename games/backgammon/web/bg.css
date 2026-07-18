@@ -1,0 +1,84 @@
+/* backgammon board — CSS triangles, stacked checkers, dice */
+
+.bg-hud { display: flex; align-items: center; gap: 10px;
+          width: min(96vw, 560px); padding: 2px 4px 8px; }
+.bg-dice { display: flex; gap: 6px; }
+.bg-dice .die {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: #f4f1e8; color: #1a2233;
+  font-family: var(--mono); font-weight: 800; font-size: 19px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+.bg-dice .die.used { opacity: 0.3; }
+.bg-pips { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.bg-btn { border: 1px solid var(--line); background: var(--raised);
+          color: var(--muted); border-radius: 10px; padding: 8px 10px;
+          font-family: var(--mono); font-weight: 700; font-size: 11px;
+          cursor: pointer; }
+
+.bg-board {
+  width: min(96vw, 560px);
+  aspect-ratio: 13 / 10;
+  display: grid;
+  grid-template-columns: 6fr 0.8fr 6fr 0.9fr;   /* left | bar | right | off */
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  background: linear-gradient(160deg, #1d2036, #14172a);
+  border: 3px solid #3a3150;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  user-select: none;
+}
+.bg-quad { display: grid; grid-template-columns: repeat(6, 1fr); }
+.bg-bar { grid-row: 1 / 3; grid-column: 2;
+          display: flex; flex-direction: column; justify-content: space-around;
+          align-items: center; background: #241f38; border-radius: 8px; }
+.bg-off { grid-row: 1 / 3; grid-column: 4;
+          display: flex; flex-direction: column; justify-content: space-between;
+          align-items: center; background: #241f38; border-radius: 8px;
+          padding: 6px 2px; cursor: pointer; }
+.bg-off .off-tray { display: flex; flex-direction: column; gap: 2px;
+                    align-items: center; font-family: var(--mono);
+                    font-size: 10px; color: var(--muted); }
+.bg-off.hot { outline: 2px solid var(--cyan); }
+
+.bg-point {
+  position: relative; display: flex; flex-direction: column;
+  align-items: center; cursor: pointer; padding: 2px 1px;
+}
+.bg-point.top { justify-content: flex-start; }
+.bg-point.bottom { justify-content: flex-end; flex-direction: column-reverse; }
+.bg-point::before {
+  content: ""; position: absolute; left: 6%; right: 6%;
+  height: 82%; z-index: 0;
+}
+.bg-point.top::before { top: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.bg-point.bottom::before { bottom: 0;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0); }
+.bg-point.odd::before { background: #55628c; }
+.bg-point.even::before { background: #333c5e; }
+.bg-point.src { filter: brightness(1.25); }
+.bg-point.src::after, .bg-point.dst::after {
+  content: ""; position: absolute; left: 30%; right: 30%;
+  aspect-ratio: 1; border-radius: 50%; z-index: 3;
+  background: rgba(34, 211, 238, 0.55);
+}
+.bg-point.top::after { bottom: 4%; }
+.bg-point.bottom::after { top: 4%; }
+.bg-point.sel { outline: 2px solid var(--cyan); outline-offset: -2px;
+                border-radius: 6px; }
+
+.bg-chk {
+  width: 78%; aspect-ratio: 1; border-radius: 50%; z-index: 2; flex: none;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.bg-chk.w { background: radial-gradient(circle at 35% 30%, #fffdf4, #d9cdb4 72%); }
+.bg-chk.b { background: radial-gradient(circle at 35% 30%, #4d5a7c, #161e33 72%); }
+.bg-chk.count { display: grid; place-items: center;
+                font-family: var(--mono); font-weight: 800; font-size: 11px; }
+.bg-chk.count.w { color: #1a2233; }
+.bg-chk.count.b { color: #e8edf9; }
+.bg-bar .bg-chk { width: 60%; }

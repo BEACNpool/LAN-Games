@@ -1,0 +1,90 @@
+/* duel.css — shared chrome for 2-seat board games (with shared.css). */
+
+.scr { position: relative; z-index: 1; height: 100dvh; display: flex;
+       flex-direction: column; max-width: 640px; margin: 0 auto; }
+.join-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center;
+             padding: 24px; text-align: center; max-width: 560px; margin: 0 auto; width: 100%; }
+.tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
+           color: var(--muted); margin: 10px 0 26px; }
+.join-card { background: var(--surface); border: 1px solid var(--line);
+             border-radius: 20px; padding: 20px 20px 24px; text-align: left;
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); }
+.join-card .btn-big { margin-top: 24px; }
+.lobby-body { flex: 1; overflow-y: auto; padding: 4px 16px 16px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-sec { margin-bottom: 22px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); font-weight: 700; }
+.sec-badge { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+.seat-note { font-size: 12px; color: var(--faint); font-family: var(--mono); margin-top: 8px; }
+.lobby-foot { padding: 12px 16px calc(14px + var(--sab)); display: grid; gap: 10px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-hint { text-align: center; font-size: 12px; color: var(--faint); font-family: var(--mono); }
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.opt-row .field-label { margin: 10px 0; }
+.seg { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line);
+       border-radius: 12px; padding: 3px; }
+.seg button { border: none; background: transparent; color: var(--muted);
+              font-family: var(--mono); font-weight: 700; font-size: 12px;
+              padding: 8px 12px; border-radius: 9px; cursor: pointer; }
+.seg button.sel { background: var(--raised); color: var(--text);
+                  box-shadow: 0 0 0 1px var(--violet); }
+
+/* game chrome */
+.duel-head { display: flex; align-items: center; gap: 8px;
+             padding: calc(10px + var(--sat)) 12px 6px; }
+.head-link { font-size: 18px; text-decoration: none; width: 38px; height: 38px; flex: none;
+             display: grid; place-items: center; background: var(--raised);
+             border: 1px solid var(--line); border-radius: 11px; }
+.duel-seat { flex: 1; display: flex; align-items: center; gap: 7px; min-width: 0;
+             background: var(--surface); border: 1px solid var(--line);
+             border-radius: 12px; padding: 7px 10px;
+             font-weight: 700; font-size: 13px; }
+.duel-seat.turn { border-color: var(--cyan);
+                  box-shadow: 0 0 0 1px var(--cyan), 0 0 14px rgba(34, 211, 238, 0.22); }
+.duel-seat.me .ds-name::after { content: " (you)"; color: var(--muted);
+                                font-weight: 400; font-size: 11px; }
+.ds-swatch { font-size: 14px; flex: none; }
+.ds-av { font-size: 16px; flex: none; display: grid; place-items: center; }
+.ds-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-extra { margin-left: auto; font-family: var(--mono); font-size: 11px;
+            color: var(--muted); flex: none; }
+.duel-clock { font-family: var(--mono); font-weight: 800; font-size: 14px;
+              border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; }
+.duel-clock.low { color: var(--danger); border-color: var(--danger);
+                  animation: blink 0.5s step-end infinite; }
+
+.board-stage { flex: 1; display: flex; flex-direction: column; align-items: center;
+               justify-content: center; padding: 8px 10px; min-height: 0; }
+
+.duel-foot { display: flex; align-items: center; gap: 8px;
+             padding: 6px 12px calc(12px + var(--sab)); }
+.turn-note { flex: 1; font-family: var(--mono); font-size: 12px; color: var(--muted);
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.turn-note.mine { color: var(--cyan); font-weight: 700; }
+.duel-actions { display: flex; gap: 6px; }
+.duel-actions button { border: 1px solid var(--line); background: var(--raised);
+                       color: var(--muted); border-radius: 10px; padding: 9px 11px;
+                       font-family: var(--mono); font-weight: 700; font-size: 11px;
+                       cursor: pointer; }
+.duel-actions button:active { transform: scale(0.96); }
+.watch-note { text-align: center; font-family: var(--mono); font-size: 11px;
+              color: var(--muted); padding-bottom: 6px; }
+
+.offer-bar { display: flex; align-items: center; gap: 10px; margin: 0 12px 6px;
+             background: var(--surface); border: 1px solid var(--yellow);
+             border-radius: 14px; padding: 9px 14px; font-size: 13px; font-weight: 700; }
+.offer-bar span { flex: 1; }
+.offer-bar button { border: none; border-radius: 10px; padding: 8px 14px;
+                    font-weight: 800; font-size: 12px; cursor: pointer; }
+#offer-yes { background: var(--green); color: #04120a; }
+#offer-no { background: var(--raised); color: var(--muted);
+            border: 1px solid var(--line); }
+
+.go-card { text-align: center; }
+.go-crown { font-size: 44px; }
+.go-title { font-size: 22px; font-weight: 800; margin: 8px 0 4px;
+            background: var(--grad); -webkit-background-clip: text;
+            background-clip: text; color: transparent; }
+.go-line { font-family: var(--mono); font-size: 13px; color: var(--muted);
+           margin-bottom: 18px; }

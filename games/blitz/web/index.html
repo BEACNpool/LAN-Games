@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>CATEGORY BLITZ · LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="36" text-anchor="middle">🧠</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="blitz.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">CATEGORY</span> <span class="wm-b">BLITZ</span></h1>
+    <p class="tagline">NAME THINGS. FAST. MATCH ANYONE — YOU BOTH GET NOTHING.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">LET'S BLITZ</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">CATEGORY</span> <span class="wm-b">BLITZ</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>IN THE ROOM</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="room-note">unique answers score 10 — match another player and you BOTH get zero</p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>DECKS</h2><span id="deck-count" class="sec-badge"></span></div>
+      <div id="deck-grid" class="bz-deck-grid"></div>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>HOUSE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">ROUNDS</span>
+        <div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">SAND TIMER</span>
+        <div id="opt-seconds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">SPICE</span>
+        <div id="opt-spice" class="seg"></div></div>
+      <p id="spice-hint" class="mode-hint"></p>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>FLIP THE TIMER</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="bz-head">
+    <span id="bz-roundchip" class="hud-chip">R1</span>
+    <div class="sand-track"><div id="sand-fill"></div></div>
+    <span id="bz-clock" class="hud-clock-sm">0:00</span>
+  </header>
+  <div id="score-strip" class="score-strip"></div>
+
+  <div class="cat-banner">
+    <span id="cb-deck" class="cb-deck">EASY STREET</span>
+    <div id="cb-cat" class="cb-cat">—</div>
+  </div>
+
+  <div id="play-zone" class="play-zone">
+    <div id="chips" class="chips"></div>
+    <p id="chips-hint" class="chips-hint">everyone's answers stay hidden — only the counts tick up</p>
+  </div>
+
+  <p id="watch-note" class="watch-note" hidden>WATCHING — you're in the next game</p>
+
+  <!-- answer bar: never re-rendered, keyboard never drops -->
+  <form id="answer-form" class="answer-form" autocomplete="off" hidden>
+    <div id="dupe-pop" class="dupe-pop" hidden>🔁 ALREADY GOT IT</div>
+    <input id="answer-input" type="text" maxlength="40" placeholder="name one…"
+           autocomplete="off" autocorrect="off" autocapitalize="off"
+           spellcheck="false" enterkeyhint="send">
+    <button id="answer-send" type="submit">ADD</button>
+  </form>
+</section>
+
+<!-- intro overlay -->
+<div id="intro-overlay" class="intro-overlay" hidden>
+  <p id="io-round" class="io-eyebrow">ROUND 1 OF 5</p>
+  <span id="io-deck" class="io-deck-chip">EASY STREET</span>
+  <div id="io-cat" class="io-cat">—</div>
+  <p class="io-ready">FINGERS READY…</p>
+</div>
+
+<!-- reveal overlay -->
+<div id="reveal-overlay" class="reveal-overlay" hidden>
+  <div class="rv-top">
+    <p id="rv-eyebrow" class="io-eyebrow">TIME! THE CATEGORY WAS</p>
+    <p id="rv-cat" class="rv-cat">—</p>
+  </div>
+  <div id="rv-grid" class="rv-grid"></div>
+  <div class="rv-foot">
+    <button id="tap-btn" class="btn btn-primary btn-big">TAP WHEN DONE</button>
+    <p id="rv-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="podium" class="podium"></div>
+    <div id="go-rows" class="go-rows"></div>
+    <p id="go-best" class="go-best" hidden></p>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="blitz.js"></script>
+</body>
+</html>

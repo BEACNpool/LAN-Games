@@ -1,0 +1,21 @@
+# runtime data (user-uploaded avatars, chat media) — never commit.
+# Root-relative so it does NOT catch game word-lists like games/wordclash/data/.
+/data/
+
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# node (playtest harness)
+node_modules/
+
+# logs / scratch
+nohup.out
+*.log
+
+# os / editor
+.DS_Store
+Thumbs.db

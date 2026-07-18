@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>WORDCLASH</title>
+<meta name="theme-color" content="#070b14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><rect x="8" y="8" width="22" height="22" rx="5" fill="%2310c96e"/><rect x="34" y="8" width="22" height="22" rx="5" fill="%23eab308"/><rect x="8" y="34" width="22" height="22" rx="5" fill="%23313a55"/><rect x="34" y="34" width="22" height="22" rx="5" fill="%2322d3ee"/></svg>'>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<main id="app">
+
+  <!-- ============ JOIN ============ -->
+  <section id="screen-join" class="screen" hidden>
+    <div class="join-wrap">
+      <h1 class="wordmark"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></h1>
+      <p class="tagline">FIVE LETTERS. NO MERCY.</p>
+      <div class="join-card">
+        <label class="field-label" for="name-input">CALL SIGN</label>
+        <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+        <label class="field-label">AVATAR</label>
+        <div id="avatar-grid" class="avatar-grid"></div>
+        <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+        <button id="join-btn" class="btn btn-primary btn-big">ENTER LOBBY</button>
+      </div>
+      <p class="join-foot">local multiplayer &middot; no accounts &middot; no cloud</p>
+    </div>
+  </section>
+
+  <!-- ============ LOBBY ============ -->
+  <section id="screen-lobby" class="screen" hidden>
+    <header class="topbar">
+      <span class="wordmark-sm"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></span>
+      <div class="topbar-right">
+        <button id="mute-btn" class="icon-btn" title="sound">🔊</button>
+        <button id="edit-profile-btn" class="icon-btn" title="profile">✏️</button>
+      </div>
+    </header>
+
+    <div class="lobby-body">
+      <div class="lobby-sec">
+        <div class="sec-head">
+          <h2>SQUAD</h2><span id="ready-count" class="sec-badge"></span>
+        </div>
+        <div id="player-grid" class="player-grid"></div>
+      </div>
+
+      <div class="lobby-sec">
+        <div class="sec-head"><h2>GAME MODE</h2></div>
+        <div id="mode-cards" class="mode-cards"></div>
+        <div class="rounds-row">
+          <span class="field-label">ROUNDS</span>
+          <div class="stepper">
+            <button id="rounds-minus" class="step-btn">−</button>
+            <span id="rounds-val" class="step-val">3</span>
+            <button id="rounds-plus" class="step-btn">+</button>
+          </div>
+        </div>
+        <div class="rounds-row" id="turn-row" hidden>
+          <span class="field-label">TURN TIMER</span>
+          <div class="stepper">
+            <button id="turn-minus" class="step-btn">−</button>
+            <span id="turn-val" class="step-val">15s</span>
+            <button id="turn-plus" class="step-btn">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="lobby-foot">
+      <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+      <button id="go-btn" class="btn btn-go btn-big" hidden>GO!</button>
+      <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+    </footer>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-game" class="screen" hidden>
+    <header class="hud">
+      <span id="hud-round" class="hud-pill">R1/3</span>
+      <div id="hud-timer" class="hud-timer"><div id="hud-timer-fill"></div></div>
+      <span id="hud-clock" class="hud-clock">0:00</span>
+    </header>
+    <div id="hud-scores" class="hud-scores"></div>
+
+    <div id="turn-banner" class="turn-banner" hidden>
+      <div class="turn-ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="19"/><circle id="ring-fg" class="ring-fg" cx="22" cy="22" r="19"/></svg><span id="turn-avatar">🦊</span></div>
+      <div class="turn-text"><span id="turn-name">—</span><span id="turn-sub">is up</span></div>
+    </div>
+
+    <div id="opp-strip" class="opp-strip" hidden></div>
+
+    <div id="board-scroll" class="board-scroll">
+      <div id="board" class="board"></div>
+    </div>
+
+    <div id="sabotage-bar" class="sabotage-bar" hidden>
+      <span id="sab-charges" class="sab-charges"></span>
+      <button class="sab-btn" data-sab="time">⏱ CUT<small>7s timer</small></button>
+      <button class="sab-btn" data-sab="ban">🚫 BAN<small>a letter</small></button>
+      <button class="sab-btn" data-sab="start">🎯 FORCE<small>a start</small></button>
+    </div>
+
+    <div id="pending-note" class="pending-note" hidden></div>
+
+    <div id="keyboard" class="keyboard"></div>
+
+    <div id="spectate-note" class="spectate-note" hidden>
+      MATCH IN PROGRESS — you're in the next one
+    </div>
+  </section>
+
+  <!-- ============ ROUND END ============ -->
+  <section id="screen-roundend" class="screen" hidden>
+    <div class="roundend-wrap">
+      <p id="re-reason" class="re-reason">TIME'S UP</p>
+      <p class="re-label">the word was</p>
+      <div id="re-word" class="re-word"></div>
+      <div id="re-scores" class="re-scores"></div>
+      <p id="re-next" class="re-next"></p>
+    </div>
+  </section>
+
+  <!-- ============ PODIUM ============ -->
+  <section id="screen-podium" class="screen" hidden>
+    <div class="podium-wrap">
+      <p class="podium-title">FINAL STANDINGS</p>
+      <div id="podium" class="podium"></div>
+      <div id="podium-rest" class="podium-rest"></div>
+      <button id="rematch-btn" class="btn btn-primary btn-big">REMATCH</button>
+      <p id="podium-auto" class="lobby-hint"></p>
+    </div>
+  </section>
+
+</main>
+
+<!-- letter picker modal (sabotage ban/force) -->
+<div id="letter-modal" class="modal" hidden>
+  <div class="modal-card">
+    <p id="letter-modal-title" class="modal-title">PICK A LETTER</p>
+    <div id="letter-grid" class="letter-grid"></div>
+    <button id="letter-cancel" class="btn btn-ghost">CANCEL</button>
+  </div>
+</div>
+
+<!-- profile modal -->
+<div id="profile-modal" class="modal" hidden>
+  <div class="modal-card">
+    <p class="modal-title">PROFILE</p>
+    <label class="field-label" for="profile-name">CALL SIGN</label>
+    <input id="profile-name" maxlength="14" autocomplete="off" spellcheck="false">
+    <div id="profile-avatars" class="avatar-grid"></div>
+    <button id="pfp-btn2" class="pfp-btn" type="button">📷 USE A PHOTO INSTEAD</button>
+    <div class="modal-btns">
+      <button id="profile-cancel" class="btn btn-ghost">CANCEL</button>
+      <button id="profile-save" class="btn btn-primary">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<div id="toasts" class="toasts"></div>
+<div id="conn-banner" class="conn-banner" hidden>RECONNECTING…</div>
+<canvas id="confetti"></canvas>
+
+<script src="brag.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

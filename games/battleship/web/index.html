@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>BATTLESHIP · LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="45" font-size="34" text-anchor="middle">🚢</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="battleship.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">BATTLE</span><span class="wm-b">SHIP</span></h1>
+    <p class="tagline">HIDDEN FLEETS. EVERYONE FIRES AT EVERYONE.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CAPTAIN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">SET SAIL</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">BATTLE</span><span class="wm-b">SHIP</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>ADMIRALS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="seat-note" id="seat-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>RULES OF ENGAGEMENT</h2></div>
+      <div class="opt-row"><span class="field-label">BOARD</span>
+        <div id="opt-board" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">BOT FLEETS</span>
+        <div class="stepper"><button id="bots-minus" class="step-btn">−</button>
+        <span id="bots-val" class="step-val">1</span>
+        <button id="bots-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">BOT GUNNERY</span>
+        <div id="opt-difficulty" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">TURN TIMER</span>
+        <div id="opt-timer" class="seg"></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>BATTLE STATIONS</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ PLACEMENT ============ -->
+<section id="scr-place" class="scr" hidden>
+  <header class="bs-head">
+    <a href="/" class="head-link">🕹</a>
+    <div class="bs-phase-label">PLACE YOUR FLEET</div>
+    <span id="pl-clock" class="bs-clock">60</span>
+  </header>
+  <div class="place-body">
+    <div id="pl-roster" class="pl-roster"></div>
+    <div class="board-wrap"><div id="place-grid" class="bs-grid big"></div></div>
+    <p id="pl-status" class="pl-status">tap a ship, tap the grid · tap a placed ship to rotate</p>
+    <div id="dock" class="dock"></div>
+    <div class="place-btns">
+      <button id="rand-btn" class="btn">🎲 RANDOMIZE</button>
+      <button id="place-ready-btn" class="btn btn-primary" disabled>⚓ READY</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BATTLE ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="bs-head">
+    <a href="/" class="head-link">🕹</a>
+    <div id="bs-turnchip" class="bs-turnchip"><span id="bs-turn-av" class="bs-turn-av">🚢</span><span id="bs-turn-name">—</span></div>
+    <span id="bs-clock" class="bs-clock">20</span>
+  </header>
+  <div id="foe-tabs" class="foe-tabs"></div>
+  <div class="battle-body">
+    <p class="target-line">TARGETING <b id="target-name">—</b></p>
+    <div class="board-wrap"><div id="target-grid" class="bs-grid big"></div></div>
+    <button id="fire-btn" class="bs-fire" disabled>PICK A CELL</button>
+    <div class="bottom-row">
+      <div class="my-waters">
+        <p class="mini-label">YOUR WATERS <span id="my-pips" class="pips"></span></p>
+        <div id="my-mini" class="bs-grid mini"></div>
+      </div>
+      <div id="feed" class="feed"></div>
+    </div>
+    <p id="watch-note" class="watch-note" hidden></p>
+  </div>
+</section>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🚢</p>
+    <p id="go-title" class="go-title">LAST FLEET AFLOAT</p>
+    <p id="go-line" class="go-line"></p>
+    <div id="res-rows" class="res-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO PORT</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="battleship.js"></script>
+</body>
+</html>

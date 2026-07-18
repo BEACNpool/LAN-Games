@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>SNAKE ARENA · LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="45" font-size="34" text-anchor="middle">🐍</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="snake.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">SNAKE</span> <span class="wm-b">ARENA</span></h1>
+    <p class="tagline">EAT. GROW. DON'T GET CLIPPED.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">PIT NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">SLITHER IN</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">SNAKE</span> <span class="wm-b">ARENA</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>IN THE PIT</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="seat-note" id="seat-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>ARENA RULES</h2></div>
+      <div class="opt-row"><span class="field-label">BOT SNAKES</span>
+        <div class="stepper"><button id="bots-minus" class="step-btn">−</button>
+        <span id="bots-val" class="step-val">1</span>
+        <button id="bots-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">BOT BRAIN</span>
+        <div id="opt-difficulty" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">BEST OF</span>
+        <div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">STEERING <em class="you-only">you</em></span>
+        <div id="opt-steer" class="seg"></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>RELEASE THE SNAKES</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ ARENA ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="sn-head">
+    <a href="/" class="head-link">🕹</a>
+    <span id="sn-round" class="sn-round">ROUND 1/3</span>
+    <span id="sn-alive" class="sn-alive">🐍 0</span>
+    <button id="ctrl-btn" class="icon-btn" title="steering (tap to change)">↔</button>
+    <button id="mute-btn2" class="icon-btn">🔊</button>
+  </header>
+
+  <div id="score-row" class="score-row"></div>
+
+  <div class="arena-wrap">
+    <div class="arena-box">
+      <canvas id="arena"></canvas>
+      <div id="round-banner" class="round-banner" hidden>
+        <p id="rb-title" class="rb-title"></p>
+        <p id="rb-sub" class="rb-sub"></p>
+      </div>
+    </div>
+    <p id="watch-note" class="watch-note" hidden>WATCHING THE PIT</p>
+    <p id="steer-hint" class="steer-hint">swipe anywhere · arrows / WASD</p>
+  </div>
+
+  <div id="dpad" aria-hidden="true">
+    <button data-d="up" class="dp dp-u">▲</button>
+    <button data-d="left" class="dp dp-l">◀</button>
+    <button data-d="right" class="dp dp-r">▶</button>
+    <button data-d="down" class="dp dp-d">▼</button>
+  </div>
+</section>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🐍</p>
+    <p id="go-title" class="go-title">KING OF THE PIT</p>
+    <p id="go-line" class="go-line"></p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="snake.js"></script>
+</body>
+</html>

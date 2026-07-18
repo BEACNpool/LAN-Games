@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>CHARADES — GAMEHUB</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="36" text-anchor="middle">🎭</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="charades.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">CHAR</span><span class="wm-b">ADES</span></h1>
+    <p class="tagline">EYES UP. PHONES READY. NO TALKING (THAT'S THE ACTOR'S JOB).</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">TAKE THE STAGE</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">CHAR</span><span class="wm-b">ADES</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>IN THE ROOM</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="room-note">everyone must be able to SEE the actor — same room, eyes up</p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>DECK</h2><span id="deck-count" class="sec-badge"></span></div>
+      <div id="deck-grid" class="deck-grid"></div>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>HOUSE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">MODE</span>
+        <div id="opt-mode" class="seg"></div></div>
+      <p id="mode-hint" class="mode-hint"></p>
+      <div class="opt-row"><span class="field-label">ACTING TIME</span>
+        <div class="stepper"><button id="turn-minus" class="step-btn">−</button>
+        <span id="turn-val" class="step-val">75s</span>
+        <button id="turn-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">ROTATIONS</span>
+        <div class="stepper"><button id="rounds-minus" class="step-btn">−</button>
+        <span id="rounds-val" class="step-val">2</span>
+        <button id="rounds-plus" class="step-btn">+</button></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>CURTAIN UP</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="ch-head">
+    <span id="ch-roundchip" class="hud-chip">R1</span>
+    <div class="ch-timer"><div id="ch-timer-fill"></div></div>
+    <span id="ch-clock" class="hud-clock-sm">0:00</span>
+  </header>
+  <div id="score-strip" class="score-strip"></div>
+
+  <!-- ACTOR VIEW -->
+  <div id="actor-zone" class="actor-zone" hidden>
+    <p class="az-label">YOU'RE ON — ACT THIS OUT</p>
+    <div id="az-card" class="az-card">
+      <span id="az-deck" class="az-deck">MOVIES</span>
+      <div id="az-subject" class="az-subject">SUBJECT</div>
+      <span id="az-chain" class="az-chain" hidden></span>
+    </div>
+    <div class="az-actions">
+      <button id="skip-btn" class="btn az-skip">⏭ SKIP <small id="skip-count">2 left</small></button>
+    </div>
+    <p class="az-note">no talking · no pointing at objects · no mouthing words</p>
+  </div>
+
+  <!-- GUESSER VIEW -->
+  <div id="guess-zone" class="guess-zone" hidden>
+    <div id="stage-banner" class="stage-banner">
+      <span id="sb-avatar" class="sb-avatar">🎭</span>
+      <div class="sb-meta">
+        <span id="sb-name" class="sb-name">—</span>
+        <span id="sb-sub" class="sb-sub">is acting · MOVIES</span>
+      </div>
+      <span id="sb-chain" class="sb-chain" hidden></span>
+    </div>
+    <div id="feed" class="feed"></div>
+  </div>
+
+  <!-- WATCHER NOTE -->
+  <p id="watch-note" class="watch-note" hidden>WATCHING — you're in the next game</p>
+
+  <!-- guess bar: never re-rendered, keyboard never drops -->
+  <form id="guess-form" class="guess-form" autocomplete="off" hidden>
+    <div id="close-pop" class="close-pop" hidden>🔥 SO CLOSE!</div>
+    <input id="guess-input" type="text" maxlength="48" placeholder="type your guess…"
+           autocomplete="off" autocorrect="off" autocapitalize="off"
+           spellcheck="false" enterkeyhint="send">
+    <button id="guess-send" type="submit">GUESS</button>
+  </form>
+</section>
+
+<!-- intro overlay -->
+<div id="intro-overlay" class="intro-overlay" hidden>
+  <p class="io-eyebrow">TAKING THE STAGE</p>
+  <div id="io-avatar" class="io-avatar">🎭</div>
+  <p id="io-name" class="io-name">—</p>
+  <p id="io-deck" class="io-deck">MOVIES · CLASSIC</p>
+  <p id="io-you" class="io-you" hidden>THAT'S YOU — GET UP THERE</p>
+</div>
+
+<!-- reveal overlay -->
+<div id="reveal-overlay" class="reveal-overlay" hidden>
+  <p id="rv-eyebrow" class="io-eyebrow">THE ANSWER WAS</p>
+  <p id="rv-word" class="rv-word">—</p>
+  <p id="rv-winner" class="rv-winner">—</p>
+  <div id="rv-chain" class="rv-chain"></div>
+  <p id="rv-next" class="rv-next"></p>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="charades.js"></script>
+</body>
+</html>

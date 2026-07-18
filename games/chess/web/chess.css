@@ -1,0 +1,62 @@
+/* chess board — glyph pieces, tap-to-move with legal dots */
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(94vw, 520px, 62vh);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+.sq {
+  position: relative;
+  display: grid; place-items: center;
+  font-size: calc(min(94vw, 520px, 62vh) / 8 * 0.74);
+  line-height: 1;
+  cursor: pointer;
+}
+.sq.light { background: #8b9cc2; }
+.sq.dark { background: #4c5d88; }
+.sq .pc { pointer-events: none; }
+.sq .pc.white { color: #f7f9ff;
+  text-shadow: 0 1px 0 #1a2233, 0 -1px 0 #1a2233, 1px 0 0 #1a2233, -1px 0 0 #1a2233; }
+.sq .pc.black { color: #12182a;
+  text-shadow: 0 1px 0 rgba(233, 238, 255, 0.35); }
+.sq.sel { outline: 3px solid var(--cyan); outline-offset: -3px; z-index: 2; }
+.sq.last { box-shadow: inset 0 0 0 100vmax rgba(234, 179, 8, 0.22); }
+.sq.check { box-shadow: inset 0 0 0 100vmax rgba(251, 113, 133, 0.4); }
+.sq .dot {
+  position: absolute; width: 26%; height: 26%;
+  border-radius: 50%; background: rgba(34, 211, 238, 0.6);
+  pointer-events: none;
+}
+.sq .ring {
+  position: absolute; inset: 6%;
+  border: 3px solid rgba(34, 211, 238, 0.7); border-radius: 50%;
+  pointer-events: none;
+}
+.sq .coord {
+  position: absolute; left: 3px; top: 1px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  color: rgba(10, 14, 26, 0.55); pointer-events: none;
+}
+
+.captured-tray {
+  min-height: 22px; display: flex; gap: 1px; align-items: center;
+  font-size: 17px; padding: 2px 4px; width: min(94vw, 520px, 62vh);
+}
+.captured-tray .cw { color: #f2f5ff; text-shadow: 0 1px 0 #1a2233; }
+.captured-tray .cb { color: #202944; text-shadow: 0 1px 0 rgba(233, 238, 255, 0.3); }
+.captured-tray .mat { margin-left: auto; font-family: var(--mono);
+                      font-size: 11px; color: var(--green); }
+
+.promo-row { display: flex; gap: 8px; justify-content: center; }
+.promo-row button {
+  width: 56px; height: 56px; font-size: 34px;
+  background: var(--raised); border: 1px solid var(--line);
+  border-radius: 12px; color: #f7f9ff; cursor: pointer;
+  text-shadow: 0 1px 0 #1a2233;
+}

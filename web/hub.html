@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="43" font-size="28" text-anchor="middle" fill="%2322d3ee" font-family="sans-serif" font-weight="800" font-style="italic">F5</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<style>
+  :root { --rail-tile-w: clamp(138px, 24vw, 196px); }
+
+  .hub-wrap { position: relative; z-index: 1; height: 100dvh; overflow-y: auto;
+              overflow-x: hidden; padding-bottom: calc(30px + var(--sab)); }
+  .hub-inner { max-width: 1080px; margin: 0 auto; }
+
+  /* ---------- top bar ---------- */
+  .hub-top { display: flex; align-items: center; justify-content: space-between;
+             padding: calc(14px + var(--sat)) 20px 10px; }
+  .hub-brand { font-weight: 800; font-style: italic; font-size: 24px;
+               letter-spacing: 0.02em; }
+  .hub-brand .b1 { color: var(--text); }
+  .hub-brand .b2 { background: var(--grad); -webkit-background-clip: text;
+                   background-clip: text; color: transparent;
+                   filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.5)); }
+  /* profile chip */
+  .hub-profile { display: flex; align-items: center; gap: 8px; cursor: pointer;
+                 background: var(--surface); border: 1px solid var(--line);
+                 border-radius: 999px; padding: 5px 13px 5px 5px; color: var(--text);
+                 max-width: 48vw; transition: border-color 0.15s ease; }
+  .hub-profile:active { transform: scale(0.97); }
+  .hp-av { width: 30px; height: 30px; border-radius: 50%; display: grid;
+           place-items: center; font-size: 17px; background: var(--bg);
+           border: 1px solid var(--line); flex: none; overflow: hidden; }
+  .hp-av img.pfp { width: 100%; height: 100%; border-radius: 50%; box-shadow: none; }
+  .hp-name { font-family: var(--mono); font-size: 12px; font-weight: 800;
+             letter-spacing: 0.08em; white-space: nowrap; overflow: hidden;
+             text-overflow: ellipsis; }
+
+  /* profile sheet */
+  .profile-card { text-align: left; position: relative; }
+  .pf-close { position: absolute; top: 12px; right: 12px; background: none;
+              border: none; color: var(--muted); font-size: 18px; cursor: pointer;
+              width: 32px; height: 32px; }
+  .pf-top { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+  .pf-av { width: 96px; height: 96px; border-radius: 50%; display: grid;
+           place-items: center; font-size: 50px; background: var(--bg);
+           border: 1px solid var(--line); flex: none; overflow: hidden;
+           box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
+  .pf-av img.pfp { width: 100%; height: 100%; border-radius: 50%; box-shadow: none; }
+  .pf-photo-col { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 0; }
+  .pf-photo-col .btn { width: 100%; font-size: 13px; padding: 10px; letter-spacing: 0.04em; }
+  .pf-rm-btn { color: var(--danger); border-color: rgba(251, 113, 133, 0.4); }
+  .pf-hint { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.4; }
+  .pf-note { font-family: var(--mono); font-size: 11px; color: var(--faint);
+             text-align: center; margin-top: 14px; letter-spacing: 0.04em; }
+
+  @keyframes pulse { 50% { opacity: 0.35; } }
+
+  /* ---------- lobby chat ---------- */
+  .lchat { margin: 6px 16px 14px; border: 1px solid var(--line); border-radius: 20px;
+           background: var(--surface); overflow: hidden; display: flex;
+           flex-direction: column; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4); }
+  .lc-head { display: flex; align-items: center; justify-content: space-between;
+             padding: 11px 16px 9px; border-bottom: 1px solid var(--line); }
+  .lc-title { font-size: 12px; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); }
+  .lc-online { font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+               letter-spacing: 0.06em; }
+  .lc-online.on { color: var(--green); }
+  .lc-msgs { height: clamp(176px, 32vh, 300px); overflow-y: auto; padding: 12px 14px;
+             display: flex; flex-direction: column; gap: 9px; }
+  .lc-empty { margin: auto; text-align: center; font-family: var(--mono);
+              font-size: 11px; color: var(--faint); line-height: 1.7; }
+  .lc-row { display: flex; gap: 9px; align-items: flex-end; max-width: 88%; }
+  .lc-row.mine { align-self: flex-end; flex-direction: row-reverse; }
+  .lc-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+           font-size: 15px; background: var(--bg); border: 1px solid var(--line);
+           flex: none; overflow: hidden; }
+  .lc-av img.pfp { width: 100%; height: 100%; border-radius: 50%; box-shadow: none; }
+  .lc-bub { background: var(--raised); border: 1px solid var(--line);
+            border-radius: 14px; padding: 7px 11px; min-width: 0; }
+  .lc-row.mine .lc-bub { background: linear-gradient(135deg,
+                           rgba(34, 211, 238, 0.16), rgba(167, 139, 250, 0.16));
+                         border-color: rgba(34, 211, 238, 0.4); }
+  .lc-name { font-size: 10.5px; font-weight: 800; color: var(--cyan);
+             margin-bottom: 2px; letter-spacing: 0.04em; }
+  .lc-row.mine .lc-name { display: none; }
+  .lc-text { font-size: 14px; line-height: 1.35; word-break: break-word; white-space: pre-wrap; }
+  .lc-text.big { font-size: 30px; line-height: 1.1; }
+  .lc-img { display: block; max-width: min(220px, 60vw); max-height: 220px;
+            border-radius: 10px; margin-top: 4px; cursor: pointer; background: var(--bg); }
+  .lc-emoji { display: flex; flex-wrap: wrap; gap: 2px; padding: 8px 12px;
+              border-top: 1px solid var(--line); max-height: 128px; overflow-y: auto; }
+  .lc-emoji button { font-size: 20px; background: none; border: none; cursor: pointer;
+                     width: 34px; height: 34px; border-radius: 8px; }
+  .lc-emoji button:active { background: var(--raised); }
+  .lc-input { display: flex; align-items: center; gap: 6px;
+              padding: 9px 10px calc(9px + var(--sab)); border-top: 1px solid var(--line); }
+  .lc-icon { flex: none; width: 38px; height: 38px; border-radius: 11px;
+             border: 1px solid var(--line); background: var(--bg); font-size: 18px; cursor: pointer; }
+  .lc-icon.on { border-color: var(--cyan); }
+  .lc-input input { flex: 1; background: var(--bg); border: 1px solid var(--line);
+                    border-radius: 12px; color: var(--text); font-family: var(--font);
+                    font-size: 16px; font-weight: 500; padding: 9px 12px; min-width: 0; }
+  .lc-send { flex: none; width: 42px; height: 42px; border-radius: 12px; border: none;
+             background: var(--grad); color: #05070e; font-size: 17px; font-weight: 800; cursor: pointer; }
+  .lc-send:disabled { opacity: 0.4; }
+  .lc-lightbox { position: fixed; inset: 0; z-index: 65; display: grid; place-items: center;
+                 background: rgba(7, 11, 20, 0.9); padding: 20px; }
+  .lc-lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+
+  /* ---------- filters ---------- */
+  .filters { display: flex; gap: 8px; padding: 2px 16px 14px;
+             overflow-x: auto; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .fchip { flex: none; border: 1px solid var(--line); background: var(--surface);
+           color: var(--muted); border-radius: 999px; padding: 9px 16px;
+           font-family: var(--mono); font-size: 11.5px; font-weight: 800;
+           letter-spacing: 0.1em; cursor: pointer;
+           transition: all 0.15s ease; }
+  .fchip.sel { color: #05070e; background: var(--grad); border-color: transparent;
+               box-shadow: 0 4px 18px rgba(129, 140, 248, 0.4); }
+
+  /* ---------- rails ---------- */
+  .rail { margin-bottom: 6px; }
+  .rail-head { display: flex; align-items: baseline; gap: 10px;
+               padding: 8px 20px 10px; }
+  .rail-title { font-size: 13px; font-weight: 800; letter-spacing: 0.2em;
+                color: var(--muted); }
+  .rail-count { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .rail-track { display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 18px;
+                scrollbar-width: none; scroll-snap-type: x proximity; }
+  .rail-track::-webkit-scrollbar { display: none; }
+
+  /* ---------- tiles ---------- */
+  .tile { position: relative; flex: none; width: var(--rail-tile-w);
+          aspect-ratio: 3 / 4; border-radius: 20px; overflow: hidden;
+          border: 1px solid var(--line); cursor: pointer;
+          scroll-snap-align: start; text-align: left;
+          background: #0d1326; color: var(--text); padding: 0;
+          transition: transform 0.16s ease, box-shadow 0.16s ease,
+                      border-color 0.16s ease;
+          animation: tile-in 0.4s ease backwards; }
+  .tile:hover, .tile:focus-visible, .tile.hot {
+    transform: translateY(-4px) scale(1.03);
+    z-index: 2; outline: none; }
+  @keyframes tile-in { from { opacity: 0; transform: translateY(14px); } }
+  .tile-art { position: absolute; inset: 0; }
+  .tile-glyph { position: absolute; right: -9%; top: 12%;
+                font-size: calc(var(--rail-tile-w) * 0.68); line-height: 1;
+                transform: rotate(-10deg);
+                filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55)); }
+  .tile-glyph-ghost { position: absolute; left: -14%; top: -10%;
+                      font-size: calc(var(--rail-tile-w) * 0.62);
+                      transform: rotate(16deg); opacity: 0.09; filter: blur(1px); }
+  .tile-scrim { position: absolute; inset: 0;
+    background: linear-gradient(4deg, rgba(7,11,20,0.97) 26%, rgba(7,11,20,0.4) 58%, transparent 80%); }
+  .tile-live { position: absolute; top: 10px; left: 10px; z-index: 3;
+               font-family: var(--mono); font-size: 9.5px; font-weight: 800;
+               letter-spacing: 0.08em; color: var(--green);
+               background: rgba(7, 11, 20, 0.72);
+               border: 1px solid rgba(16, 201, 110, 0.5);
+               border-radius: 999px; padding: 4px 9px; }
+  .tile-live::before { content: "●"; margin-right: 5px;
+                       animation: pulse 1.4s ease infinite; }
+  .tile-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+               padding: 12px 13px; display: flex; flex-direction: column; gap: 4px; }
+  .tile-title { font-weight: 800; font-size: 14.5px; font-style: italic;
+                letter-spacing: 0.02em; }
+  .tile-sub { font-family: var(--mono); font-size: 9.5px; color: #aab6d4;
+              letter-spacing: 0.06em; }
+  .tile.soon { cursor: default; border-style: dashed; }
+  .tile.soon .tile-glyph { filter: grayscale(0.7) drop-shadow(0 10px 22px rgba(0,0,0,0.5));
+                           opacity: 0.55; }
+  .tile.soon .tile-title { color: var(--muted); font-size: 13px; font-style: normal;
+                           display: -webkit-box; -webkit-line-clamp: 2;
+                           -webkit-box-orient: vertical; overflow: hidden; }
+  .tile.soon .tile-sub { display: -webkit-box; -webkit-line-clamp: 3;
+                         -webkit-box-orient: vertical; overflow: hidden;
+                         letter-spacing: 0.02em; line-height: 1.45; }
+  .tile-ribbon { position: absolute; top: 12px; right: -30px; z-index: 3;
+                 transform: rotate(38deg);
+                 font-family: var(--mono); font-size: 9px; font-weight: 800;
+                 letter-spacing: 0.22em; color: #05070e;
+                 background: var(--yellow); padding: 4px 34px; }
+
+  .hub-foot { text-align: center; font-family: var(--mono); font-size: 11px;
+              color: var(--faint); padding: 22px 20px 4px; letter-spacing: 0.08em; }
+  .hub-foot b { background: var(--grad); -webkit-background-clip: text;
+                background-clip: text; color: transparent; font-style: italic; }
+
+  @media (min-width: 760px) {
+    .hero { margin: 8px 20px 18px; }
+    .hero-body { padding: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile, .hero { animation: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+<div class="hub-wrap">
+  <div class="hub-inner">
+    <header class="hub-top">
+      <span class="hub-brand"><span class="b1">LAN</span><span class="b2"> GAMES</span></span>
+      <button class="hub-profile" id="profile-chip" aria-label="your profile">
+        <span class="hp-av" id="hp-av">🎮</span>
+        <span class="hp-name" id="hp-name">SET UP</span>
+      </button>
+    </header>
+
+    <section class="lchat" aria-label="lobby chat">
+      <div class="lc-head">
+        <span class="lc-title">LOBBY CHAT</span>
+        <span class="lc-online" id="lc-online">connecting…</span>
+      </div>
+      <div class="lc-msgs" id="lc-msgs"></div>
+      <div class="lc-emoji" id="lc-emoji" hidden></div>
+      <form class="lc-input" id="lc-form" autocomplete="off">
+        <button type="button" class="lc-icon" id="lc-emoji-btn" aria-label="emoji">😀</button>
+        <button type="button" class="lc-icon" id="lc-gif-btn" aria-label="meme or gif">🖼️</button>
+        <input id="lc-text" maxlength="400" placeholder="say something…" aria-label="message">
+        <button type="submit" class="lc-send" id="lc-send" aria-label="send">➤</button>
+      </form>
+    </section>
+
+    <nav id="filters" class="filters" aria-label="party size"></nav>
+
+    <main id="rails"></main>
+
+    <p class="hub-foot">no accounts · no cloud · winners get brag rights ·
+      <b>LAN Games</b></p>
+  </div>
+</div>
+
+<div id="profile-sheet" class="modal" hidden>
+  <div class="modal-card profile-card">
+    <button class="pf-close" id="pf-close" aria-label="close">✕</button>
+    <p class="modal-title">YOUR PROFILE</p>
+    <div class="pf-top">
+      <span class="pf-av" id="pf-av">🎮</span>
+      <div class="pf-photo-col">
+        <button id="pf-photo" class="btn btn-ghost">📷 ADD PHOTO</button>
+        <button id="pf-photo-rm" class="btn btn-ghost pf-rm-btn" hidden>REMOVE PHOTO</button>
+        <p class="pf-hint">import a photo, then pinch / zoom to frame your face</p>
+      </div>
+    </div>
+    <label class="field-label" for="pf-name">NAME</label>
+    <input id="pf-name" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+    <label class="field-label">CHARACTER</label>
+    <div id="pf-grid" class="avatar-grid"></div>
+    <button id="pf-save" class="btn btn-primary btn-big" style="margin-top:18px">SAVE PROFILE</button>
+    <p class="pf-note">🔒 saved on this device · used across every game</p>
+  </div>
+</div>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/hub.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>WEREWOLF · LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="36" text-anchor="middle">🐺</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="werewolf.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">WERE</span><span class="wm-b">WOLF</span></h1>
+    <p class="tagline">SAME ROOM. SECRET ROLES. TRUST NO ONE — ESPECIALLY FAMILY.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">ENTER THE VILLAGE</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">WERE</span><span class="wm-b">WOLF</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>THE VILLAGE</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="room-note">5–10 phones · one room · lights low · the dead don't talk</p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>ROLES IN PLAY</h2></div>
+      <p id="role-plan" class="role-plan">—</p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>HOUSE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">DAY DISCUSSION</span>
+        <div id="opt-day" class="seg"></div></div>
+      <ul class="howto">
+        <li>🌙 at night the phones whisper — wolves mark a victim, the seer peeks, the doctor guards</li>
+        <li>☀️ by day you argue out loud, then vote someone out</li>
+        <li>🏆 village wins when every wolf is gone · wolves win at parity</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>BEGIN THE HUNT</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for villagers…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="ww-head">
+    <span id="ww-chip" class="hud-chip">NIGHT 1</span>
+    <span id="ww-sub" class="ww-sub"></span>
+    <span id="ghost-chip" class="ghost-chip" hidden>👻 GHOST</span>
+  </header>
+
+  <!-- ROLE CARD -->
+  <div id="pane-role" class="pane" hidden>
+    <p class="pr-hint">YOUR SECRET ROLE — TAP &amp; HOLD TO PEEK</p>
+    <div id="role-card" class="role-card">
+      <div class="rc-inner">
+        <div class="rc-back">
+          <span class="rc-moon">🌕</span>
+          <span class="rc-backword">HOLD TO REVEAL</span>
+          <span class="rc-backnote">elbows in — no wandering eyes</span>
+        </div>
+        <div class="rc-face">
+          <span id="rc-art" class="rc-art">🌾</span>
+          <span id="rc-name" class="rc-name">VILLAGER</span>
+          <p id="rc-mission" class="rc-mission">—</p>
+          <p id="rc-partner" class="rc-partner" hidden></p>
+        </div>
+      </div>
+    </div>
+    <button id="role-ack" class="btn btn-primary btn-big">I KNOW WHO I AM</button>
+    <p id="role-wait" class="pane-note"></p>
+  </div>
+
+  <!-- NIGHT (one pane, one brightness — sleepers and actors alike) -->
+  <div id="pane-night" class="pane pane-night" hidden>
+    <div class="night-sky" aria-hidden="true">
+      <span class="moon">🌕</span>
+      <i class="stars s1"></i><i class="stars s2"></i>
+    </div>
+    <div id="sleep-view" class="night-slot" hidden>
+      <p class="sleep-zzz"><span>z</span><span>z</span><span>Z</span></p>
+      <p class="sleep-title">THE VILLAGE SLEEPS</p>
+      <p class="sleep-sub">eyes on your own phone · no talking</p>
+      <p id="seer-note" class="seer-note" hidden></p>
+    </div>
+    <div id="act-view" class="night-slot" hidden>
+      <p id="act-title" class="act-title">—</p>
+      <p id="act-sub" class="act-sub">—</p>
+      <div id="act-grid" class="target-grid"></div>
+      <div id="seer-result" class="seer-result" hidden></div>
+      <button id="act-lock" class="btn nt-lock" hidden>🔪 CONFIRM THE KILL</button>
+      <div class="act-timer"><i id="act-bar"></i></div>
+    </div>
+  </div>
+
+  <!-- DAY -->
+  <div id="pane-day" class="pane pane-day" hidden>
+    <p id="day-recap" class="day-recap"></p>
+    <div class="day-clockwrap">
+      <span id="day-clock" class="day-clock">3:00</span>
+      <p class="day-help">ARGUE. ACCUSE. DEFEND.</p>
+      <div class="day-bar"><i id="day-fill"></i></div>
+    </div>
+    <p id="wolf-count" class="wolf-count"></p>
+    <div id="day-grid" class="alive-grid"></div>
+    <button id="ready-vote" class="btn btn-big btn-vote">🗳 READY TO VOTE</button>
+    <p id="ready-status" class="pane-note"></p>
+  </div>
+
+  <!-- VOTE -->
+  <div id="pane-vote" class="pane pane-day" hidden>
+    <p class="vote-title">WHO DIES AT SUNSET?</p>
+    <div class="vote-timer"><i id="vote-bar"></i></div>
+    <div id="vote-grid" class="target-grid vote-grid"></div>
+    <button id="vote-lock" class="btn btn-big btn-vote" disabled>LOCK IT IN</button>
+    <p id="vote-status" class="pane-note"></p>
+  </div>
+
+  <!-- GHOST -->
+  <div id="pane-ghost" class="pane pane-ghost" hidden>
+    <div class="ghost-banner">👻 YOU ARE A GHOST — DON'T TALK!</div>
+    <p class="ghost-sub">you see everything now. take it to the grave.</p>
+    <div id="ghost-truth" class="ghost-truth"></div>
+    <div id="ghost-live" class="ghost-live"></div>
+  </div>
+
+  <!-- WATCHER -->
+  <p id="pane-watch" class="watch-note" hidden>A HUNT IS UNDERWAY — you'll join the next one</p>
+</section>
+
+<!-- night falls beat -->
+<div id="nightfall-overlay" class="beat-overlay night-beat" hidden>
+  <span class="bo-moon">🌙</span>
+  <p class="bo-title">NIGHT FALLS</p>
+  <p class="bo-sub">everyone look at your OWN phone</p>
+</div>
+
+<!-- dawn reveal -->
+<div id="dawn-overlay" class="beat-overlay dawn-beat" hidden>
+  <p class="bo-eyebrow">☀️ DAWN BREAKS</p>
+  <div id="dawn-body"></div>
+</div>
+
+<!-- vote verdict -->
+<div id="verdict-overlay" class="beat-overlay dusk-beat" hidden>
+  <p class="bo-eyebrow">THE VILLAGE HAS SPOKEN</p>
+  <div id="verdict-body"></div>
+  <div id="verdict-tally" class="v-tally"></div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p id="go-banner" class="go-banner">VILLAGE WINS</p>
+    <p id="go-sub" class="go-sub"></p>
+    <div id="go-roles" class="go-roles"></div>
+    <details class="go-logwrap"><summary>📜 HOW IT WENT DOWN</summary>
+      <div id="go-log" class="go-log"></div>
+    </details>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO THE VILLAGE</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="werewolf.js"></script>
+</body>
+</html>

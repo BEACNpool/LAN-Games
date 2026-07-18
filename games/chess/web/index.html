@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>CHESS — GAMEHUB</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="47" font-size="38" text-anchor="middle" fill="%23e8edf9">♞</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/duel.css">
+<link rel="stylesheet" href="chess.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">CHE</span><span class="wm-b">SS</span></h1>
+    <p class="tagline">THE CLASSIC. NO TAKEBACKS (UNLESS THEY SAY YES).</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">TO THE BOARD</button>
+    </div>
+  </div>
+</section>
+
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">CHE</span><span class="wm-b">SS</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PLAYERS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="seat-note" id="seat-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>TABLE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">BOT LEVEL</span>
+        <div id="opt-difficulty" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">MOVE TIMER</span>
+        <div id="opt-timer" class="seg"></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START GAME</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<section id="scr-game" class="scr" hidden>
+  <header class="duel-head">
+    <a href="/" class="head-link">🕹</a>
+    <div id="seat-w" class="duel-seat"></div>
+    <div id="seat-b" class="duel-seat"></div>
+    <span id="duel-clock" class="duel-clock" hidden>60s</span>
+  </header>
+
+  <div id="offer-bar" class="offer-bar" hidden>
+    <span id="offer-text"></span>
+    <button id="offer-yes">YES</button>
+    <button id="offer-no">NO</button>
+  </div>
+
+  <div class="board-stage">
+    <div id="captured-top" class="captured-tray"></div>
+    <div id="board" class="chess-board"></div>
+    <div id="captured-bottom" class="captured-tray"></div>
+  </div>
+
+  <p id="watch-note" class="watch-note" hidden>WATCHING — winner stays on</p>
+  <footer class="duel-foot">
+    <span id="turn-note" class="turn-note">—</span>
+    <div id="duel-actions" class="duel-actions" hidden>
+      <button id="act-takeback">↩ TAKEBACK</button>
+      <button id="act-draw">½ DRAW</button>
+      <button id="act-resign">🏳 RESIGN</button>
+    </div>
+  </footer>
+</section>
+
+<!-- promotion picker -->
+<div id="promo-modal" class="modal" hidden>
+  <div class="modal-card" style="max-width:300px;text-align:center">
+    <p class="modal-title">PROMOTE TO</p>
+    <div id="promo-row" class="promo-row"></div>
+  </div>
+</div>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">♚</p>
+    <p id="go-title" class="go-title">—</p>
+    <p id="go-line" class="go-line"></p>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="/shared/duel.js"></script>
+<script src="chess.js"></script>
+</body>
+</html>

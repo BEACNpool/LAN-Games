@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>RUMMIKUB — GAMEHUB</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><rect x="10" y="16" width="20" height="30" rx="4" fill="%23f4f1e8"/><rect x="34" y="16" width="20" height="30" rx="4" fill="%23f4f1e8"/><text x="20" y="38" font-size="17" font-weight="bold" text-anchor="middle" fill="%23dc2626">7</text><text x="44" y="38" font-size="17" font-weight="bold" text-anchor="middle" fill="%232563eb">7</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="rummikub.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">RUMMI</span><span class="wm-b">KUB</span></h1>
+    <p class="tagline">MELD 30. THEN WRECK THE TABLE. LEGALLY.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">RACK UP</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">RUMMI</span><span class="wm-b">KUB</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PLAYERS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="set-note" id="set-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>TABLE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">ROUNDS</span>
+        <div class="stepper"><button id="rounds-minus" class="step-btn">−</button>
+        <span id="rounds-val" class="step-val">1</span>
+        <button id="rounds-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">TURN TIMER</span>
+        <div class="stepper"><button id="turn-minus" class="step-btn">−</button>
+        <span id="turn-val" class="step-val">60s</span>
+        <button id="turn-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">BOT PLAYERS</span>
+        <div class="stepper"><button id="bots-minus" class="step-btn">−</button>
+        <span id="bots-val" class="step-val">0</span>
+        <button id="bots-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">BOT IQ</span>
+        <div class="seg" id="skill-seg">
+          <button data-v="smart">SHARP</button>
+          <button data-v="baseline">CHILL</button></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>RACK 'EM</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="rk-head">
+    <a href="/" class="head-link">🕹</a>
+    <div id="seat-strip" class="seat-strip"></div>
+    <div id="pool-chip" class="pool-chip">🁵 <b>64</b></div>
+  </header>
+
+  <div id="board-wrap" class="board-wrap">
+    <div id="board-groups" class="board-groups"></div>
+    <div id="new-group-zone" class="new-group-zone">＋ drop tiles here for a new set</div>
+    <p id="board-empty" class="board-empty" hidden>the table is empty — someone needs 30 points</p>
+  </div>
+
+  <div class="my-bar">
+    <div id="meld-meter" class="meld-meter" hidden>OPENING <b id="meld-val">0</b>/30</div>
+    <div id="turn-note" class="turn-note">—</div>
+    <div class="my-actions">
+      <button id="sort-btn" class="mini-btn" title="sort">7↔9</button>
+      <button id="undo-btn" class="mini-btn" disabled>UNDO</button>
+      <button id="draw-btn" class="act-btn draw" disabled>DRAW</button>
+      <button id="end-btn" class="act-btn end" disabled>END TURN</button>
+    </div>
+  </div>
+  <div id="hand-tray" class="hand-tray"></div>
+  <p id="watch-note" class="watch-note" hidden>WATCHING — you're in the next round</p>
+</section>
+
+<!-- round summary -->
+<div id="summary" class="modal" hidden>
+  <div class="modal-card">
+    <p class="modal-title" id="sum-title">ROUND OVER</p>
+    <div id="sum-body"></div>
+    <p id="sum-next" class="sum-next"></p>
+  </div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">👑</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="rummikub.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WORDCLASH — TV</title>
+<meta name="theme-color" content="#070b14">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><rect x="8" y="8" width="22" height="22" rx="5" fill="%2310c96e"/><rect x="34" y="8" width="22" height="22" rx="5" fill="%23eab308"/><rect x="8" y="34" width="22" height="22" rx="5" fill="%23313a55"/><rect x="34" y="34" width="22" height="22" rx="5" fill="%2322d3ee"/></svg>'>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<main id="app">
+  <section id="tv-lobby" class="screen tv-screen" hidden>
+    <div class="tv-hero">
+      <h1 class="wordmark"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></h1>
+      <div class="tv-join-row">
+        <div class="tv-qr"><div id="tv-qr-host"></div></div>
+        <div>
+          <p class="tagline" style="text-align:left">SCAN TO JOIN</p>
+          <p id="tv-url" class="tv-url">—</p>
+        </div>
+      </div>
+      <div id="tv-players" class="tv-players"></div>
+      <p id="tv-hint" class="tv-footer">waiting for players…</p>
+    </div>
+  </section>
+
+  <section id="tv-game" class="screen tv-screen" hidden>
+    <header class="hud">
+      <span id="tv-round" class="hud-pill">R1/3</span>
+      <div class="hud-timer"><div id="tv-timer-fill"></div></div>
+      <span id="tv-clock" class="hud-clock">0:00</span>
+    </header>
+    <div id="tv-duel-boards" class="tv-boards" hidden></div>
+    <div id="tv-relay" class="tv-relay-wrap" hidden>
+      <div id="tv-relay-board" class="board"></div>
+      <div class="tv-relay-side">
+        <div class="tv-turn">
+          <div class="turn-ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="19"/><circle id="tv-ring-fg" class="ring-fg" cx="22" cy="22" r="19"/></svg><span id="tv-turn-av">🦊</span></div>
+          <div>
+            <div id="tv-turn-name" class="tv-turn-name">—</div>
+            <div id="tv-pending" class="tv-footer" style="text-align:left"></div>
+          </div>
+        </div>
+        <div id="tv-scores" class="tv-scorelist"></div>
+      </div>
+    </div>
+    <p id="tv-game-foot" class="tv-footer"></p>
+  </section>
+
+  <section id="tv-roundend" class="screen tv-screen" hidden>
+    <div class="tv-hero">
+      <p id="tv-re-reason" class="re-reason">ROUND OVER</p>
+      <p class="re-label">the word was</p>
+      <div id="tv-re-word" class="re-word"></div>
+      <div id="tv-re-boards" class="tv-re-boards"></div>
+      <div id="tv-re-scores" class="tv-scorelist" style="min-width:340px"></div>
+      <p id="tv-re-next" class="tv-footer"></p>
+    </div>
+  </section>
+
+  <section id="tv-podium" class="screen tv-screen" hidden>
+    <div class="tv-hero">
+      <p class="podium-title">FINAL STANDINGS</p>
+      <div id="tv-podium-blocks" class="podium" style="max-width:640px"></div>
+      <div id="tv-podium-rest" class="tv-podium-rest"></div>
+      <p id="tv-podium-auto" class="tv-footer"></p>
+    </div>
+  </section>
+</main>
+
+<canvas id="confetti"></canvas>
+<div id="tv-conn" class="conn-banner" hidden>RECONNECTING…</div>
+
+<script src="qr.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

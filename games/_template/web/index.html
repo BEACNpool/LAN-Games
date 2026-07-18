@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HIGH CARD — template</title>
+<link rel="stylesheet" href="/shared/shared.css">
+<style>
+  .scr { position: relative; z-index: 1; height: 100dvh; display: flex; flex-direction: column;
+         max-width: 560px; margin: 0 auto; padding: 16px; }
+  .mid { flex: 1; display: flex; flex-direction: column; justify-content: center;
+         align-items: center; gap: 18px; text-align: center; }
+  .bigcard { font-family: var(--mono); font-size: 64px; font-weight: 800; }
+  .results { display: grid; gap: 6px; width: 100%; max-width: 360px; }
+  .rrow { display: flex; justify-content: space-between; background: var(--surface);
+          border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; }
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<section class="scr">
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">HIGH</span><span class="wm-b">CARD</span></span>
+    <span></span>
+  </header>
+  <div class="mid">
+    <div id="status" class="field-label">connecting…</div>
+    <div id="stage"></div>
+    <button id="action-btn" class="btn btn-primary btn-big" style="max-width:280px" hidden>DRAW</button>
+  </div>
+</section>
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="cd">3</span></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+/* RUMMIKUB — real-tile rendering, drag-friendly board. Builds on shared.css. */
+
+.scr { position: relative; z-index: 1; height: 100dvh; display: flex;
+       flex-direction: column; max-width: 900px; margin: 0 auto; }
+
+/* join / lobby reuse */
+.join-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center;
+             padding: 24px; text-align: center; max-width: 560px; margin: 0 auto; width: 100%; }
+.tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em;
+           color: var(--muted); margin: 10px 0 26px; }
+.join-card { background: var(--surface); border: 1px solid var(--line);
+             border-radius: 20px; padding: 20px 20px 24px; text-align: left;
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); }
+.join-card .btn-big { margin-top: 24px; }
+.lobby-body { flex: 1; overflow-y: auto; padding: 4px 16px 16px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-sec { margin-bottom: 22px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); font-weight: 700; }
+.sec-badge { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+.set-note { font-size: 12px; color: var(--faint); font-family: var(--mono); margin-top: 8px; }
+.lobby-foot { padding: 12px 16px calc(14px + var(--sab)); display: grid; gap: 10px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-hint { text-align: center; font-size: 12px; color: var(--faint); font-family: var(--mono); }
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.opt-row .field-label { margin: 10px 0; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.step-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line);
+            background: var(--raised); color: var(--text); font-size: 19px; cursor: pointer; }
+.step-val { font-family: var(--mono); font-weight: 700; font-size: 17px;
+            min-width: 46px; text-align: center; }
+
+/* ---------- game header ---------- */
+.rk-head { display: flex; align-items: center; gap: 8px;
+           padding: calc(10px + var(--sat)) 12px 6px; }
+.head-link { font-size: 18px; text-decoration: none; width: 38px; height: 38px; flex: none;
+             display: grid; place-items: center; background: var(--raised);
+             border: 1px solid var(--line); border-radius: 11px; }
+.seat-strip { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.seat-strip::-webkit-scrollbar { display: none; }
+.seat-chip { display: flex; align-items: center; gap: 6px; flex: none;
+             background: var(--surface); border: 1px solid var(--line);
+             border-radius: 999px; padding: 5px 11px 5px 7px;
+             font-family: var(--mono); font-size: 12px; font-weight: 700; }
+.seat-chip .sc-av { font-size: 15px; }
+.seat-chip .sc-n { color: var(--muted); }
+.seat-chip.turn { border-color: var(--cyan);
+                  box-shadow: 0 0 0 1px var(--cyan), 0 0 14px rgba(34, 211, 238, 0.25); }
+.seat-chip.me { border-color: rgba(167, 139, 250, 0.5); }
+.seat-chip .sc-meld { width: 7px; height: 7px; border-radius: 50%;
+                      background: var(--faint); }
+.seat-chip .sc-meld.yes { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.pool-chip { flex: none; font-family: var(--mono); font-size: 13px; font-weight: 700;
+             background: var(--surface); border: 1px solid var(--line);
+             border-radius: 999px; padding: 7px 12px; }
+
+/* ---------- board ---------- */
+.board-wrap { flex: 1; overflow-y: auto; padding: 10px 12px 4px; min-height: 0;
+              position: relative; }
+.board-groups { display: flex; flex-wrap: wrap; gap: 14px 18px; align-content: flex-start; }
+.tile-group { display: flex; gap: 3px; padding: 6px; border-radius: 12px;
+              border: 1.5px solid transparent; background: rgba(22, 30, 51, 0.55);
+              min-height: 66px; transition: border-color 0.15s, box-shadow 0.15s; }
+.tile-group.bad { border-color: var(--danger);
+                  box-shadow: 0 0 0 1px var(--danger), 0 0 18px rgba(251, 113, 133, 0.25); }
+.tile-group.drop-hint { border-color: var(--cyan); }
+.group-reason { position: absolute; transform: translateY(-100%);
+                font-family: var(--mono); font-size: 10px; color: var(--danger);
+                background: var(--bg); border: 1px solid var(--danger);
+                border-radius: 8px; padding: 2px 8px; pointer-events: none; z-index: 5; }
+.new-group-zone { margin: 14px 0 20px; border: 2px dashed var(--line); border-radius: 14px;
+                  padding: 18px; text-align: center; color: var(--faint);
+                  font-family: var(--mono); font-size: 12px; display: none; }
+/* visible for the WHOLE editing turn — it's the invitation to drag, not
+   just a drop target */
+.board-wrap.editing .new-group-zone { display: block; }
+.new-group-zone.drop-hint { border-color: var(--cyan); color: var(--cyan); }
+.board-empty { text-align: center; color: var(--faint); font-family: var(--mono);
+               font-size: 12px; padding: 40px 20px; }
+
+/* ---------- tiles ---------- */
+.tile {
+  width: var(--tw, 46px); height: calc(var(--tw, 46px) * 1.32);
+  border-radius: 8px; flex: none; position: relative;
+  background: linear-gradient(160deg, #f7f4ea 0%, #ece7d8 100%);
+  border: 1px solid #c9c2ac;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 0 #fffdf6;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; user-select: none; -webkit-user-select: none;
+}
+.tile .tn { font-family: var(--mono); font-weight: 800;
+            font-size: calc(var(--tw, 46px) * 0.46); line-height: 1; }
+.tile .ts { font-size: calc(var(--tw, 46px) * 0.22); line-height: 1; opacity: 0.85; }
+.tile.c-r .tn, .tile.c-r .ts { color: #dc2626; }
+.tile.c-b .tn, .tile.c-b .ts { color: #2563eb; }
+.tile.c-k .tn, .tile.c-k .ts { color: #1e2433; }
+.tile.c-y .tn, .tile.c-y .ts { color: #d97706; }
+.tile.joker .tn { font-size: calc(var(--tw, 46px) * 0.52); color: #7c3aed; }
+.tile.draggable { cursor: grab; touch-action: none; }
+.tile.ghosted { opacity: 0.25; }
+.tile.placed-now { outline: 2px solid rgba(34, 211, 238, 0.55); outline-offset: 1px; }
+.tile.drag-clone { position: fixed; z-index: 90; pointer-events: none;
+                   transform: scale(1.12) rotate(2deg);
+                   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6); }
+
+/* ---------- my bar + hand ---------- */
+.my-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+          padding: 6px 10px 2px; }
+.meld-meter { font-family: var(--mono); font-size: 11px; font-weight: 700;
+              color: var(--yellow); border: 1px solid var(--yellow);
+              border-radius: 999px; padding: 4px 9px; flex: none; }
+.meld-meter.ok { color: var(--green); border-color: var(--green); }
+.turn-note { flex: 1; min-width: 60px; font-family: var(--mono); font-size: 11.5px;
+             color: var(--muted);
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.turn-note.mine { color: var(--cyan); font-weight: 700; }
+.my-actions { display: flex; gap: 6px; }
+.mini-btn { border: 1px solid var(--line); background: var(--raised); color: var(--muted);
+            border-radius: 10px; padding: 8px 8px; font-family: var(--mono);
+            font-weight: 700; font-size: 11px; cursor: pointer; }
+.mini-btn:disabled { opacity: 0.35; }
+.act-btn { border: none; border-radius: 12px; padding: 9px 12px;
+           font-family: var(--font); font-weight: 800; font-size: 12.5px;
+           letter-spacing: 0.04em; cursor: pointer; white-space: nowrap; }
+.act-btn:disabled { opacity: 0.35; }
+.act-btn.draw { background: var(--raised); color: var(--text);
+                border: 1px solid var(--line); }
+.act-btn.end { background: linear-gradient(135deg, #10c96e, #22d3ee); color: #05070e;
+               box-shadow: 0 4px 18px rgba(16, 201, 110, 0.35); }
+/* a blocked END TURN must not out-shine the live DRAW button */
+.act-btn.end.inactive { background: var(--raised); color: var(--muted);
+                        border: 1px solid var(--line); box-shadow: none; }
+.hand-tray { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start;
+             padding: 8px 12px calc(12px + var(--sab));
+             min-height: 78px; max-height: 176px; overflow-y: auto;
+             background: rgba(15, 21, 36, 0.7); border-top: 1px solid var(--line); }
+.hand-tray .tile { --tw: 44px; }
+.hand-tray.drop-hint { background: rgba(34, 211, 238, 0.08); }
+.watch-note { text-align: center; font-family: var(--mono); font-size: 11px;
+              color: var(--muted); padding: 8px 0 calc(14px + var(--sab)); }
+
+/* ---------- summary / game over ---------- */
+.sum-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+           background: var(--raised); border: 1px solid var(--line);
+           border-radius: 12px; margin-bottom: 6px; font-size: 13.5px; }
+.sum-row .sr-name { flex: 1; font-weight: 700; }
+.sum-row .sr-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.sum-row b { font-family: var(--mono); }
+.sum-row b.pos { color: var(--green); } .sum-row b.neg { color: var(--danger); }
+.sum-row.winner { border-color: var(--green); }
+.sum-next { text-align: center; font-family: var(--mono); font-size: 12px;
+            color: var(--faint); margin-top: 12px; }
+.go-card { text-align: center; }
+.go-crown { font-size: 44px; }
+.go-title { font-size: 22px; font-weight: 800; margin: 8px 0 12px;
+            background: var(--grad); -webkit-background-clip: text;
+            background-clip: text; color: transparent; }
+.go-rows { display: grid; gap: 6px; margin-bottom: 18px; }
+
+@media (max-width: 480px) {
+  .tile { --tw: 40px; }
+  .hand-tray .tile { --tw: 40px; }
+  .tile-group { min-height: 60px; }
+}
+
+/* BOT IQ toggle */
+.seg { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line);
+       border-radius: 12px; padding: 3px; }
+.seg button { border: none; background: transparent; color: var(--muted);
+              font-family: var(--mono); font-weight: 700; font-size: 12px;
+              padding: 8px 11px; border-radius: 9px; cursor: pointer; }
+.seg button.sel { background: var(--raised); color: var(--text);
+                  box-shadow: 0 0 0 1px var(--violet); }

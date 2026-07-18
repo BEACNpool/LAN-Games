@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>TRIVIA · LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="36" text-anchor="middle">🚨</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="trivia.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">TRIV</span><span class="wm-b">IA</span></h1>
+    <p class="tagline">FASTEST THUMB TAKES THE POINTS. SLOWEST BUYS DESSERT.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">GRAB A BUZZER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">TRIV</span><span class="wm-b">IA</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>CONTESTANTS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>MODE</h2></div>
+      <div id="opt-mode" class="seg seg-wide"></div>
+      <p id="mode-hint" class="mode-hint"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>CATEGORY</h2><span id="cat-count" class="sec-badge"></span></div>
+      <div id="cat-grid" class="cat-grid"></div>
+    </div>
+    <div class="lobby-sec">
+      <div class="opt-row"><span class="field-label">QUESTIONS</span>
+        <div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">DIFFICULTY</span>
+        <div id="opt-diff" class="seg"></div></div>
+      <p id="diff-hint" class="mode-hint"></p>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START THE SHOW</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="tv-head">
+    <span id="tv-qchip" class="hud-chip">Q1</span>
+    <div class="tv-timer"><div id="tv-timer-fill"></div></div>
+    <span id="tv-clock" class="hud-clock-sm">0:20</span>
+  </header>
+  <div id="score-strip" class="score-strip"></div>
+
+  <div id="quiz-zone" class="quiz-zone" hidden>
+    <div id="q-card" class="q-card">
+      <div class="q-meta">
+        <span id="q-cat" class="q-cat">🧠 GENERAL</span>
+        <span id="q-diff" class="q-diff">★</span>
+      </div>
+      <div id="q-text" class="q-text">Question</div>
+    </div>
+
+    <!-- the room state banner: who buzzed / locked / answered count -->
+    <div id="room-banner" class="room-banner" hidden>
+      <span id="rb-avatar" class="rb-avatar">🚨</span>
+      <div class="rb-meta">
+        <span id="rb-title" class="rb-title">REX BUZZED FIRST</span>
+        <span id="rb-sub" class="rb-sub">answering…</span>
+      </div>
+      <span id="rb-count" class="rb-count" hidden>6</span>
+    </div>
+
+    <div id="choices" class="choices"></div>
+
+    <!-- buzzer mode: the giant thumb target -->
+    <div id="buzz-wrap" class="buzz-wrap" hidden>
+      <button id="buzz-btn" class="buzz-btn"><span class="bb-ico">🚨</span><span class="bb-label">BUZZ</span></button>
+      <p id="buzz-note" class="buzz-note">know it? SLAM IT</p>
+    </div>
+  </div>
+
+  <p id="watch-note" class="watch-note" hidden>WATCHING — you're in the next game</p>
+</section>
+
+<!-- reveal overlay strip (bottom, non-blocking so the answer glow shows) -->
+<div id="reveal-strip" class="reveal-strip" hidden>
+  <span id="rs-icon">✅</span>
+  <div class="rs-meta">
+    <span id="rs-title" class="rs-title">CORRECT!</span>
+    <span id="rs-sub" class="rs-sub"></span>
+  </div>
+</div>
+
+<!-- standings interstitial -->
+<div id="standings-overlay" class="standings-overlay" hidden>
+  <p class="io-eyebrow">HALFTIME SCOREBOARD</p>
+  <div id="st-rows" class="st-rows"></div>
+  <p id="st-next" class="rv-next"></p>
+</div>
+
+<!-- game over: podium + full standings -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="podium" class="podium"></div>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="trivia.js"></script>
+</body>
+</html>

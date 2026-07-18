@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>TANKS — GAMEHUB</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="45" font-size="34" text-anchor="middle">🪖</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="tanks.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">TA</span><span class="wm-b">NKS</span></h1>
+    <p class="tagline">ANGLE. POWER. APOLOGIZE LATER.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">ROLL OUT</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">TA</span><span class="wm-b">NKS</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>COMBATANTS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="seat-note" id="seat-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>BATTLE RULES</h2></div>
+      <div class="opt-row"><span class="field-label">TERRAIN</span>
+        <div id="opt-terrain" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">BOT TANKS</span>
+        <div class="stepper"><button id="bots-minus" class="step-btn">−</button>
+        <span id="bots-val" class="step-val">1</span>
+        <button id="bots-plus" class="step-btn">+</button></div></div>
+      <div class="opt-row"><span class="field-label">BOT AIM</span>
+        <div id="opt-difficulty" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">TURN TIMER</span>
+        <div id="opt-timer" class="seg"></div></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>OPEN FIRE</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ BATTLE ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="tk-head">
+    <a href="/" class="head-link">🕹</a>
+    <div id="tk-turnchip" class="tk-turnchip"><span id="tk-turn-av">🪖</span><span id="tk-turn-name">—</span></div>
+    <span id="tk-wind" class="tk-wind">WIND →12</span>
+    <span id="tk-clock" class="tk-clock">45</span>
+  </header>
+
+  <div id="hp-bar-row" class="hp-bar-row"></div>
+
+  <div class="field-wrap">
+    <canvas id="field"></canvas>
+  </div>
+
+  <div id="controls" class="tk-controls" hidden>
+    <div class="tk-row">
+      <button id="mv-left" class="tk-move">◀</button>
+      <div class="tk-fuel"><div id="fuel-fill" class="tk-fuel-fill"></div><span id="fuel-label">FUEL</span></div>
+      <button id="mv-right" class="tk-move">▶</button>
+    </div>
+    <div class="tk-row">
+      <span class="tk-lab">ANGLE</span>
+      <input id="angle" type="range" min="0" max="180" step="1" value="60">
+      <span id="angle-val" class="tk-val">60°</span>
+    </div>
+    <div class="tk-row">
+      <span class="tk-lab">POWER</span>
+      <input id="power" type="range" min="10" max="100" step="1" value="55">
+      <span id="power-val" class="tk-val">55</span>
+    </div>
+    <button id="fire-btn" class="tk-fire">🔥 FIRE</button>
+  </div>
+  <p id="watch-note" class="watch-note" hidden>WATCHING THE CARNAGE</p>
+</section>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🪖</p>
+    <p id="go-title" class="go-title">LAST TANK STANDING</p>
+    <p id="go-line" class="go-line"></p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="tanks.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+/* SNAKE ARENA — real-time canvas pit + thumb steering */
+
+.scr { position: relative; z-index: 1; height: 100dvh; display: flex;
+       flex-direction: column; max-width: 720px; margin: 0 auto; }
+.join-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center;
+             padding: 24px; text-align: center; max-width: 560px; margin: 0 auto; width: 100%; }
+.tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.26em;
+           color: var(--muted); margin: 10px 0 26px; }
+.join-card { background: var(--surface); border: 1px solid var(--line);
+             border-radius: 20px; padding: 20px 20px 24px; text-align: left;
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); }
+.join-card .btn-big { margin-top: 24px; }
+.lobby-body { flex: 1; overflow-y: auto; padding: 4px 16px 16px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-sec { margin-bottom: 22px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); font-weight: 700; }
+.sec-badge { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+.seat-note { font-size: 12px; color: var(--faint); font-family: var(--mono); margin-top: 8px; }
+.lobby-foot { padding: 12px 16px calc(14px + var(--sab)); display: grid; gap: 10px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-hint { text-align: center; font-size: 12px; color: var(--faint); font-family: var(--mono); }
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.opt-row .field-label { margin: 10px 0; }
+.seg { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line);
+       border-radius: 12px; padding: 3px; }
+.seg button { border: none; background: transparent; color: var(--muted);
+              font-family: var(--mono); font-weight: 700; font-size: 12px;
+              padding: 8px 13px; border-radius: 9px; cursor: pointer; }
+.seg button.sel { background: var(--raised); color: var(--text);
+                  box-shadow: 0 0 0 1px var(--violet); }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.step-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line);
+            background: var(--raised); color: var(--text); font-size: 19px; cursor: pointer; }
+.step-val { font-family: var(--mono); font-weight: 700; font-size: 17px;
+            min-width: 46px; text-align: center; }
+
+/* ---------- arena chrome ---------- */
+#scr-game { touch-action: none; }
+.sn-head { display: flex; align-items: center; gap: 8px;
+           padding: calc(10px + var(--sat)) 12px 6px; }
+.head-link { font-size: 18px; text-decoration: none; width: 38px; height: 38px; flex: none;
+             display: grid; place-items: center; background: var(--raised);
+             border: 1px solid var(--line); border-radius: 11px; }
+.sn-round { flex: 1; font-family: var(--mono); font-weight: 800; font-size: 13px;
+            letter-spacing: 0.08em; background: var(--surface);
+            border: 1px solid var(--cyan); border-radius: 12px; padding: 9px 12px;
+            box-shadow: 0 0 14px rgba(34, 211, 238, 0.15); }
+.sn-alive { font-family: var(--mono); font-size: 12px; font-weight: 800;
+            color: var(--green); border: 1px solid var(--line);
+            border-radius: 999px; padding: 7px 11px; flex: none; }
+
+.score-row { display: flex; gap: 6px; padding: 0 12px 6px; overflow-x: auto;
+             scrollbar-width: none; }
+.score-row::-webkit-scrollbar { display: none; }
+.sn-chip { display: flex; align-items: center; gap: 6px; flex: none;
+           background: var(--surface); border: 1px solid var(--line);
+           border-radius: 999px; padding: 4px 10px 4px 6px;
+           font-family: var(--mono); font-size: 11px; font-weight: 700; }
+.sn-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.sn-chip .ln { color: var(--muted); }
+.sn-chip .stars { color: var(--yellow); letter-spacing: -1px; }
+.sn-chip.you { border-color: var(--cyan); }
+.sn-chip.dead { opacity: 0.4; }
+
+.arena-wrap { flex: 1; display: grid; align-content: center; gap: 2px;
+              padding: 2px 8px calc(120px + var(--sab)); min-height: 0; }
+.arena-box { position: relative; }
+#arena { display: block; width: 100%; aspect-ratio: 44 / 26;
+         background: linear-gradient(180deg, #0a0f22 0%, #0d1428 60%, #101a30 100%);
+         border: 1px solid var(--line); border-radius: 14px;
+         box-shadow: 0 14px 50px rgba(0, 0, 0, 0.5); }
+
+.round-banner { position: absolute; inset: 0; display: grid; place-items: center;
+                align-content: center; gap: 6px; text-align: center;
+                background: rgba(7, 11, 20, 0.72); backdrop-filter: blur(3px);
+                border-radius: 14px; pointer-events: none; }
+.rb-title { font-weight: 800; font-size: clamp(18px, 5.4vw, 26px);
+            background: var(--grad); -webkit-background-clip: text;
+            background-clip: text; color: transparent; }
+.rb-sub { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.watch-note { text-align: center; font-family: var(--mono); font-size: 11px;
+              color: var(--yellow); padding: 8px 0 0; letter-spacing: 0.12em; }
+.steer-hint { text-align: center; font-family: var(--mono); font-size: 10px;
+              color: var(--faint); padding: 8px 0 calc(10px + var(--sab)); }
+
+/* ---------- d-pad (thumb corner; hidden when a mouse is around) ---------- */
+#dpad { position: fixed; right: 14px; bottom: calc(16px + var(--sab)); z-index: 30;
+        display: none; grid-template-columns: repeat(3, 52px);
+        grid-template-rows: repeat(3, 52px); gap: 4px; opacity: 0.82; }
+#scr-game[data-ctrl="pad"] #dpad { display: grid; }   /* only the D-PAD scheme */
+.dp { border: 1px solid var(--line); background: rgba(22, 30, 51, 0.85);
+      color: var(--text); border-radius: 14px; font-size: 17px; cursor: pointer;
+      touch-action: none; -webkit-user-select: none; user-select: none; }
+.dp:active { background: var(--line); transform: scale(0.94); }
+.dp-u { grid-column: 2; grid-row: 1; }
+.dp-l { grid-column: 1; grid-row: 2; }
+.dp-r { grid-column: 3; grid-row: 2; }
+.dp-d { grid-column: 2; grid-row: 3; }
+
+.you-only { font-family: var(--mono); font-size: 8px; font-style: normal;
+            letter-spacing: 0.1em; color: var(--faint); border: 1px solid var(--line);
+            border-radius: 4px; padding: 1px 4px; margin-left: 6px; vertical-align: middle; }
+
+/* ---------- game over ---------- */
+.go-card { text-align: center; }
+.go-crown { font-size: 44px; }
+.go-title { font-size: 22px; font-weight: 800; margin: 8px 0 4px;
+            background: var(--grad); -webkit-background-clip: text;
+            background-clip: text; color: transparent; }
+.go-line { font-family: var(--mono); font-size: 13px; color: var(--muted);
+           margin-bottom: 14px; }
+.go-rows { display: grid; gap: 6px; margin-bottom: 16px; }
+.go-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+          background: var(--raised); border: 1px solid var(--line);
+          border-radius: 12px; font-size: 13.5px; }
+.go-row.first { border-color: var(--green); }
+.go-row .gr-stars { font-family: var(--mono); color: var(--yellow); }
+.go-row b { margin-left: auto; font-family: var(--mono); }
