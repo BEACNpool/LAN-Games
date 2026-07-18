@@ -102,7 +102,7 @@ body {
 
 .icon-btn {
   background: var(--raised); border: 1px solid var(--line); border-radius: 12px;
-  width: 42px; height: 42px; font-size: 17px; cursor: pointer; color: var(--text);
+  width: 44px; height: 44px; font-size: 17px; cursor: pointer; color: var(--text);
 }
 
 .field-label {
@@ -198,6 +198,7 @@ input::placeholder { color: var(--faint); font-weight: 400; }
   width: 100%; max-width: 420px;
   background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
   padding: 20px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  max-height: calc(100dvh - 24px); overflow-y: auto;
 }
 .modal-title { font-size: 14px; font-weight: 800; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 14px; }
 .modal-btns { display: flex; gap: 8px; }
@@ -253,3 +254,23 @@ img.pfp {
              letter-spacing: 0.04em; margin: 2px 0 14px; }
 .crop-btns { display: flex; gap: 8px; }
 .crop-btns .btn { flex: 1; }
+
+/* Phone ergonomics: keep repeated pickers comfortably tappable without
+   forcing game boards (which have their own sizing rules) to grow. */
+@media (max-width: 480px) {
+  .avatar-grid { grid-template-columns: repeat(5, minmax(44px, 1fr)); }
+  .modal, .crop-ov { padding: 12px; }
+}
+
+@media (pointer: coarse) {
+  .btn, .icon-btn, .avatar-cell, .pfp-btn { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

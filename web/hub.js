@@ -179,6 +179,65 @@
     } catch { /* transient — next tick */ }
   }
 
+  /* ---------- one-scan phone onboarding (entirely local) ---------- */
+  const shareUrl = new URL("/", location.href).href;
+  const localOnlyHost = ["localhost", "127.0.0.1", "0.0.0.0", "::1"]
+    .includes(location.hostname);
+
+  function closeShare() { $("share-sheet").hidden = true; }
+
+  function openShare() {
+    const qr = $("share-qr");
+    qr.textContent = "";
+    $("share-url").textContent = shareUrl;
+    $("share-hint").textContent = localOnlyHost
+      ? "This address only works on the host. Reopen LAN Games using the host's LAN IP, then share again."
+      : "Connect to the same Wi-Fi, then scan this code.";
+    $("share-sheet").hidden = false;
+    try { renderQR(qr, shareUrl); }
+    catch (e) { qr.textContent = "QR unavailable"; }
+    $("share-copy").focus();
+  }
+
+  async function copyJoinLink() {
+    let copied = false;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+        copied = true;
+      }
+    } catch (e) { /* use the HTTP-safe fallback below */ }
+    if (!copied) {
+      const ta = document.createElement("textarea");
+      ta.value = shareUrl;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;left:-9999px;top:0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { copied = document.execCommand("copy"); } catch (e) { /* no-op */ }
+      ta.remove();
+    }
+    Hub.toast(copied ? "✓ join link copied" : "press and hold the link to copy",
+      copied ? "" : "err");
+  }
+
+  $("share-open").onclick = openShare;
+  $("share-close").onclick = closeShare;
+  $("share-copy").onclick = copyJoinLink;
+  $("share-sheet").addEventListener("click", (e) => {
+    if (e.target.id === "share-sheet") closeShare();
+  });
+  $("share-qr").addEventListener("qr-overflow", () => {
+    $("share-qr").textContent = "Address is too long for the QR code";
+  });
+  if (typeof navigator.share === "function") {
+    $("share-native").hidden = false;
+    $("share-native").onclick = async () => {
+      try { await navigator.share({ title: "LAN Games", url: shareUrl }); }
+      catch (e) { if (e.name !== "AbortError") copyJoinLink(); }
+    };
+  }
+
   /* ---------- profile (name + character + photo, shared with every game) ---------- */
   let pfAvatar = "";
   const pfMe = () => ({ pfp: Hub.identity.pfp || null,

@@ -222,6 +222,29 @@ That's the whole integration surface. `server.py` loops `REGISTRY` and mounts
 No build step, no framework, no CDN — vanilla JS/CSS served static, self-hosted
 fonts. Mobile-first (design at 390px; it must also be clean at 820/1440).
 
+### Phone acceptance checklist
+
+Before calling a game finished, run its real browser flow at both **360×740**
+and **390×844** and verify:
+
+- no horizontal page overflow at any phase, including game-over modals;
+- primary controls and repeated pickers have at least a **44×44 CSS-pixel**
+  tap target, with space between destructive and primary actions;
+- every action has a tap control — nothing is hover-only, and gesture controls
+  have an on-screen alternative where practical;
+- text inputs render at 16px or larger so iOS does not zoom the page when the
+  keyboard opens;
+- fixed bars include `env(safe-area-inset-top/bottom)` and game screens use
+  `100dvh`, not legacy `100vh`;
+- `touch-action:none` is scoped only to the board/drag surface, never the whole
+  scrollable screen;
+- a rotate, background/foreground cycle, WebSocket reconnect, and full reload
+  do not strand or skip the player.
+
+The shared stylesheet already supplies safe-area variables, reduced-motion
+handling, phone-sized avatar cells, scrollable modals, and 44px shared buttons.
+Do not undo those guarantees in a game-specific stylesheet.
+
 ### `index.html` skeleton
 Load, in order:
 ```html

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LAN Games">
+  <rect width="512" height="512" rx="112" fill="#070b14"/>
+  <rect x="16" y="16" width="480" height="480" rx="98" fill="none" stroke="#818cf8" stroke-width="12"/>
+  <path d="M122 294c-16-73 24-137 88-137h92c64 0 104 64 88 137l-17 77c-7 31-46 40-65 15l-30-40h-44l-30 40c-19 25-58 16-65-15l-17-77Z" fill="#0f1524" stroke="#22d3ee" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M194 235v66M161 268h66" stroke="#e8edf9" stroke-width="19" stroke-linecap="round"/>
+  <circle cx="326" cy="251" r="13" fill="#f472b6"/>
+  <circle cx="357" cy="283" r="13" fill="#22d3ee"/>
+  <circle cx="326" cy="315" r="13" fill="#a78bfa"/>
+  <circle cx="295" cy="283" r="13" fill="#10c96e"/>
+  <text x="256" y="126" fill="#e8edf9" font-family="system-ui,sans-serif" font-size="67" font-weight="800" font-style="italic" text-anchor="middle" letter-spacing="3">LAN</text>
+</svg>

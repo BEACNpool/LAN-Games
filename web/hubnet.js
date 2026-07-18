@@ -7,6 +7,29 @@ const Hub = (() => {
   const AVATARS = ["🦊", "🐸", "🦖", "🐙", "🦉", "🐯", "🐼", "🦄",
                    "👾", "🤖", "🐲", "😈", "🦈", "🐝", "🦩", "🐢"];
 
+  // Every game loads this file, so nested game pages get the same home-screen
+  // identity without copying manifest markup into every client.
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const manifest = document.createElement("link");
+    manifest.rel = "manifest";
+    manifest.href = "/shared/app.webmanifest";
+    document.head.appendChild(manifest);
+  }
+  if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+    const icon = document.createElement("link");
+    icon.rel = "apple-touch-icon";
+    icon.sizes = "180x180";
+    icon.href = "/shared/app-icon-180.png";
+    document.head.appendChild(icon);
+  }
+  if (!document.querySelector('link[rel~="icon"]')) {
+    const favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/svg+xml";
+    favicon.href = "/shared/app-icon.svg";
+    document.head.appendChild(favicon);
+  }
+
   const identity = {
     get token() { return localStorage.getItem("wc-token") || ""; },
     set token(v) { localStorage.setItem("wc-token", v); },

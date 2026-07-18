@@ -58,8 +58,24 @@ Find `<the-host-ip>` with `hostname -I` (Linux), `ipconfig getifaddr en0`
 (macOS), or `ipconfig` (Windows) — e.g. `http://192.168.1.50:8096/`. Share that
 URL with everyone in the room; they open it, pick a name + avatar, and join.
 
+Once the hub is open, tap the **join-link button** beside your profile. It shows
+a QR code for the exact address you opened, so everyone else can scan it instead
+of typing an IP address. The QR is generated in the browser; it does not call an
+outside service.
+
 > **Tip:** give the host a static IP (or a hostname on your router) so the URL
 > doesn't change, and bookmark it on everyone's phones.
+
+### Best phone setup
+
+- Keep every phone on the same Wi-Fi as the host.
+- Open the hub with the host's **LAN IP or LAN hostname**, not `localhost`,
+  before showing the QR code.
+- Add the hub to the home screen (or bookmark it) for an app-like, full-height
+  launch. Some Android browsers require HTTPS before they offer a formal
+  “Install app” prompt; a home-screen bookmark still works on a plain LAN.
+- Set your name, character, and optional photo once on the hub. That profile is
+  reused by every game on that device.
 
 ---
 
