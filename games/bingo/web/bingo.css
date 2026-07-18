@@ -1,0 +1,107 @@
+/* BINGO — controller (phone): join, lobby, and the 5x5 card. */
+
+.scr { position: relative; z-index: 1; min-height: 100dvh; display: flex;
+       flex-direction: column; max-width: 620px; margin: 0 auto; }
+
+/* join */
+.join-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center;
+             padding: 24px; text-align: center; max-width: 480px; margin: 0 auto; width: 100%; }
+.tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+           color: var(--muted); margin: 10px 0 24px; }
+.join-card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+             padding: 20px 20px 24px; text-align: left; box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+.join-card .btn-big { margin-top: 22px; }
+
+/* lobby */
+.lobby-body { flex: 1; overflow-y: auto; padding: 12px 16px 16px; max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-sec { margin-bottom: 20px; }
+.sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 13px; letter-spacing: 0.16em; color: var(--muted); font-weight: 700; }
+.sec-badge { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+.seat-note { font-size: 12px; color: var(--faint); font-family: var(--mono); margin: 8px 2px 0; line-height: 1.5; }
+.seat-note b { color: var(--yellow); }
+.lobby-foot { padding: 12px 16px calc(14px + var(--sab)); display: grid; gap: 10px;
+              max-width: 560px; margin: 0 auto; width: 100%; }
+.lobby-hint { text-align: center; font-size: 12px; color: var(--faint); font-family: var(--mono); }
+.opt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.seg { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line);
+       border-radius: 12px; padding: 3px; flex-wrap: wrap; justify-content: flex-end; }
+.seg button { border: none; background: transparent; color: var(--muted); font-family: var(--mono);
+              font-weight: 700; font-size: 13px; padding: 8px 12px; border-radius: 9px; cursor: pointer;
+              min-height: 38px; }
+.seg button.sel { background: var(--raised); color: var(--text); box-shadow: 0 0 0 1px var(--cyan); }
+
+/* "open on TV" call-to-action */
+.tv-cta { display: flex; align-items: center; gap: 12px; text-decoration: none; margin-bottom: 20px;
+          background: linear-gradient(135deg, rgba(34,211,238,0.14), var(--surface));
+          border: 1px solid var(--cyan); border-radius: 16px; padding: 14px 16px; color: var(--text); }
+.tv-cta-ic { font-size: 26px; }
+.tv-cta-tx { flex: 1; display: flex; flex-direction: column; }
+.tv-cta-tx b { font-size: 14px; letter-spacing: 0.04em; }
+.tv-cta-tx small { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+.tv-cta-go { font-size: 20px; color: var(--cyan); }
+
+/* game header */
+.bg-head { display: flex; align-items: center; gap: 10px; padding: calc(10px + var(--sat)) 14px 8px; }
+.head-link { font-size: 18px; text-decoration: none; width: 40px; height: 40px; flex: none;
+             display: grid; place-items: center; background: var(--raised); border: 1px solid var(--line); border-radius: 12px; }
+.call-now { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.call-kick { font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em; color: var(--faint); }
+.call-chip { font-family: var(--mono); font-weight: 800; font-size: 30px; color: var(--yellow); line-height: 1.1;
+             min-height: 34px; }
+.call-chip.pics { font-family: var(--font); font-size: 34px; }
+.bg-round { font-family: var(--mono); font-weight: 800; color: var(--muted); font-size: 14px;
+            width: 40px; text-align: right; }
+.bg-goal { text-align: center; font-size: 13px; color: var(--muted); font-weight: 700;
+           letter-spacing: 0.02em; padding: 0 14px 8px; }
+.bg-goal b { color: var(--cyan); }
+
+/* the 5x5 card */
+.card { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px;
+        padding: 12px 12px 4px; align-content: start; max-width: 520px; margin: 0 auto; width: 100%; }
+.cell { position: relative; aspect-ratio: 1 / 1; border-radius: 12px; border: 1px solid var(--line);
+        background: var(--surface); display: grid; place-items: center; cursor: pointer;
+        font-family: var(--mono); font-weight: 800; font-size: clamp(16px, 5.4vw, 26px); color: var(--text);
+        user-select: none; transition: transform 0.1s, border-color 0.15s, background 0.15s; }
+.cell.pics { font-family: var(--font); font-size: clamp(22px, 7vw, 34px); }
+.cell.free { color: var(--violet); background: var(--raised); }
+.cell.callable { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan), 0 0 16px rgba(34,211,238,0.35);
+                 animation: pulse 1.2s ease-in-out infinite; }
+.cell.daubed { color: #05070e; }
+.cell.daubed::after { content: ""; position: absolute; inset: 5px; border-radius: 9px;
+                      background: radial-gradient(circle at 50% 40%, var(--cyan), #0891b2);
+                      z-index: -0; mix-blend-mode: normal; }
+.cell.daubed span { position: relative; z-index: 1; }
+.cell.free.daubed::after { background: radial-gradient(circle at 50% 40%, var(--violet), #7c3aed); }
+.cell:active { transform: scale(0.94); }
+@keyframes pulse { 50% { box-shadow: 0 0 0 1px var(--cyan), 0 0 26px rgba(34,211,238,0.6); } }
+
+/* footer controls */
+.bg-foot { padding: 8px 14px calc(12px + var(--sab)); display: grid; gap: 10px; max-width: 520px;
+           margin: 0 auto; width: 100%; }
+.auto-toggle { display: flex; align-items: center; justify-content: center; gap: 8px;
+               font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.auto-toggle input { width: 18px; height: 18px; accent-color: var(--cyan); }
+.btn-bingo { background: var(--grad); color: #05070e; border: none; font-size: 20px; letter-spacing: 0.14em;
+             opacity: 0.5; transition: opacity 0.2s, transform 0.15s; }
+.btn-bingo.ready { opacity: 1; animation: bingo-glow 0.9s ease-in-out infinite; }
+@keyframes bingo-glow { 50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(34,211,238,0.6); } }
+
+/* banners */
+.rb-card, .go-card { text-align: center; }
+.rb-emoji { font-size: 48px; }
+.rb-title { font-size: 24px; font-weight: 800; margin: 6px 0;
+            background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.rb-sub { font-size: 14px; color: var(--muted); }
+.go-crown { font-size: 46px; }
+.go-title { font-size: 22px; font-weight: 800; margin: 8px 0 14px;
+            background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.go-rows { display: grid; gap: 8px; margin-bottom: 16px; }
+.go-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: var(--raised);
+          border: 1px solid var(--line); border-radius: 12px; font-size: 15px; }
+.go-row.first { border-color: var(--green); box-shadow: 0 0 16px rgba(16,201,110,0.2); }
+.go-row .gr-av { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+                 background: var(--bg); border: 1px solid var(--line); font-size: 17px; flex: none; overflow: hidden; }
+.go-row .gr-av img.pfp { width: 100%; height: 100%; border-radius: 9px; box-shadow: none; }
+.go-row .gr-name { flex: 1; font-weight: 700; text-align: left; }
+.go-row b { font-family: var(--mono); font-size: 17px; color: var(--cyan); }

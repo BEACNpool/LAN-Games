@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>BINGO · FAB5.GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="34" text-anchor="middle">🎱</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="bingo.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">BIN</span><span class="wm-b">GO</span></h1>
+    <p class="tagline">CALLER ON THE TV · YOUR CARD'S ON YOUR PHONE</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">YOUR NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">TAKE A CARD</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">BIN</span><span class="wm-b">GO</span></span>
+    <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+  </header>
+  <div class="lobby-body">
+    <a id="tv-open" class="tv-cta" href="tv.html" target="_blank" rel="noopener">
+      <span class="tv-cta-ic">📺</span>
+      <span class="tv-cta-tx"><b>OPEN ON THE BIG SCREEN</b><small>put the caller on a TV — players scan to join</small></span>
+      <span class="tv-cta-go">↗</span>
+    </a>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>SET UP</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div class="opt-row"><span class="field-label">CARDS</span><div id="opt-mode" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">TO WIN</span><div id="opt-pattern" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">CALL SPEED</span><div id="opt-pace" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">ROUNDS</span><div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">AUTO-PLAY</span><div id="opt-auto" class="seg"></div></div>
+      <p class="seat-note" id="auto-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PLAYERS</h2></div>
+      <div id="player-grid" class="player-grid"></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START CALLING</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="bg-head">
+    <a href="/" class="head-link">🕹</a>
+    <div class="call-now">
+      <span class="call-kick">NOW CALLING</span>
+      <span id="call-chip" class="call-chip">—</span>
+    </div>
+    <span id="bg-round" class="bg-round">R1</span>
+  </header>
+
+  <p id="bg-goal" class="bg-goal"></p>
+
+  <div id="card" class="card"></div>
+
+  <div class="bg-foot">
+    <label class="auto-toggle"><input id="auto-me" type="checkbox"><span>auto-daub my card</span></label>
+    <button id="bingo-btn" class="btn btn-bingo btn-big">BINGO!</button>
+  </div>
+</section>
+
+<!-- round / winner banner -->
+<div id="round-banner" class="modal" hidden>
+  <div class="modal-card rb-card">
+    <p id="rb-emoji" class="rb-emoji">🎉</p>
+    <p id="rb-title" class="rb-title"></p>
+    <p id="rb-sub" class="rb-sub"></p>
+  </div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="bingo.js"></script>
+</body>
+</html>

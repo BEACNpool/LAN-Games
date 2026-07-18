@@ -183,7 +183,8 @@ the top). Every field matters — the hub reads them for its rails and filters:
     "title": "MY GAME",
     "icon": "🎲",                      # emoji, shown on the card & used as key art
     "art": "♠︎",            # OPTIONAL: hub key-art override (see footgun)
-    "category": "party",              # party | cards | board | battle  -> which hub rail
+    "category": "party",              # bigscreen | party | cards | board | battle -> hub rail
+    "tv": True,                       # OPTIONAL: BIG SCREEN game (📺 badge + TV view) — see §11
     "accent": "#22d3ee",              # hex; drives the card's generated key-art gradient
     "tagline": "Short punchy line.",  # hero spotlight subtitle
     "blurb": "One or two sentences for the card.",
@@ -196,9 +197,10 @@ the top). Every field matters — the hub reads them for its rails and filters:
 },
 ```
 
-Rails are chosen by `category`: **party** (charades/trivia/blitz/werewolf),
-**cards** (spades/hearts/euchre/rummikub), **board** (chess/checkers/backgammon),
-**battle** (connect4/tanks/battleship/snake). Filters use `min_p`/`max_p`/`solo`.
+Rails are chosen by `category`: **bigscreen** (bingo/pricecheck — TV + phone
+controllers, see §11), **party** (charades/trivia/blitz/werewolf), **cards**
+(spades/hearts/euchre/rummikub), **board** (chess/checkers/backgammon), **battle**
+(connect4/tanks/battleship/snake). Filters use `min_p`/`max_p`/`solo`.
 
 - `EXTERNAL` is for games not mounted as a normal registry `GameBinding`. Use a
   same-origin path `"url": "/games/<slug>/"` (preferred — shares identity/profile),
@@ -456,5 +458,59 @@ for a new game — it rides the same proxy).
 game), `games/spades` (multi-seat + bots + partnerships), `games/checkers`
 (`DuelSession` board game), `games/charades` (party/typing + data bank),
 `games/snake` (real-time tick), `games/werewolf` (hidden-role + anti-leak),
-`games/rummikub` (local board arrangement + commit/referee). Core contracts:
-`core/session.py`, `core/net.py`, `core/duel.py`, `core/avatars.py`.
+`games/rummikub` (local board arrangement + commit/referee), `games/bingo` &
+`games/pricecheck` (BIG SCREEN — see §11). Core contracts: `core/session.py`,
+`core/net.py`, `core/duel.py`, `core/avatars.py`.
+
+---
+
+## 11. BIG SCREEN games (one shared display + every phone is a controller)
+
+The **BIG SCREEN** rail is the Jackbox-style format: a TV/laptop shows the
+shared game (the "caller", the item, the board) and each player's **phone is a
+lean controller**. It's built entirely on machinery that already exists — a game
+is a normal `GameSession`; there is **no room-code system** (one room per slug,
+same as every other game). Reference implementations: `games/bingo` (caller +
+cards), `games/pricecheck` (item + number keypad + reveal).
+
+**What makes a game "BIG SCREEN" — three things:**
+
+1. **Registry:** `"category": "bigscreen"` (puts it on the BIG SCREEN rail) and
+   `"tv": True` (renders the 📺 badge on the hub and is surfaced by `/api/games`).
+2. **A TV view** at `games/<slug>/web/tv.html` (+ `tv.js`) — the big shared
+   screen. It connects as a **read-only spectator**:
+   ```js
+   Hub.connect("/games/<slug>/ws", { onState: render }, { watch: true });
+   ```
+   The `{watch:true}` opt sends `{t:"hello", watch:true}`; the server adds the
+   socket to `watch_sockets` and pushes `state_for(None)` (a viewer with no
+   token). **The TV only ever sees public/shared state** — your `game_state`
+   already masks per-viewer secrets, and `viewer_token is None` for the TV, so
+   never leak a player's private info into the spectator payload.
+3. **A join path.** The TV shows a QR pointing at the controller URL so phones
+   join by scanning:
+   ```js
+   const joinUrl = new URL(".", location.href).href;   // tv.html sits next to index.html
+   renderQR(document.getElementById("tv-qr"), joinUrl); // /shared/qr.js is global
+   ```
+   The controller's lobby carries an **"📺 OPEN ON TV"** link
+   (`<a href="tv.html" target="_blank">`) so whoever's at the TV opens the big
+   screen with one tap. Players never need the TV to play — starting/ready are
+   normal lobby verbs sent **from a phone** (the TV can't send actions).
+
+**Shared TV styling:** load `/shared/bigscreen.css` after `shared.css` in
+`tv.html`. It provides the whole TV shell — `.tv` / `.tv-head` / `.tv-main`
+(stage + rail) / `.tv-stage` / `.tv-join` (QR panel) / `.tv-roster` /
+`.tv-banner` (winner overlay) — sized for a room-distance display with `clamp()`
+type. Put game-specific big-screen markup inside `#tv-stage`; keep per-game bits
+in a small `<style>` in `tv.html` (see `games/bingo/web/tv.html`).
+
+**Controller shape:** a normal game client (§6) but designed as a *controller* —
+you're looking at the TV, not the phone. Big tap targets, minimal text, your
+private info only (your card, your number pad). BINGO's card and PRICE CHECK's
+in-app numeric keypad (avoids the iOS keyboard/zoom entirely) are the patterns.
+
+**Footgun:** `state_for(viewer_token=None)` runs on **every push** for the TV
+socket in addition to per-player pushes — it must be pure and must never raise
+in any phase/mode (the freeze-the-whole-room class of bug). Test it: call
+`state_for(None)` in every stage (BINGO's `test_state_never_crashes_any_phase`).

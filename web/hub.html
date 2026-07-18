@@ -207,6 +207,17 @@
                  font-family: var(--mono); font-size: 9px; font-weight: 800;
                  letter-spacing: 0.22em; color: #05070e;
                  background: var(--yellow); padding: 4px 34px; }
+  /* BIG SCREEN feature rail + TV badge */
+  .rail-feature .rail-head { flex-wrap: wrap; }
+  .rail-feature .rail-title { background: var(--grad); -webkit-background-clip: text;
+                 background-clip: text; color: transparent; }
+  .rail-sub { order: 1; flex-basis: 100%; font-size: 11px; color: var(--muted);
+              font-weight: 600; letter-spacing: 0.01em; margin-top: 2px; }
+  .tile-tv-badge { position: absolute; top: 10px; left: 10px; z-index: 3;
+                 font-family: var(--mono); font-size: 10px; font-weight: 800;
+                 letter-spacing: 0.06em; color: var(--text);
+                 background: rgba(7,11,20,0.72); border: 1px solid var(--line);
+                 padding: 4px 8px; border-radius: 999px; }
 
   .hub-foot { text-align: center; font-family: var(--mono); font-size: 11px;
               color: var(--faint); padding: 22px 20px 4px; letter-spacing: 0.08em; }

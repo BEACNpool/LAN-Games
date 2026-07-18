@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PRICE CHECK · Big Screen</title>
+<meta name="theme-color" content="#070b14">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/bigscreen.css">
+<style>
+  .pc-emoji-xl { font-size: clamp(80px, 18vw, 220px); line-height: 1; }
+  .pc-prompt-xl { font-size: clamp(24px, 4.6vw, 54px); font-weight: 800; line-height: 1.15; max-width: 90%; }
+  .pc-timer { font-family: var(--mono); font-weight: 800; font-size: clamp(30px, 5vw, 64px);
+              color: var(--cyan); }
+  .pc-timer.low { color: var(--danger); }
+  .pc-lockline { font-family: var(--mono); font-size: clamp(14px, 1.6vw, 22px); color: var(--muted); letter-spacing: 0.1em; }
+  .pc-answer-xl { font-family: var(--mono); font-weight: 800; font-size: clamp(56px, 13vw, 168px);
+                  color: var(--yellow); text-shadow: 0 0 40px rgba(234,179,8,0.35); }
+  .pc-fact-xl { font-size: clamp(15px, 1.9vw, 26px); color: var(--muted); max-width: 80%; margin-top: 4px; }
+  .pc-ranks-xl { display: grid; gap: clamp(5px, 0.8vh, 10px); width: 100%; max-width: 720px; margin-top: 8px; }
+  .pc-rank-xl { display: flex; align-items: center; gap: 14px; background: var(--surface);
+                border: 1px solid var(--line); border-radius: 14px; padding: clamp(7px, 1vh, 12px) 16px; }
+  .pc-rank-xl.won { border-color: var(--green); box-shadow: 0 0 20px rgba(16,201,110,0.25); }
+  .pc-rank-xl .rk-av { width: clamp(30px, 2.6vw, 44px); height: clamp(30px, 2.6vw, 44px); border-radius: 10px;
+                       display: grid; place-items: center; background: var(--bg); border: 1px solid var(--line);
+                       font-size: clamp(18px, 1.8vw, 26px); flex: none; overflow: hidden; }
+  .pc-rank-xl .rk-av img.pfp { width: 100%; height: 100%; border-radius: 10px; box-shadow: none; }
+  .pc-rank-xl .rk-name { flex: 1; font-weight: 700; font-size: clamp(16px, 1.6vw, 24px); }
+  .pc-rank-xl .rk-guess { font-family: var(--mono); font-weight: 800; font-size: clamp(18px, 1.9vw, 28px); }
+</style>
+</head>
+<body class="tv-body">
+<div class="tv">
+  <header class="tv-head">
+    <span class="tv-wordmark">📺 BIG SCREEN · <b>PRICE CHECK</b></span>
+    <span id="tv-online" class="tv-online">connecting…</span>
+  </header>
+  <main class="tv-main">
+    <section class="tv-stage" id="tv-stage"></section>
+    <aside class="tv-rail">
+      <div class="tv-join">
+        <p class="tv-join-h">📱 SCAN TO PLAY</p>
+        <div class="tv-qr" id="tv-qr"></div>
+        <p class="tv-join-url" id="tv-url"></p>
+      </div>
+      <div class="tv-roster" id="tv-roster"></div>
+    </aside>
+  </main>
+  <div class="tv-banner" id="tv-banner" hidden></div>
+</div>
+<canvas id="confetti"></canvas>
+<script src="/shared/qr.js"></script>
+<script src="/shared/hubnet.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

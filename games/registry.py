@@ -30,11 +30,45 @@ from games.werewolf.game import WerewolfSession
 from games.blitz.game import BlitzSession
 from games.poker.game import PokerSession
 from games.fab5feud.game import Fab5FeudSession
+from games.bingo.game import BingoSession
+from games.pricecheck.game import PriceCheckSession
 from games._template.game import HighCardSession
 
 GAMES_DIR = Path(__file__).parent
 
 REGISTRY = [
+    # ---- BIG SCREEN: one shared display, every phone is a controller -------
+    {
+        "slug": "bingo",
+        "category": "bigscreen", "accent": "#22d3ee", "tv": True,
+        "tagline": "Caller on the TV. Your card's on your phone.",
+        "min_p": 1, "max_p": 12, "solo": True,
+        "title": "BINGO",
+        "icon": "🎱",
+        "blurb": "The TV calls the numbers; every phone is a card. Number or "
+                 "picture bingo, lines / corners / blackout. Tap to daub, shout "
+                 "BINGO — or let little kids auto-play.",
+        "players": "1–12 + TV",
+        "session": BingoSession,
+        "web": GAMES_DIR / "bingo" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "pricecheck",
+        "category": "bigscreen", "accent": "#10c96e", "tv": True,
+        "tagline": "Guess the price. Closest wins.",
+        "min_p": 1, "max_p": 12, "solo": True,
+        "title": "PRICE CHECK",
+        "icon": "🏷️",
+        "art": "🏷",
+        "blurb": "The TV shows an item; everyone locks a price on their phone. "
+                 "Closest wins — or closest without going over. 120-item bank, "
+                 "real-guess reveal.",
+        "players": "1–12 + TV",
+        "session": PriceCheckSession,
+        "web": GAMES_DIR / "pricecheck" / "web",
+        "hidden": False,
+    },
     {
         "slug": "orbitriot",
         "category": "bigscreen", "accent": "#ff3dbb", "tv": True,

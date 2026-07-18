@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>PRICE CHECK · FAB5.GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="32" text-anchor="middle">🏷️</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="pricecheck.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">PRICE</span> <span class="wm-b">CHECK</span></h1>
+    <p class="tagline">GUESS THE PRICE · CLOSEST WINS</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">YOUR NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">JOIN THE GAME</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">PRICE</span> <span class="wm-b">CHECK</span></span>
+    <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+  </header>
+  <div class="lobby-body">
+    <a id="tv-open" class="tv-cta" href="tv.html" target="_blank" rel="noopener">
+      <span class="tv-cta-ic">📺</span>
+      <span class="tv-cta-tx"><b>OPEN ON THE BIG SCREEN</b><small>put the item up on a TV — players scan to join</small></span>
+      <span class="tv-cta-go">↗</span>
+    </a>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>SET UP</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div class="opt-row"><span class="field-label">SCORING</span><div id="opt-rule" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">ITEMS</span><div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">CLOCK</span><div id="opt-clock" class="seg"></div></div>
+      <p class="seat-note" id="rule-note"></p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PLAYERS</h2></div>
+      <div id="player-grid" class="player-grid"></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START THE GAME</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="pc-head">
+    <a href="/" class="head-link">🕹</a>
+    <span id="pc-header" class="pc-header">WHAT'S THE PRICE?</span>
+    <span id="pc-round" class="pc-round">1/5</span>
+  </header>
+
+  <div class="pc-item">
+    <div id="pc-emoji" class="pc-emoji">❓</div>
+    <p id="pc-prompt" class="pc-prompt">…</p>
+  </div>
+
+  <!-- guessing -->
+  <div id="pc-guess" class="pc-guess" hidden>
+    <div id="pc-readout" class="pc-readout"><span id="pc-value">0</span></div>
+    <div id="pc-pad" class="pc-pad"></div>
+    <button id="lock-btn" class="btn btn-primary btn-big">LOCK IT IN</button>
+  </div>
+
+  <!-- locked (waiting) -->
+  <div id="pc-locked" class="pc-locked" hidden>
+    <p class="pc-lockmsg">🔒 LOCKED IN</p>
+    <p id="pc-mylock" class="pc-mylock"></p>
+    <p id="pc-waiting" class="watch-note">waiting for the others…</p>
+  </div>
+
+  <!-- reveal -->
+  <div id="pc-reveal" class="pc-reveal" hidden>
+    <div class="pc-answer-wrap"><span class="pc-answer-kick">ACTUAL</span>
+      <span id="pc-answer" class="pc-answer">—</span></div>
+    <p id="pc-fact" class="pc-fact"></p>
+    <div id="pc-ranks" class="pc-ranks"></div>
+  </div>
+</section>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="pricecheck.js"></script>
+</body>
+</html>
