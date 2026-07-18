@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
 <img width="1563" height="1185" alt="image" src="https://github.com/user-attachments/assets/a80e1ef4-704d-4587-8568-03fca09cbd44" />
 # LAN Games
 
-A self-hosted **game hub for your local network**. One page, ~18 games, bots to
+A self-hosted **game hub for your local network**. One page, 18 games, bots to
 fill empty seats, shared identity across every game. Everyone plays from their
 own phone/laptop on the same Wi‑Fi — **no accounts, no cloud, no build step.**
 
@@ -25,7 +25,7 @@ server), open the URL on everyone's phones, and you've got game night.
   Spades, Hearts, Euchre, Rummikub
 - **Board** — Chess, Checkers, Backgammon, Connect Four (real rules engines)
 - **Party** (same room, phones as controllers) — Charades, Trivia Buzzer,
-  Category Blitz, Werewolf
+  Category Blitz, Werewolf, FAB5 Feud
 - **Battle** — Battleship, Tanks (2D artillery), Snake Arena
 - **Word** — WordClash (multiplayer Wordle: duel / relay / sabotage)
 
