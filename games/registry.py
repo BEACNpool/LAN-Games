@@ -21,6 +21,7 @@ from games.backgammon.game import BackgammonSession
 from games.tanks.game import TanksSession
 from games.fortfling.game import FortFlingSession
 from games.orbitriot.game import OrbitRiotSession
+from games.buzzboard.game import BuzzBoardSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -38,6 +39,23 @@ GAMES_DIR = Path(__file__).parent
 
 REGISTRY = [
     # ---- BIG SCREEN: one shared display, every phone is a controller -------
+    {
+        "slug": "buzzboard",
+        "category": "bigscreen", "accent": "#f5b301", "tv": True,
+        "tagline": "Pick a square. Beat them to the buzzer. Risk it all.",
+        "min_p": 2, "max_p": 10, "solo": False,
+        "title": "BUZZ BOARD",
+        "icon": "🔔",
+        "art": "?",
+        "blurb": "A Jeopardy-style clue board takes over the TV while every "
+                 "phone becomes a selector, buzzer, answer pad, and secret "
+                 "wager slate. Find the HOT CLUE, survive the power surge, "
+                 "then risk it all on LAST CALL.",
+        "players": "2–10 + TV",
+        "session": BuzzBoardSession,
+        "web": GAMES_DIR / "buzzboard" / "web",
+        "hidden": False,
+    },
     {
         "slug": "bingo",
         "category": "bigscreen", "accent": "#22d3ee", "tv": True,

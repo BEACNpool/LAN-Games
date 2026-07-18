@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>BUZZ BOARD · FAB5.GAMES</title>
+<meta name="theme-color" content="#070810">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070810"/><text x="32" y="46" font-size="34" text-anchor="middle">🔔</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="buzzboard.css">
+</head>
+<body>
+<div class="bb-aurora" aria-hidden="true"></div>
+
+<section id="scr-join" class="scr" hidden>
+  <div class="bb-join-wrap">
+    <p class="bb-eyebrow">A BIG SCREEN GAME</p>
+    <h1 class="bb-logo"><span>BUZZ</span><b>BOARD</b></h1>
+    <p class="bb-tag">PICK A SQUARE · OWN THE BUZZER · RISK IT ALL</p>
+    <div class="bb-card bb-join-card">
+      <label class="field-label" for="name-input">PLAYER NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">YOUR GAME FACE</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn bb-gold-btn btn-big">GRAB A BUZZER</button>
+    </div>
+  </div>
+</section>
+
+<section id="scr-lobby" class="scr" hidden>
+  <header class="bb-topbar">
+    <a href="/" class="bb-home">🕹</a>
+    <span class="bb-logo-sm">BUZZ <b>BOARD</b></span>
+    <button id="pfp-btn2" class="bb-home" type="button">📷</button>
+  </header>
+  <main class="bb-lobby-main">
+    <a class="bb-tv-cta" href="tv.html" target="_blank" rel="noopener">
+      <span class="bb-tv-icon">📺</span>
+      <span><b>OPEN ON THE BIG SCREEN</b><small>the board belongs on the TV</small></span>
+      <i>↗</i>
+    </a>
+    <section class="bb-card bb-setup">
+      <div class="bb-section-head"><h2>THE SHOW</h2><span id="ready-count">0/2 READY</span></div>
+      <label class="field-label">BOARD</label>
+      <div id="opt-length" class="seg bb-seg"></div>
+      <label class="field-label">WRONG ANSWER COST</label>
+      <div id="opt-penalty" class="seg bb-seg"></div>
+      <p id="setup-note" class="bb-note"></p>
+    </section>
+    <section class="bb-card bb-players">
+      <div class="bb-section-head"><h2>CONTESTANTS</h2><span>2–10</span></div>
+      <div id="player-grid" class="bb-player-grid"></div>
+    </section>
+  </main>
+  <footer class="bb-lobby-foot">
+    <button id="ready-btn" class="btn bb-ready-btn btn-big">READY UP</button>
+    <button id="go-btn" class="btn bb-gold-btn btn-big" hidden>START THE SHOW</button>
+    <p id="lobby-hint" class="bb-hint">two players needed</p>
+  </footer>
+</section>
+
+<section id="scr-game" class="scr bb-game" hidden>
+  <header class="bb-game-head">
+    <div><span>YOUR SCORE</span><b id="bb-score">$0</b></div>
+    <span id="bb-power" class="bb-power">ROUND ONE</span>
+    <div class="right"><span>BOARD</span><b id="bb-progress">0/12</b></div>
+  </header>
+  <main class="bb-controller">
+    <p id="bb-status" class="bb-status">LOOK AT THE TV</p>
+    <h2 id="bb-title" class="bb-title">GET READY</h2>
+    <p id="bb-sub" class="bb-sub"></p>
+
+    <div id="bb-pick-board" class="bb-pick-board" hidden></div>
+    <button id="bb-buzzer" class="bb-buzzer" type="button" hidden>
+      <span>BUZZ!</span><small>FIRST HAND WINS</small>
+    </button>
+    <div id="bb-choices" class="bb-choices" hidden></div>
+    <div id="bb-wager" class="bb-wager" hidden>
+      <div id="bb-wager-value" class="bb-wager-value">$0</div>
+      <input id="bb-wager-range" type="range" min="0" max="1000" step="100" value="0">
+      <div id="bb-wager-presets" class="bb-wager-presets"></div>
+      <button id="bb-lock-wager" class="btn bb-gold-btn btn-big">LOCK WAGER</button>
+    </div>
+    <div id="bb-look" class="bb-look">
+      <span>👀</span><b>LOOK AT THE BIG SCREEN</b><small>the show is happening up there</small>
+    </div>
+  </main>
+  <div class="bb-timer"><i id="bb-timer-fill"></i></div>
+</section>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card bb-gameover">
+    <p class="bb-crown">🏆</p>
+    <p class="bb-go-kicker">BUZZ BOARD CHAMPION</p>
+    <h2 id="go-title">WHAT A FINISH</h2>
+    <div id="go-rows" class="bb-go-rows"></div>
+    <div id="brag-slot"></div>
+    <button id="rematch-btn" class="btn bb-gold-btn btn-big">BACK TO LOBBY</button>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="buzzboard.js"></script>
+</body>
+</html>

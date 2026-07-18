@@ -458,8 +458,9 @@ for a new game — it rides the same proxy).
 game), `games/spades` (multi-seat + bots + partnerships), `games/checkers`
 (`DuelSession` board game), `games/charades` (party/typing + data bank),
 `games/snake` (real-time tick), `games/werewolf` (hidden-role + anti-leak),
-`games/rummikub` (local board arrangement + commit/referee), `games/bingo` &
-`games/pricecheck` (BIG SCREEN — see §11). Core contracts: `core/session.py`,
+`games/rummikub` (local board arrangement + commit/referee), `games/bingo`,
+`games/pricecheck`, and `games/buzzboard` (BIG SCREEN — see §11). Core
+contracts: `core/session.py`,
 `core/net.py`, `core/duel.py`, `core/avatars.py`.
 
 ---
@@ -474,6 +475,10 @@ same as every other game). Reference implementations: `games/bingo` (caller +
 cards), `games/pricecheck` (item + number keypad + reveal), and
 `games/orbitriot` (custom full-bleed canvas, private aim controllers, and a
 server-authoritative physics replay).
+
+`games/buzzboard` is the full game-show reference: a persistent TV board,
+server-serialized buzzer ownership, private answer choices and wagers, a
+tap-to-start audio curtain, and Screen Wake Lock for an unattended TV.
 
 **What makes a game "BIG SCREEN" — three things:**
 
