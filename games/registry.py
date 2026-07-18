@@ -22,6 +22,7 @@ from games.tanks.game import TanksSession
 from games.fortfling.game import FortFlingSession
 from games.orbitriot.game import OrbitRiotSession
 from games.buzzboard.game import BuzzBoardSession
+from games.smelterskelter.game import SmelterSkelterSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -39,6 +40,23 @@ GAMES_DIR = Path(__file__).parent
 
 REGISTRY = [
     # ---- BIG SCREEN: one shared display, every phone is a controller -------
+    {
+        "slug": "smelterskelter",
+        "category": "bigscreen", "accent": "#ff4d1a", "tv": True,
+        "tagline": "Hook. Swing. Steal the cargo.",
+        "min_p": 2, "max_p": 8, "solo": False,
+        "title": "SMELTER SKELTER",
+        "icon": "⛓️",
+        "art": "⛓",
+        "blurb": "Turn every phone into a hook-and-reel controller, then "
+                 "swing through a live industrial physics arena on the TV. "
+                 "Haul volatile cargo, hook rivals out of the air, and steal "
+                 "the winning delivery before the smelter overloads.",
+        "players": "2–8 + TV",
+        "session": SmelterSkelterSession,
+        "web": GAMES_DIR / "smelterskelter" / "web",
+        "hidden": False,
+    },
     {
         "slug": "buzzboard",
         "category": "bigscreen", "accent": "#f5b301", "tv": True,

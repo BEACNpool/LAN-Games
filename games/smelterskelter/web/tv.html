@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SMELTER SKELTER · Big Screen</title>
+<meta name="theme-color" content="#06070a">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="smelterskelter.css">
+</head>
+<body class="tv-body smelter-tv">
+<main id="tv-app">
+  <section id="tv-lobby" class="tv-scene" hidden>
+    <div class="tv-lobby-copy">
+      <p class="hazard-kicker">FAB5.GAMES PRESENTS</p>
+      <h1><span>SMELTER</span><b>SKELTER</b></h1>
+      <h2>HOOK. SWING.<br>STEAL THE CARGO.</h2>
+      <div class="tv-how">
+        <div><b>1</b><span>HOLD TO HOOK<small>ANCHORS OR RIVALS</small></span></div>
+        <div><b>2</b><span>REEL TO FLY<small>PUMP THE PENDULUM</small></span></div>
+        <div><b>3</b><span>HAUL THE CRATE<small>SLAM IT INTO THE CHUTE</small></span></div>
+      </div>
+      <div id="tv-crew" class="tv-crew"></div>
+      <p id="tv-lobby-hint">SCAN TO CLOCK IN · READY UP ON YOUR PHONE</p>
+    </div>
+    <aside class="tv-join-panel">
+      <div class="qr-eyebrow">SCAN WITH YOUR PHONE</div>
+      <div id="tv-qr" class="tv-qr"></div>
+      <b id="tv-url"></b><span>NO APP · SAME WI-FI</span>
+    </aside>
+  </section>
+
+  <section id="tv-arena" class="tv-scene arena-scene" hidden>
+    <canvas id="arena" width="1200" height="675"></canvas>
+    <header class="arena-hud">
+      <div class="arena-brand"><span>SMELTER</span><b>SKELTER</b></div>
+      <div id="shift-chip" class="shift-chip">SHIFT 1/3</div>
+      <div id="overload-chip" class="overload-chip" hidden>⚠ OVERLOAD · DOUBLE CARGO</div>
+      <div id="tv-clock" class="tv-clock">45</div>
+    </header>
+    <aside id="score-stack" class="score-stack"></aside>
+    <div id="cargo-callout" class="cargo-callout">GRAB THE GLOWING CARGO</div>
+    <div id="shift-flash" class="shift-flash" hidden><small>NIGHT CREW</small><b>SHIFT 1</b><em>GO!</em></div>
+  </section>
+
+  <section id="tv-results" class="tv-scene tv-results" hidden>
+    <p class="hazard-kicker">THE SMELTER HAS SPOKEN</p>
+    <h1 id="tv-winner">TOP WORKER</h1>
+    <div id="tv-podium" class="tv-podium"></div>
+    <p id="tv-result-line"></p>
+  </section>
+</main>
+
+<button id="tv-curtain" class="tv-curtain"><span>⛓</span><b>START SMELTER SKELTER</b><small>enables sound · keeps this screen awake</small></button>
+<div id="tv-flash" class="impact-flash" hidden></div>
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/qr.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>
