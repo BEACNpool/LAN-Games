@@ -94,7 +94,7 @@ fonts) live at the repo `web/` dir and are served at `/shared/*`.
 | Strictly 2 players/seats, turn-based (board game) | `core.duel.DuelSession` | `games/checkers` |
 | 2–N seats, bots fill empty chairs, turn-based | `GameSession` | `games/spades`, `games/tanks` |
 | Party/round game, everyone acts, no fixed seats | `GameSession` | `games/charades`, `games/_template` |
-| Real-time (server ticks continuously) | `GameSession` | `games/snake` |
+| Real-time (server ticks continuously) | `GameSession` | `games/snake`, `games/smelterskelter` |
 | Social/hidden-role, secrets per player | `GameSession` | `games/werewolf` |
 
 `DuelSession` saves the most code for 2-seat games — you only implement
@@ -459,7 +459,8 @@ game), `games/spades` (multi-seat + bots + partnerships), `games/checkers`
 (`DuelSession` board game), `games/charades` (party/typing + data bank),
 `games/snake` (real-time tick), `games/werewolf` (hidden-role + anti-leak),
 `games/rummikub` (local board arrangement + commit/referee), `games/bingo`,
-`games/pricecheck`, and `games/buzzboard` (BIG SCREEN — see §11). Core
+`games/pricecheck`, `games/buzzboard`, and `games/smelterskelter` (continuous
+BIG SCREEN physics — see §11). Core
 contracts: `core/session.py`,
 `core/net.py`, `core/duel.py`, `core/avatars.py`.
 
@@ -474,7 +475,10 @@ is a normal `GameSession`; there is **no room-code system** (one room per slug,
 same as every other game). Reference implementations: `games/bingo` (caller +
 cards), `games/pricecheck` (item + number keypad + reveal), and
 `games/orbitriot` (custom full-bleed canvas, private aim controllers, and a
-server-authoritative physics replay).
+server-authoritative physics replay). `games/smelterskelter` is the continuous
+action reference: one self-chaining 15 Hz server tick with 60 Hz physics
+substeps, compact TV snapshots, private controller-only phone states, and
+interpolated full-bleed canvas rendering.
 
 `games/buzzboard` is the full game-show reference: a persistent TV board,
 server-serialized buzzer ownership, private answer choices and wagers, a

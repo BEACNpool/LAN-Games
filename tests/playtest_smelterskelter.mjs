@@ -89,6 +89,17 @@ try {
     if (layout.overflowX > 1 || layout.overflowY > 1) fail(`controller overflow ${JSON.stringify(layout)}`);
     if (layout.faces.some(([w, h]) => w < 44 || h < 44) || Math.min(...layout.aim) < 180) fail("controller touch targets too small");
   }
+  // Releasing HOOK while REEL is held disables the reel button; the client
+  // must still send the REEL-up edge instead of leaving a sticky server hold.
+  await phones[0].evaluate(() => {
+    __smelterPhone.hold("hook", true); __smelterPhone.hold("reel", true);
+    __smelterPhone.hold("hook", false);
+  });
+  await phones[0].waitForFunction(() => __smelterPhone.state()?.game?.hooked === false, { timeout: 3000 });
+  await sleep(200);
+  const sticky = await phones[0].evaluate(() => __smelterPhone.input());
+  if (sticky.reel) fail("REEL remained held after the hook was released");
+  await phones[0].evaluate(() => __smelterPhone.hold("hook", true));
   await sleep(1800); await shot(tv, "03-tv-live-physics"); await shot(phones[0], "04-phone-controller");
 
   step = "drive full match";

@@ -71,6 +71,7 @@ function escText(value) { return String(value ?? ""); }
 
 function renderLobby(st) {
   show("tv-lobby");
+  S.trails.clear();
   const host = $("tv-crew"); host.textContent = "";
   const humans = st.players.filter((p) => !p.bot);
   for (const p of humans) {
@@ -149,7 +150,9 @@ function onState(st) {
   else if (st.phase === "game_end") renderResults(st);
   else renderArena(st);
   const stage = st.game?.stage || st.phase;
-  if (st.game?.shift && st.game.shift !== S.lastShift && stage === "play") showShift(st.game.shift);
+  if (st.game?.shift && st.game.shift !== S.lastShift && stage === "play") {
+    S.trails.clear(); showShift(st.game.shift);
+  }
   S.lastShift = st.game?.shift || 0; S.lastStage = stage;
 }
 
@@ -197,7 +200,7 @@ function onFx(fx) {
 function fit() {
   const rect = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
   const w = Math.max(1, Math.round(rect.width * dpr)), h = Math.max(1, Math.round(rect.height * dpr));
-  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; S.trails.clear(); }
 }
 addEventListener("resize", fit);
 
@@ -271,9 +274,11 @@ function drawAnchor(a, sx, sy, t) {
   ctx.restore();
 }
 
-function drawChain(u, x, y, sx, sy, t) {
+function drawChain(u, allUnits, x, y, sx, sy, t) {
   const hx = u.raw[6], hy = u.raw[7]; if (hx === null || hy === null || hx === undefined || hy === undefined) return;
-  const ax = hx * sx, ay = hy * sy, dx = x - ax, dy = y - ay, dist = Math.hypot(dx, dy), tension = clamp(Number(u.raw[8]) || 0, 0, 1);
+  const host = allUnits.find((v) => v.raw[0] !== u.raw[0] && v.raw[1] === hx && v.raw[2] === hy);
+  const ax = (host ? host.x : hx) * sx, ay = (host ? host.y : hy) * sy;
+  const dx = x - ax, dy = y - ay, dist = Math.hypot(dx, dy), tension = clamp(Number(u.raw[8]) || 0, 0, 1);
   const p = player(u.raw[0]), color = p?.color || "#ffb020", sag = (1 - tension) * Math.min(70 * sy, dist * .2);
   const cx = (ax + x) / 2, cy = (ay + y) / 2 + sag;
   ctx.save(); ctx.lineCap = "round";
@@ -284,10 +289,10 @@ function drawChain(u, x, y, sx, sy, t) {
   ctx.restore();
 }
 
-function drawUnit(u, sx, sy, t) {
+function drawUnit(u, allUnits, sx, sy, t) {
   const pid = u.raw[0], flags = u.raw[5] | 0, alive = !!(flags & 1), p = player(pid); if (!alive) return;
   const x = u.x * sx, y = u.y * sy, color = p?.color || "#ffb020";
-  drawChain(u, x, y, sx, sy, t);
+  drawChain(u, allUnits, x, y, sx, sy, t);
   const trail = S.trails.get(pid) || []; trail.push([x, y]); if (trail.length > 12) trail.shift(); S.trails.set(pid, trail);
   ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
   if (trail.length > 2) { ctx.beginPath(); ctx.moveTo(trail[0][0], trail[0][1]); for (const q of trail.slice(1)) ctx.lineTo(q[0], q[1]); ctx.strokeStyle = color + "35"; ctx.lineWidth = 9 * Math.min(sx, sy); ctx.stroke(); }
@@ -351,7 +356,10 @@ function frame(now) {
   drawBackground(g, t, W, H); drawChute(g, sx, sy, t);
   for (const a of g.anchors || []) drawAnchor(a, sx, sy, t);
   const units = (g.units || []).map((u) => interpUnit(u, f));
-  for (const u of units) drawUnit(u, sx, sy, t);
+  for (const u of units) {
+    if (!(u.raw[5] & 1)) S.trails.delete(u.raw[0]);
+    drawUnit(u, units, sx, sy, t);
+  }
   drawCargo(interpCargo(g.cargo, f), units, g, sx, sy, t); stepFx(dt, sx, sy); ctx.restore();
 }
 requestAnimationFrame(frame);

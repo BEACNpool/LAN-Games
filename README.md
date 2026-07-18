@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
 <img width="1563" height="1185" alt="image" src="https://github.com/user-attachments/assets/a80e1ef4-704d-4587-8568-03fca09cbd44" />
 # LAN Games
 
-A self-hosted **game hub for your local network**. One page, 23 games, bots to
+A self-hosted **game hub for your local network**. One page, 24 games, bots to
 fill empty seats, shared identity across every game. Everyone plays from their
 own phone/laptop on the same Wi‑Fi — **no accounts, no cloud, no build step.**
 
@@ -21,9 +21,10 @@ server), open the URL on everyone's phones, and you've got game night.
 
 ## The games
 
-- **Big Screen** (one TV, every phone is a controller) — Buzz Board
-  (Jeopardy-style clue picking, buzzing, and secret wagers), Bingo, Price
-  Check, Orbit Riot (simultaneous cosmic billiards + pinball physics)
+- **Big Screen** (one TV, every phone is a controller) — Smelter Skelter
+  (live hook-and-reel pendulum physics), Buzz Board (clue picking, buzzing,
+  and secret wagers), Bingo, Price Check, Orbit Riot (simultaneous cosmic
+  billiards + pinball physics)
 - **Cards** — Texas Hold'em (No‑Limit, real side pots & all‑in showdowns),
   Spades, Hearts, Euchre, Rummikub
 - **Board** — Chess, Checkers, Backgammon, Connect Four (real rules engines)

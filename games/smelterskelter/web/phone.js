@@ -112,7 +112,9 @@ function renderPad(st) {
 
   const alive = g.alive !== false;
   $("hook-btn").disabled = !alive;
-  $("reel-btn").disabled = !alive || !g.hooked;
+  const reelOk = alive && !!g.hooked;
+  $("reel-btn").disabled = !reelOk;
+  if (!reelOk && S.reel) setEdge("reel", false);
   if (!alive) {
     setStatus("dead", `SMELTERED · SUPER HOOK IN ${clockText(g.respawn)}s`);
     $("pad-hint").textContent = "FALLING ISN'T FAILURE · YOUR COMEBACK HAS EXTRA RANGE";
@@ -143,6 +145,13 @@ function renderWatch(st) {
     : "CLOCK IN FOR THE NEXT SHIFT";
 }
 
+function resetInputCache() {
+  if (S.aimTimer) clearTimeout(S.aimTimer);
+  S.aimTimer = null; S.pendingAim = null; S.sentAim = null; S.sentAt = 0;
+  S.aim = 270; S.dragging = null; S.lastTension = 0;
+  S.lastAlive = true; S.lastCarrying = false;
+}
+
 function renderResults(st) {
   const g = st.game;
   const result = g?.result;
@@ -170,9 +179,12 @@ function renderResults(st) {
 }
 
 function onState(st) {
+  const resetInputs = !S.st || !["lobby", "countdown"].includes(S.st.phase);
   S.st = st; S.stateAt = performance.now();
   if (st.phase === "lobby" || st.phase === "countdown") {
-    show("scr-lobby"); releaseControls(); renderLobby(st);
+    show("scr-lobby"); releaseControls();
+    if (resetInputs) resetInputCache();
+    renderLobby(st);
   } else if (st.game?.mode === "pad") renderPad(st);
   else renderWatch(st);
   renderResults(st);
@@ -275,7 +287,7 @@ addEventListener("keyup", (e) => {
 
 function connect() {
   S.conn = Hub.connect("/games/smelterskelter/ws", {
-    onWelcome: (m) => { S.pid = m.pid; }, onState, onFx,
+    onWelcome: (m) => { S.pid = m.pid; releaseControls(); }, onState, onFx,
   });
 }
 
@@ -323,6 +335,7 @@ else show("scr-join");
 
 window.__smelterPhone = {
   state: () => S.st,
+  input: () => ({ aim: S.aim, hook: S.hook, reel: S.reel }),
   setAim: (degrees) => { S.aim = normDeg(Number(degrees) || 0); queueAim(); drawAim(); },
   hold: (kind, on) => { if (kind === "hook" || kind === "reel") setEdge(kind, !!on); },
   normDeg, diffDeg, releaseControls,
