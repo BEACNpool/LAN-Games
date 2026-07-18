@@ -122,6 +122,10 @@ JS/CSS served static (no bundler). Adding a game is one registry entry + one
 directory — see **[ADDING_A_GAME.md](ADDING_A_GAME.md)** for the full guide, and
 copy `games/_template/` (HIGH CARD, the smallest complete game) to start.
 
+The console-style hub (featured spotlight, box-art tiles, CRT mode), the design
+language behind it, and a prioritized UI/UX roadmap are documented in
+**[DESIGN_AUDIT.md](DESIGN_AUDIT.md)**.
+
 ## Tests
 
 ```bash
