@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>FORT FLING — LAN GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="36" text-anchor="middle">🏰</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="fortfling.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">FORT</span> <span class="wm-b">FLING</span></h1>
+    <p class="tagline">PULL BACK. PICK A WEAPON. WRECK THEIR FORT.</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">ENTER THE FORT</button>
+    </div>
+  </div>
+</section>
+
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn home-btn">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">FORT</span> <span class="wm-b">FLING</span></span>
+    <span class="top-actions">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn" title="sound">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <section class="lobby-sec">
+      <div class="sec-head"><h2>THE RIVALS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="duel-grid"></div>
+      <p id="seat-note" class="seat-note">Exactly two phones. One fort each.</p>
+    </section>
+    <section class="rules-card">
+      <h2>HOW TO FLING</h2>
+      <ol>
+        <li>Pick a weapon from your belt.</li>
+        <li>Pull the loaded sling backward and downward.</li>
+        <li>Release to fire. Smash the shield, then the rival fort.</li>
+      </ol>
+      <div class="opt-row">
+        <span class="field-label">TURN TIMER</span>
+        <div id="opt-timer" class="seg"></div>
+      </div>
+    </section>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START THE SIEGE</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for a rival…</p>
+  </footer>
+</section>
+
+<section id="scr-game" class="scr game-scr" hidden>
+  <header class="battle-head">
+    <a href="/" class="head-link">🕹</a>
+    <div class="turn-chip"><span id="turn-av">🏰</span><span id="turn-name">YOUR FLING</span></div>
+    <span id="wind-chip" class="wind-chip">WIND ·0</span>
+    <span id="turn-clock" class="turn-clock">40</span>
+  </header>
+
+  <div id="fort-bars" class="fort-bars"></div>
+
+  <div class="battle-body">
+    <div class="arena-column">
+      <div class="arena-wrap">
+        <canvas id="arena" aria-label="Fort Fling battlefield"></canvas>
+        <div id="arena-callout" class="arena-callout">WAITING FOR THE FLING…</div>
+      </div>
+      <div class="aim-readout">
+        <span id="aim-angle">45°</span>
+        <div class="power-track"><span id="power-fill"></span></div>
+        <span id="aim-power">40%</span>
+      </div>
+    </div>
+
+    <aside class="weapon-panel">
+      <div class="belt-head">
+        <span>WEAPON BELT</span>
+        <span id="belt-hint">PICK ONE</span>
+      </div>
+      <div id="weapon-belt" class="weapon-belt"></div>
+      <p id="drag-hint" class="drag-hint">Grab the glowing sling, pull back, then release.</p>
+    </aside>
+  </div>
+</section>
+
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏰</p>
+    <p id="go-title" class="go-title">FORT STANDING</p>
+    <p id="go-line" class="go-line"></p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="fortfling.js"></script>
+</body>
+</html>
