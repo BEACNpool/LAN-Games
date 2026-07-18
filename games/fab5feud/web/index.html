@@ -42,7 +42,15 @@
   </header>
   <div class="lobby-body">
     <div class="lobby-sec">
-      <div class="sec-head"><h2>PICK YOUR SIDE</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div class="sec-head"><h2>FORMAT</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div class="opt-row"><span class="field-label">MODE</span>
+        <div id="opt-mode" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">SURVEYS</span>
+        <div id="opt-rounds" class="seg"></div></div>
+      <p class="seat-note" id="format-note">last survey is a <b>DOUBLE</b> round</p>
+    </div>
+    <div class="lobby-sec" id="sec-teams">
+      <div class="sec-head"><h2>PICK YOUR SIDE</h2></div>
       <p class="seat-note" id="mode-note"></p>
       <div class="teams-pick">
         <div class="team-col">
@@ -58,11 +66,11 @@
         </div>
       </div>
     </div>
-    <div class="lobby-sec">
-      <div class="sec-head"><h2>ROUNDS</h2></div>
-      <div class="opt-row"><span class="field-label">SURVEYS</span>
-        <div id="opt-rounds" class="seg"></div></div>
-      <p class="seat-note">last survey is a <b>DOUBLE</b> round</p>
+    <div class="lobby-sec" id="sec-singles" hidden>
+      <div class="sec-head"><h2>FREE-FOR-ALL</h2></div>
+      <p class="seat-note">🎯 everyone plays for themselves — the two face-off
+        contestants rotate every round, and the highest personal score wins. Great
+        for odd numbers (like 3 or 5 players).</p>
     </div>
   </div>
   <footer class="lobby-foot">
@@ -86,6 +94,8 @@
     <div class="pot-box"><span>POT</span><b id="pot-val">0</b></div>
     <div class="side-score" id="ss-B"><span class="ss-name">B</span><b class="ss-pts">0</b></div>
   </div>
+
+  <div id="standings" class="standings" hidden></div>
 
   <div class="strikes" id="strikes"></div>
 

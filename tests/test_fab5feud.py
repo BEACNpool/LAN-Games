@@ -18,13 +18,14 @@ BANK = [
 ]
 
 
-def make(n=2, seed=1, rounds=3, teams=None):
+def make(n=2, seed=1, rounds=3, teams=None, mode="teams"):
     s = Fab5FeudSession(rng=random.Random(seed), bank=BANK)
     toks = ["feudtok%03d" % i for i in range(n)]
     for i, t in enumerate(toks):
         s.join(t, "P%d" % i, None)
         s.set_ready(t, True)
     s.settings["rounds"] = rounds
+    s.settings["mode"] = mode
     if teams:
         for t, side in zip(toks, teams):
             s.teams[t] = side
@@ -66,14 +67,14 @@ def test_match_exact_beats_shorter_containment():
 
 def test_head_to_head_names_are_players():
     s, toks = make(2)
-    assert s.g["names"]["A"] == "P0" and s.g["names"]["B"] == "P1"
+    assert s.g["round"]["names"]["A"] == "P0" and s.g["round"]["names"]["B"] == "P1"
     assert s.g["roster"]["A"] == [toks[0]] and s.g["roster"]["B"] == [toks[1]]
 
 
 def test_teams_mode_splits_and_labels():
     s, toks = make(4, teams=["A", "A", "B", "B"])
     assert s.g["roster"]["A"] == [toks[0], toks[1]]
-    assert s.g["names"]["A"] == "TEAM A" and s.g["names"]["B"] == "TEAM B"
+    assert s.g["round"]["names"]["A"] == "TEAM A" and s.g["round"]["names"]["B"] == "TEAM B"
 
 
 def test_lobby_team_pick_before_start():
@@ -85,6 +86,87 @@ def test_lobby_team_pick_before_start():
     assert s.teams["feudtok000"] == "B"
     st = s.state_for("feudtok000")
     assert st["ff"]["my_side"] == "B"
+
+
+# ---------------- singles (free-for-all, for odd counts) ----------------
+
+def test_singles_rotates_contestants_and_scores_individuals():
+    s, toks = make(3, mode="singles", rounds=3)
+    r = s.g["round"]
+    assert s.g["mode"] == "singles"
+    assert r["sides"]["A"] == [toks[0]] and r["sides"]["B"] == [toks[1]]
+    assert r["names"]["A"] == "P0" and r["names"]["B"] == "P1"
+    assert s._side_of(toks[2]) is None           # the 3rd player spectates round 1
+    # P0 wins the face-off and sweeps -> P0's PERSONAL score
+    guess(s, toks[0], "apple")
+    guess(s, toks[1], "zzz")
+    cap = s.g["round"]["sides"][s.g["round"]["control"]][0]
+    s.game_action(cap, {"t": "choice", "play": True})
+    for w in ["banana", "cherry", "date"]:
+        guess(s, cap, w)
+    assert s.g["scores"][toks[0]] == 100
+    assert s.g["scores"][toks[1]] == 0 and s.g["scores"][toks[2]] == 0
+    # round 2 rotates the pairing forward
+    s.tick(s.gen)                                # reveal -> next round
+    r2 = s.g["round"]
+    assert r2["sides"]["A"] == [toks[1]] and r2["sides"]["B"] == [toks[2]]
+
+
+def test_singles_podium_ranks_individuals():
+    s, toks = make(3, mode="singles", rounds=1)
+    guess(s, toks[0], "apple")
+    guess(s, toks[1], "zzz")
+    s.game_action(toks[0], {"t": "choice", "play": True})
+    for w in ["banana", "cherry", "date"]:
+        guess(s, toks[0], w)
+    s.tick(s.gen)                                # reveal -> podium
+    assert s.phase == "game_end"
+    res = s.g["result"]
+    assert res["mode"] == "singles" and not res["tie"]
+    assert res["standings"][0]["name"] == "P0" and res["standings"][0]["score"] == 200
+    assert res["winner_name"] == "P0"
+
+
+def test_singles_lobby_has_mode_not_picker():
+    s = Fab5FeudSession(rng=random.Random(1), bank=BANK)
+    for i in range(3):
+        s.join("feudtok%03d" % i, "P%d" % i, None)
+        s.set_ready("feudtok%03d" % i, True)
+    s.settings["mode"] = "singles"
+    ff = s.state_for("feudtok000")["ff"]
+    assert ff["mode"] == "singles" and ff["n"] == 3
+    assert "teams" not in ff                     # no A/B picker in singles
+
+
+def test_singles_state_carries_standings():
+    s, toks = make(3, mode="singles")
+    st = s.state_for(toks[2])["game"]
+    assert st["mode"] == "singles"
+    assert isinstance(st["standings"], list) and len(st["standings"]) == 3
+    assert st["my_side"] is None                 # spectator this round
+
+
+def test_state_for_never_crashes_in_any_stage(mode="singles"):
+    # game_state runs on EVERY push, for every viewer + the TV socket — it must
+    # not raise in any stage or mode (caught the roster-is-None-in-singles bug)
+    for mode in ("singles", "teams"):
+        s, toks = make(3, mode=mode, rounds=1, teams=(["A", "A", "B"] if mode == "teams" else None))
+        snap = lambda: [s.state_for(t) for t in toks + [None]]
+        snap()                                   # faceoff
+        guess(s, s.g["round"]["reps"]["A"], "zzz")
+        guess(s, s.g["round"]["reps"]["B"], "zzz")
+        snap()                                   # choice  <-- the crash site
+        cap = s.g["round"]["sides"][s.g["round"]["control"]][0]
+        s.game_action(cap, {"t": "choice", "play": True})
+        snap()                                   # play
+        for _ in range(3):
+            guess(s, s.g["round"]["turn_order"][s.g["round"]["turn_idx"]], "zzz")
+        snap()                                   # steal
+        stealer = s.g["round"]["sides"][s.g["round"]["steal"]["side"]][0]
+        guess(s, stealer, "zzz")
+        snap()                                   # reveal
+        s.tick(s.gen)                            # -> game_end
+        snap()                                   # game_end
 
 
 # ---------------- faceoff ----------------

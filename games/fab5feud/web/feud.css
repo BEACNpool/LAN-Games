@@ -65,6 +65,17 @@
 .pot-box span { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--yellow); }
 .pot-box b { font-size: 22px; font-family: var(--mono); font-weight: 800; }
 
+.standings { display: flex; gap: 6px; overflow-x: auto; padding: 4px 12px 2px; scrollbar-width: none; }
+.standings::-webkit-scrollbar { display: none; }
+.st-chip { display: flex; align-items: center; gap: 6px; flex: none; background: var(--surface);
+           border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px 4px 5px; font-size: 12px; }
+.st-chip.me { border-color: var(--cyan); }
+.st-av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+         font-size: 13px; background: var(--bg); border: 1px solid var(--line); flex: none; overflow: hidden; }
+.st-av img.pfp { width: 100%; height: 100%; border-radius: 50%; box-shadow: none; }
+.st-nm { font-weight: 700; white-space: nowrap; }
+.st-chip b { font-family: var(--mono); color: var(--cyan); margin-left: 2px; }
+
 .strikes { display: flex; justify-content: center; gap: 10px; padding: 4px 0 6px; min-height: 30px; }
 .strike-x { font-size: 24px; font-weight: 900; color: var(--line); transition: color 0.15s, transform 0.15s; }
 .strike-x.on { color: var(--danger); transform: scale(1.15); text-shadow: 0 0 14px rgba(251,113,133,0.6); }

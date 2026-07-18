@@ -76,6 +76,12 @@ try {
   await sleep(400);
 
   step = "teams";
+  // the room's mode setting persists across games — make sure we're in TEAMS
+  await ava.evaluate(() => {
+    const b = [...document.querySelectorAll("#opt-mode button")].find((x) => x.textContent === "TEAMS");
+    if (b) b.click();
+  });
+  await sleep(350);
   await ava.click("#join-A"); await sleep(150);
   await rex.click("#join-B"); await sleep(300);
   const colA = await ava.$$eval("#col-A .tp-chip", (e) => e.length);

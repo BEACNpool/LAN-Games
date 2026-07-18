@@ -50,33 +50,40 @@ function seg(hostId, options, current, key) {
 }
 
 function renderLobby(st) {
-  const ff = st.ff || { teams: {}, names: {}, counts: { A: 0, B: 0 }, my_side: null };
+  const ff = st.ff || { mode: "teams", teams: {}, names: {}, counts: { A: 0, B: 0 }, my_side: null };
   const humans = st.players.filter((p) => !p.bot);
   const readyN = humans.filter((p) => p.ready && p.connected).length;
   $("ready-count").textContent = `${readyN} READY`;
-  const total = humans.length;
-  $("mode-note").textContent = total <= 2
-    ? "2 players → HEAD-TO-HEAD (one per side)"
-    : "3+ players → TEAMS (split into two sides)";
+  const mode = st.settings.mode || "teams";
 
-  for (const side of ["A", "B"]) {
-    const col = $("col-" + side); col.textContent = "";
-    const mem = humans.filter((p) => ff.teams[p.pid] === side);
-    $("cap-" + side).textContent = ff.names[side] || ("SIDE " + side);
-    for (const p of mem) {
-      const chip = document.createElement("div");
-      chip.className = "tp-chip" + (p.pid === S.pid ? " me" : "");
-      const av = document.createElement("span"); av.className = "av";
-      Hub.fillAvatar(av, p);
-      const nm = document.createElement("span"); nm.textContent = p.name + (p.pid === S.pid ? " (you)" : "");
-      chip.append(av, nm); col.appendChild(chip);
+  seg("opt-mode", [["teams", "TEAMS"], ["singles", "SINGLES"]], mode, "mode");
+  seg("opt-rounds", [[3, "3"], [5, "5"], [7, "7"]], st.settings.rounds, "rounds");
+  $("sec-teams").hidden = mode !== "teams";
+  $("sec-singles").hidden = mode === "teams";
+
+  if (mode === "teams") {
+    const total = humans.length;
+    $("mode-note").textContent = total <= 2
+      ? "2 players → HEAD-TO-HEAD (one per side)"
+      : "3+ players → split the two sides (2v1 for odd — or use SINGLES)";
+    for (const side of ["A", "B"]) {
+      const col = $("col-" + side); col.textContent = "";
+      const mem = humans.filter((p) => (ff.teams || {})[p.pid] === side);
+      $("cap-" + side).textContent = (ff.names || {})[side] || ("SIDE " + side);
+      for (const p of mem) {
+        const chip = document.createElement("div");
+        chip.className = "tp-chip" + (p.pid === S.pid ? " me" : "");
+        const av = document.createElement("span"); av.className = "av";
+        Hub.fillAvatar(av, p);
+        const nm = document.createElement("span"); nm.textContent = p.name + (p.pid === S.pid ? " (you)" : "");
+        chip.append(av, nm); col.appendChild(chip);
+      }
+      const jb = $("join-" + side);
+      jb.classList.toggle("on", ff.my_side === side);
+      jb.textContent = ff.my_side === side ? `✓ SIDE ${side}` : `JOIN ${side}`;
     }
-    const jb = $("join-" + side);
-    jb.classList.toggle("on", ff.my_side === side);
-    jb.textContent = ff.my_side === side ? `✓ SIDE ${side}` : `JOIN ${side}`;
   }
 
-  seg("opt-rounds", [[3, "3"], [5, "5"], [7, "7"]], st.settings.rounds, "rounds");
   const me = st.you;
   const amReady = !!(me && me.ready);
   $("ready-btn").textContent = amReady ? "READY ✓" : "READY UP";
@@ -101,6 +108,7 @@ function renderGame(st) {
     el.querySelector(".ss-pts").textContent = g.scores[side];
   }
   $("pot-val").textContent = g.pot;
+  renderStandings(g);
 
   // strikes
   const sk = $("strikes"); sk.textContent = "";
@@ -125,6 +133,21 @@ function renderGame(st) {
   }
 
   renderStatusAndControls(g);
+}
+
+function renderStandings(g) {
+  const el = $("standings");
+  if (g.mode !== "singles" || !g.standings) { el.hidden = true; return; }
+  el.hidden = false; el.textContent = "";
+  for (const r of g.standings) {
+    const chip = document.createElement("span");
+    chip.className = "st-chip" + (r.pid === S.pid ? " me" : "");
+    const av = document.createElement("span"); av.className = "st-av";
+    Hub.fillAvatar(av, r);
+    const nm = document.createElement("span"); nm.className = "st-nm"; nm.textContent = r.name;
+    const sc = document.createElement("b"); sc.textContent = r.score;
+    chip.append(av, nm, sc); el.appendChild(chip);
+  }
 }
 
 function renderStatusAndControls(g) {
@@ -195,18 +218,23 @@ function renderGameOver(st) {
   const r = g.result;
   $("go-title").textContent = r.tie ? "IT'S A TIE!" : `${r.winner_name} WINS!`;
   const rows = $("go-rows"); rows.textContent = "";
-  const sides = [...r.sides].sort((a, b) => b.score - a.score);
-  for (const sd of sides) {
+  const list = r.mode === "singles"
+    ? r.standings.map((x, i) => ({ name: x.name, score: x.score, top: !r.tie && i === 0 }))
+    : [...r.sides].sort((a, b) => b.score - a.score)
+        .map((x) => ({ name: x.name, score: x.score, top: !r.tie && x.side === r.winner }));
+  for (const row of list) {
     const div = document.createElement("div");
-    div.className = "go-row" + (!r.tie && sd.side === r.winner ? " first" : "");
-    const nm = document.createElement("span"); nm.className = "gr-name"; nm.textContent = sd.name;
-    const b = document.createElement("b"); b.textContent = sd.score;
+    div.className = "go-row" + (row.top ? " first" : "");
+    const nm = document.createElement("span"); nm.className = "gr-name"; nm.textContent = row.name;
+    const b = document.createElement("b"); b.textContent = row.score;
     div.append(nm, b); rows.appendChild(div);
   }
   if (!goShown) {
     goShown = true;
-    if (!r.tie && g.my_side === r.winner) { Hub.confettiBurst(200); SFX.win(); }
-    else SFX.ding();
+    const iWon = r.mode === "singles"
+      ? (!r.tie && r.standings[0] && r.standings[0].pid === S.pid)
+      : (!r.tie && g.my_side === r.winner);
+    if (iWon) { Hub.confettiBurst(200); SFX.win(); } else SFX.ding();
   }
 }
 
@@ -259,6 +287,15 @@ if (window.Brag) {
     const g = game();
     if (!g || !g.result || g.result.tie) return null;
     const r = g.result;
+    if (r.mode === "singles") {
+      const win = r.standings[0];
+      return {
+        title: "Fab5 Feud", icon: "📋",
+        winner: { name: win.name, avatar: win.avatar || "📋", pfp: win.pfp || null },
+        headline: `${win.score} points`,
+        beaten: r.standings.slice(1, 5).map((x) => ({ name: x.name, score: x.score })),
+      };
+    }
     const win = r.sides.find((s) => s.side === r.winner);
     const lose = r.sides.find((s) => s.side !== r.winner);
     let av = "📋", pfp = null;

@@ -32,7 +32,9 @@ REVEAL_SECONDS = 7
 class Fab5FeudSession(GameSession):
     MIN_PLAYERS = 2
     MAX_HUMANS = 10
-    DEFAULT_SETTINGS = {"rounds": 3}   # 3 / 5 / 7
+    # mode: "teams" (two sides, split; 2v1 for odd) or "singles" (everyone for
+    # themselves, the two face-off contestants rotate each round — best for odd)
+    DEFAULT_SETTINGS = {"rounds": 3, "mode": "teams"}
 
     def __init__(self, rng=None, bank=None):
         super().__init__(rng)
@@ -47,6 +49,8 @@ class Fab5FeudSession(GameSession):
         r = patch.get("rounds")
         if isinstance(r, int) and not isinstance(r, bool) and r in (3, 5, 7):
             ok["rounds"] = r
+        if patch.get("mode") in ("teams", "singles"):
+            ok["mode"] = patch["mode"]
         return ok
 
     # ---------------- teams ----------------
@@ -81,26 +85,32 @@ class Fab5FeudSession(GameSession):
 
     def game_start(self):
         toks = [t for t in self.participants]      # locked-in, join order
-        roster = self._rosters(toks)
-        # both sides must have someone — rebalance if everyone piled onto one
-        if not roster["A"] or not roster["B"]:
-            for i, t in enumerate(toks):
-                self.teams[t] = SIDES[i % 2]
-            roster = self._rosters(toks)
         bank = self._bank if self._bank is not None else surveys.load()
+        mode = self.settings.get("mode", "teams")
         self.g = {
-            "bank": bank,
-            "roster": roster,
-            "names": {s: self._side_name(roster, s) for s in SIDES},
-            "scores": {"A": 0, "B": 0},
+            "bank": bank, "mode": mode,
+            "order": list(toks),                    # singles: face-off rotation
+            "roster": None,                          # teams: fixed A/B rosters
+            "scores": ({"A": 0, "B": 0} if mode == "teams"
+                       else {t: 0 for t in toks}),
             "round_no": 0,
             "rounds_total": self.settings["rounds"],
             "used": set(),
             "round": None,
             "result": None,
         }
-        fx = [self.fx("toast", icon="📋",
-                      msg="%s  vs  %s" % (self.g["names"]["A"], self.g["names"]["B"]))]
+        if mode == "teams":
+            roster = self._rosters(toks)
+            if not roster["A"] or not roster["B"]:   # everyone piled onto one side
+                for i, t in enumerate(toks):
+                    self.teams[t] = SIDES[i % 2]
+                roster = self._rosters(toks)
+            self.g["roster"] = roster
+            fx = [self.fx("toast", icon="📋", msg="%s  vs  %s"
+                          % (self._side_name(roster, "A"), self._side_name(roster, "B")))]
+        else:
+            fx = [self.fx("toast", icon="🎯",
+                          msg="%d players — free-for-all!" % len(toks))]
         fx.extend(self._start_round())
         return fx
 
@@ -117,17 +127,31 @@ class Fab5FeudSession(GameSession):
                 return bank[i]
         return bank[self.rng.randrange(len(bank))]
 
+    def _round_sides(self):
+        """The two sides that face off THIS round. Teams: the fixed rosters.
+        Singles: the next rotating pair of individual contestants."""
+        g = self.g
+        if g["mode"] == "teams":
+            return {s: list(g["roster"][s]) for s in SIDES}
+        order = g["order"]
+        n = len(order)
+        i = (g["round_no"] - 1) % n
+        return {"A": [order[i]], "B": [order[(i + 1) % n]]}
+
     def _start_round(self):
         g = self.g
         g["round_no"] += 1
         s = self._pick_survey()
-        roster = g["roster"]
+        sides = self._round_sides()
+        names = {side: self._side_name(sides, side) for side in SIDES}
         idx = g["round_no"] - 1
-        reps = {side: roster[side][idx % len(roster[side])] for side in SIDES}
+        reps = {side: sides[side][idx % len(sides[side])] for side in SIDES}
         g["round"] = {
             "q": s["q"],
             "answers": [{"text": a["text"], "pts": a["pts"], "aliases": a["aliases"],
                          "revealed": False} for a in s["answers"]],
+            "sides": sides,
+            "names": names,
             "pot": 0,
             "strikes": 0,
             "control": None,
@@ -171,8 +195,11 @@ class Fab5FeudSession(GameSession):
         return [self.fx("toast", msg="%s joined Side %s" % (p.name, side), icon="🫱")]
 
     def _side_of(self, token):
+        r = self.g["round"] if self.g else None
+        if not r:
+            return None
         for s in SIDES:
-            if token in self.g["roster"][s]:
+            if token in r["sides"][s]:
                 return s
         return None
 
@@ -239,7 +266,7 @@ class Fab5FeudSession(GameSession):
         r["stage"] = "choice"
         self.phase = "choice"
         self._bump(time.time() + CHOICE_SECONDS)
-        fx.append(self.fx("faceoff_won", side=winner, name=self.g["names"][winner]))
+        fx.append(self.fx("faceoff_won", side=winner, name=r["names"][winner]))
         return fx
 
     # ---- choice ----
@@ -247,7 +274,7 @@ class Fab5FeudSession(GameSession):
     def _choice(self, token, play, r):
         if r["stage"] != "choice" or self._side_of(token) != r["control"]:
             return [self.fx("invalid", to=token, msg="Not your call")]
-        if token != self.g["roster"][r["control"]][0]:
+        if token != r["sides"][r["control"]][0]:
             return [self.fx("invalid", to=token, msg="Only the captain decides")]
         return self._begin_play(r, play)
 
@@ -255,13 +282,13 @@ class Fab5FeudSession(GameSession):
         if not play:
             r["control"] = self._other(r["control"])
         ctrl = r["control"]
-        r["turn_order"] = list(self.g["roster"][ctrl])
+        r["turn_order"] = list(r["sides"][ctrl])
         r["turn_idx"] = 0
         self._seat_answerer(r)
         r["stage"] = "play"
         self.phase = "play"
         self._bump(time.time() + TURN_SECONDS)
-        return [self.fx("play_begins", side=ctrl, name=self.g["names"][ctrl],
+        return [self.fx("play_begins", side=ctrl, name=r["names"][ctrl],
                         passed=not play)]
 
     def _current_answerer(self, r):
@@ -334,7 +361,7 @@ class Fab5FeudSession(GameSession):
         self.phase = "steal"
         self._bump(time.time() + STEAL_SECONDS)
         return [self.fx("steal_open", side=r["steal"]["side"],
-                        name=self.g["names"][r["steal"]["side"]], pot=r["pot"])]
+                        name=r["names"][r["steal"]["side"]], pot=r["pot"])]
 
     def _steal_guess(self, token, side, word, r):
         if side != r["steal"]["side"]:
@@ -352,11 +379,17 @@ class Fab5FeudSession(GameSession):
 
     # ---- round / match end ----
 
+    def _award(self, r, side, amount):
+        if self.g["mode"] == "singles":
+            self.g["scores"][r["sides"][side][0]] += amount
+        else:
+            self.g["scores"][side] += amount
+
     def _end_round(self, r, winner, reason):
         mult = self._mult()
         award = r["pot"] * mult
-        self.g["scores"][winner] += award
-        r["outcome"] = {"winner": winner, "name": self.g["names"][winner],
+        self._award(r, winner, award)
+        r["outcome"] = {"winner": winner, "name": r["names"][winner],
                         "reason": reason, "award": award, "mult": mult}
         for a in r["answers"]:                 # reveal the rest for the board
             a["revealed"] = True
@@ -365,16 +398,49 @@ class Fab5FeudSession(GameSession):
         self._bump(time.time() + REVEAL_SECONDS)
         return [self.fx("round_end", winner=winner, award=award)]
 
+    def _pid(self, token):
+        p = self.players.get(token)
+        return p.pid if p else None
+
+    def _standings(self):
+        """Singles: every player ranked (tie-aware ranks). None for teams."""
+        if self.g["mode"] != "singles":
+            return None
+        rows = sorted(self.g["order"],
+                      key=lambda t: -self.g["scores"].get(t, 0))
+        out, prev, rank = [], None, 0
+        for i, t in enumerate(rows):
+            sc = self.g["scores"].get(t, 0)
+            rank = rank if sc == prev else i + 1
+            prev = sc
+            p = self.players.get(t)
+            out.append({"pid": self._pid(t), "name": p.name if p else "?",
+                        "avatar": p.avatar if p else "🙂",
+                        "pfp": p.pfp if p else None, "score": sc, "rank": rank})
+        return out
+
     def _podium(self):
-        sc = self.g["scores"]
+        g = self.g
+        if g["mode"] == "singles":
+            st = self._standings()
+            top = st[0]["score"] if st else 0
+            leaders = [r for r in st if r["score"] == top]
+            self.g["result"] = {
+                "mode": "singles",
+                "tie": len(leaders) > 1 or top == 0 and len(st) > 1,
+                "winner_name": leaders[0]["name"] if len(leaders) == 1 else None,
+                "standings": st,
+            }
+            return self.end_game()
+        sc = g["scores"]
         winner = "A" if sc["A"] > sc["B"] else ("B" if sc["B"] > sc["A"] else None)
         self.g["result"] = {
+            "mode": "teams",
             "winner": winner,
-            "winner_name": self.g["names"][winner] if winner else None,
+            "winner_name": (self._side_name(g["roster"], winner) if winner else None),
             "tie": winner is None,
-            "sides": [{"side": s, "name": self.g["names"][s], "score": sc[s],
-                       "members": [self.players[t].pid for t in self.g["roster"][s]
-                                   if t in self.players]}
+            "sides": [{"side": s, "name": self._side_name(g["roster"], s), "score": sc[s],
+                       "members": [self._pid(t) for t in g["roster"][s] if t in self.players]}
                       for s in SIDES],
         }
         return self.end_game()
@@ -431,16 +497,19 @@ class Fab5FeudSession(GameSession):
 
     def state_for(self, viewer_token=None):
         st = super().state_for(viewer_token)
-        # team picker data — available in the LOBBY too (base omits game there)
+        # mode + team-picker data — available in the LOBBY too (base omits game there)
+        mode = self.g["mode"] if self.g else self.settings.get("mode", "teams")
         toks = self._humans_tokens()
-        roster = self.g["roster"] if self.g else self._rosters(toks)
-        st["ff"] = {
-            "teams": {self.players[t].pid: self.teams.get(t)
-                      for t in toks if t in self.players},
-            "names": {s: self._side_name(roster, s) for s in SIDES},
-            "counts": {s: len(roster[s]) for s in SIDES},
-            "my_side": self.teams.get(viewer_token) if viewer_token else None,
-        }
+        ff = {"mode": mode, "n": len(toks)}
+        if mode == "teams":
+            roster = (self.g["roster"] if (self.g and self.g.get("roster"))
+                      else self._rosters(toks))
+            ff["teams"] = {self.players[t].pid: self.teams.get(t)
+                           for t in toks if t in self.players}
+            ff["names"] = {s: self._side_name(roster, s) for s in SIDES}
+            ff["counts"] = {s: len(roster[s]) for s in SIDES}
+            ff["my_side"] = self.teams.get(viewer_token) if viewer_token else None
+        st["ff"] = ff
         return st
 
     def game_state(self, viewer_token):
@@ -471,15 +540,20 @@ class Fab5FeudSession(GameSession):
             "round_no": g["round_no"],
             "rounds_total": g["rounds_total"],
             "mult": self._mult(),
+            "mode": g["mode"],
             "control": r["control"],
-            "scores": dict(g["scores"]),
-            "names": dict(g["names"]),
-            "roster": {s: [pid(t) for t in g["roster"][s]] for s in SIDES},
+            # the two sides' scores shown on the strip: side scores in teams,
+            # the two contestants' personal scores in singles
+            "scores": ({s: g["scores"][s] for s in SIDES} if g["mode"] == "teams"
+                       else {s: g["scores"].get(r["sides"][s][0], 0) for s in SIDES}),
+            "names": dict(r["names"]),
+            "roster": {s: [pid(t) for t in r["sides"][s]] for s in SIDES},
             "reps": {s: pid(r["reps"][s]) for s in SIDES},
             "faceoff_done": {s: r["faceoff"][s] is not None for s in SIDES},
-            "captain": pid(g["roster"][r["control"]][0]) if r["control"] else None,
+            "captain": pid(r["sides"][r["control"]][0]) if r["control"] else None,
             "turn": pid(cur) if cur else None,
             "steal_side": r["steal"]["side"] if r["steal"] else None,
+            "standings": self._standings(),
             "outcome": r["outcome"],
             "result": g["result"],
             # per-viewer helpers
@@ -487,7 +561,7 @@ class Fab5FeudSession(GameSession):
             "my_turn": bool(cur and cur == viewer_token),
             "im_rep": bool(my_side and r["reps"].get(my_side) == viewer_token),
             "im_captain": bool(r["control"] and my_side == r["control"]
-                               and g["roster"][r["control"]][0] == viewer_token),
+                               and r["sides"][r["control"]][0] == viewer_token),
             "can_steal": bool(r["steal"] and my_side == r["steal"]["side"]),
         }
         return st
