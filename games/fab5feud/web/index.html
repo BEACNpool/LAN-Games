@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>FAB5 FEUD · FAB5.GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="45" font-size="34" text-anchor="middle">📋</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="feud.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">FAB5</span> <span class="wm-b">FEUD</span></h1>
+    <p class="tagline">SURVEY SAYS… HEAD-TO-HEAD OR TEAMS</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">YOUR NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">TAKE A SEAT</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">FAB5</span> <span class="wm-b">FEUD</span></span>
+    <span style="display:flex;gap:8px">
+      <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+      <button id="mute-btn" class="icon-btn">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PICK YOUR SIDE</h2><span id="ready-count" class="sec-badge"></span></div>
+      <p class="seat-note" id="mode-note"></p>
+      <div class="teams-pick">
+        <div class="team-col">
+          <div class="team-cap" id="cap-A">SIDE A</div>
+          <div id="col-A" class="team-list"></div>
+          <button id="join-A" class="btn team-join">JOIN A</button>
+        </div>
+        <div class="team-vs">VS</div>
+        <div class="team-col">
+          <div class="team-cap" id="cap-B">SIDE B</div>
+          <div id="col-B" class="team-list"></div>
+          <button id="join-B" class="btn team-join">JOIN B</button>
+        </div>
+      </div>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>ROUNDS</h2></div>
+      <div class="opt-row"><span class="field-label">SURVEYS</span>
+        <div id="opt-rounds" class="seg"></div></div>
+      <p class="seat-note">last survey is a <b>DOUBLE</b> round</p>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START THE FEUD</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="fd-head">
+    <a href="/" class="head-link">🕹</a>
+    <span id="fd-round" class="fd-round">ROUND 1</span>
+    <span id="fd-mult" class="fd-mult" hidden>×2</span>
+    <button id="mute-btn2" class="icon-btn">🔊</button>
+  </header>
+
+  <div class="score-strip">
+    <div class="side-score" id="ss-A"><span class="ss-name">A</span><b class="ss-pts">0</b></div>
+    <div class="pot-box"><span>POT</span><b id="pot-val">0</b></div>
+    <div class="side-score" id="ss-B"><span class="ss-name">B</span><b class="ss-pts">0</b></div>
+  </div>
+
+  <div class="strikes" id="strikes"></div>
+
+  <div class="board-wrap">
+    <p id="fd-q" class="fd-q"></p>
+    <div id="board" class="board"></div>
+  </div>
+
+  <div id="fd-status" class="fd-status"></div>
+
+  <div class="fd-controls">
+    <div id="ctl-choice" class="choice-row" hidden>
+      <button id="btn-play" class="btn btn-primary">▶ PLAY</button>
+      <button id="btn-pass" class="btn">PASS ▶</button>
+    </div>
+    <form id="ctl-guess" class="guess-row" hidden autocomplete="off">
+      <input id="guess-input" maxlength="40" placeholder="type your answer…" aria-label="answer">
+      <button type="submit" id="guess-send" class="btn btn-primary">SEND</button>
+    </form>
+    <p id="ctl-wait" class="watch-note" hidden></p>
+  </div>
+</section>
+
+<!-- round summary -->
+<div id="round-banner" class="modal" hidden>
+  <div class="modal-card rb-card">
+    <p id="rb-title" class="rb-title"></p>
+    <p id="rb-sub" class="rb-sub"></p>
+    <p id="rb-next" class="sum-next"></p>
+  </div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="feud.js"></script>
+</body>
+</html>
