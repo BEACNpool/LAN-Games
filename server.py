@@ -12,6 +12,7 @@ Shared:
 
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 
@@ -69,6 +70,19 @@ async def api_games():
         "external": EXTERNAL,
         "coming_soon": COMING_SOON,
     })
+
+
+@app.get("/api/venue")
+async def api_venue():
+    """Optional per-venue config (e.g. guest Wi-Fi for the join-QR) read from a
+    gitignored data/venue.json. Absent on public clones -> returns {} and the
+    hub simply hides the Wi-Fi button. Never commit venue.json (it holds the
+    Wi-Fi password); the /data/ gitignore already covers it."""
+    f = Path(__file__).parent / "data" / "venue.json"
+    try:
+        return JSONResponse(json.loads(f.read_text(encoding="utf-8")))
+    except Exception:
+        return JSONResponse({})
 
 
 def _valid_token(token):

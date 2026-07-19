@@ -434,7 +434,10 @@
                 aria-pressed="false" title="CRT mode">
           <span aria-hidden="true">📺</span>
         </button>
-        <button class="hub-btn" id="share-open" aria-label="share join link" title="join link">
+        <button class="hub-btn" id="wifi-open" aria-label="guest Wi-Fi QR" title="guest Wi-Fi QR" hidden>
+          <span aria-hidden="true">📶</span>
+        </button>
+        <button class="hub-btn" id="share-open" aria-label="games join QR" title="games QR — scan to open the games">
           <span aria-hidden="true">⌁</span>
         </button>
         <button class="hub-profile" id="profile-chip" aria-label="your profile">
@@ -490,6 +493,19 @@
       <button id="share-copy" class="btn btn-primary">COPY LINK</button>
       <button id="share-native" class="btn" hidden>SHARE…</button>
     </div>
+  </div>
+</div>
+
+<div id="wifi-sheet" class="modal" role="dialog" aria-modal="true"
+     aria-labelledby="wifi-title" hidden>
+  <div class="modal-card share-card">
+    <button class="pf-close" id="wifi-close" aria-label="close">✕</button>
+    <p class="modal-title" id="wifi-title">📶 JOIN THE WI-FI</p>
+    <div class="share-qr" id="wifi-qr" aria-label="QR code to join the guest Wi-Fi"></div>
+    <p class="share-hint">Scan to hop on the guest Wi-Fi — then tap the ⌁ button for the games.</p>
+    <code class="share-url">📶 <b id="wifi-ssid"></b>&nbsp;&nbsp;·&nbsp;&nbsp;🔑 <span id="wifi-pass"></span></code>
+    <p class="share-hint" id="wifi-note" hidden>Hidden network — the QR includes it, but a
+      phone or two may need you to add it by name.</p>
   </div>
 </div>
 

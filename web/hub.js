@@ -471,6 +471,34 @@
     };
   }
 
+  /* ---------- guest Wi-Fi QR (config from gitignored data/venue.json) ---------- */
+  function wifiQRString(w) {
+    // WIFI: payload; ; , : \ and " must be backslash-escaped. H:true is REQUIRED
+    // for a hidden SSID or phones won't join from the scan.
+    const esc = (s) => String(s == null ? "" : s).replace(/([\\;,":])/g, "\\$1");
+    const sec = w.security || (w.password ? "WPA" : "nopass");
+    return `WIFI:T:${sec};S:${esc(w.ssid)};P:${esc(w.password)};${w.hidden ? "H:true;" : ""};`;
+  }
+  let venueWifi = null;
+  function openWifi() {
+    if (!venueWifi) return;
+    const qr = $("wifi-qr"); qr.textContent = "";
+    $("wifi-ssid").textContent = venueWifi.ssid || "";
+    $("wifi-pass").textContent = venueWifi.password || "(open)";
+    $("wifi-note").hidden = !venueWifi.hidden;
+    $("wifi-sheet").hidden = false;
+    try { renderQR(qr, wifiQRString(venueWifi)); }
+    catch (e) { qr.textContent = "QR unavailable"; }
+  }
+  $("wifi-open").onclick = openWifi;
+  $("wifi-close").onclick = () => { $("wifi-sheet").hidden = true; };
+  $("wifi-sheet").addEventListener("click", (e) => {
+    if (e.target.id === "wifi-sheet") $("wifi-sheet").hidden = true;
+  });
+  fetch("/api/venue").then((r) => r.json()).then((v) => {
+    if (v && v.wifi && v.wifi.ssid) { venueWifi = v.wifi; $("wifi-open").hidden = false; }
+  }).catch(() => { /* no venue config (e.g. public clone) — Wi-Fi button stays hidden */ });
+
   /* ---------- profile (name + character + photo, shared with every game) ---------- */
   let pfAvatar = "";
   const pfMe = () => ({ pfp: Hub.identity.pfp || null,
