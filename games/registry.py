@@ -34,6 +34,7 @@ from games.poker.game import PokerSession
 from games.fab5feud.game import Fab5FeudSession
 from games.bingo.game import BingoSession
 from games.pricecheck.game import PriceCheckSession
+from games.wordrush.game import WordRushSession
 from games._template.game import HighCardSession
 
 GAMES_DIR = Path(__file__).parent
@@ -249,6 +250,22 @@ REGISTRY = [
         "players": "2\u201310, teams",
         "session": Fab5FeudSession,
         "web": GAMES_DIR / "fab5feud" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "wordrush",
+        "category": "party", "accent": "#2dd4bf", "tv": True,
+        "tagline": "Same 7 letters. Race to find the most words.",
+        "min_p": 1, "max_p": 12, "solo": True,
+        "title": "WORD RUSH",
+        "icon": "🔤",
+        "blurb": "One rack of letters, everyone races to spell as many words as "
+                 "they can before the clock runs out. Longer words score more; a "
+                 "full-rack word earns a bonus. 80,000-word dictionary, big-screen "
+                 "leaderboard.",
+        "players": "1–12 + TV",
+        "session": WordRushSession,
+        "web": GAMES_DIR / "wordrush" / "web",
         "hidden": False,
     },
     {

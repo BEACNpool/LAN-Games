@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>WORD RUSH · FAB5.GAMES</title>
+<meta name="theme-color" content="#070b14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%23070b14"/><text x="32" y="46" font-size="30" text-anchor="middle">🔤</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="wordrush.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <h1 class="wordmark"><span class="wm-a">WORD</span> <span class="wm-b">RUSH</span></h1>
+    <p class="tagline">SAME LETTERS · RACE TO FIND THE MOST WORDS</p>
+    <div class="join-card">
+      <label class="field-label" for="name-input">YOUR NAME</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">JOIN THE RUSH</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar">
+    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <span class="wordmark-sm"><span class="wm-a">WORD</span> <span class="wm-b">RUSH</span></span>
+    <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+  </header>
+  <div class="lobby-body">
+    <a id="tv-open" class="tv-cta" href="tv.html" target="_blank" rel="noopener">
+      <span class="tv-cta-ic">📺</span>
+      <span class="tv-cta-tx"><b>OPEN ON THE BIG SCREEN</b><small>shared rack + live leaderboard on a TV</small></span>
+      <span class="tv-cta-go">↗</span>
+    </a>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>SET UP</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div class="opt-row"><span class="field-label">LETTERS</span><div id="opt-size" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">ROUNDS</span><div id="opt-rounds" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">CLOCK</span><div id="opt-clock" class="seg"></div></div>
+      <p class="seat-note">🔤 Everyone gets the <b>same rack</b>. Spell as many words
+        as you can (3+ letters) before time's up — longer words score more, and a
+        word using every tile earns a bonus.</p>
+    </div>
+    <div class="lobby-sec">
+      <div class="sec-head"><h2>PLAYERS</h2></div>
+      <div id="player-grid" class="player-grid"></div>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START THE RUSH</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <header class="wr-head">
+    <a href="/" class="head-link">🕹</a>
+    <span id="wr-round" class="wr-round">R1</span>
+    <span id="wr-timer" class="wr-timer">1:30</span>
+  </header>
+
+  <div id="wr-board" class="wr-board"></div>
+
+  <div class="wr-found-wrap">
+    <div class="wr-found-head"><span id="wr-mine">0 words · 0 pts</span></div>
+    <div id="wr-found" class="wr-found"></div>
+  </div>
+
+  <div class="wr-inputzone">
+    <div id="wr-current" class="wr-current"><span class="wr-cur-empty">tap letters to spell a word</span></div>
+    <div id="wr-rack" class="wr-rack"></div>
+    <div class="wr-ctrls">
+      <button id="wr-shuffle" class="btn wr-ctrl" type="button" aria-label="shuffle">🔀</button>
+      <button id="wr-del" class="btn wr-ctrl" type="button" aria-label="delete">⌫</button>
+      <button id="wr-enter" class="btn btn-primary wr-enter" type="button">ENTER</button>
+    </div>
+  </div>
+</section>
+
+<!-- round reveal -->
+<div id="wr-reveal" class="modal" hidden>
+  <div class="modal-card rv-card">
+    <p class="rv-kick">ROUND OVER</p>
+    <div id="rv-rows" class="rv-rows"></div>
+    <p id="rv-possible" class="rv-possible"></p>
+    <p class="rv-missed-h">BIG WORDS NOBODY FOUND</p>
+    <div id="rv-missed" class="rv-missed"></div>
+    <p id="rv-next" class="sum-next"></p>
+  </div>
+</div>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card">
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <div id="go-rows" class="go-rows"></div>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="wordrush.js"></script>
+</body>
+</html>

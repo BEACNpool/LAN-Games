@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WORD RUSH · Big Screen</title>
+<meta name="theme-color" content="#070b14">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/bigscreen.css">
+<style>
+  .wr-tv-top { display: flex; align-items: baseline; gap: 18px; }
+  .wr-tv-round { font-family: var(--mono); font-size: clamp(14px, 1.6vw, 22px); letter-spacing: 0.22em; color: var(--muted); }
+  .wr-tv-timer { font-family: var(--mono); font-weight: 800; font-size: clamp(40px, 7vw, 96px); color: #2dd4bf; line-height: 1; }
+  .wr-tv-timer.low { color: var(--danger); }
+  .wr-tv-rack { display: flex; flex-wrap: wrap; gap: clamp(8px, 1.4vw, 18px); justify-content: center; }
+  .wr-tv-tile { width: clamp(64px, 9vw, 132px); height: clamp(72px, 10vw, 148px); border-radius: 16px;
+                border: 1px solid var(--line); background: linear-gradient(160deg, var(--raised), var(--surface));
+                display: grid; place-items: center; font-family: var(--mono); font-weight: 800;
+                font-size: clamp(40px, 6vw, 88px); color: var(--text); box-shadow: 0 6px 0 rgba(0,0,0,0.4); }
+  .wr-tv-feed { display: flex; flex-direction: column; gap: 6px; min-height: clamp(70px, 12vh, 130px);
+                width: 100%; max-width: 640px; align-items: center; }
+  .wr-feed-line { font-family: var(--mono); font-size: clamp(14px, 1.7vw, 24px); color: var(--muted);
+                  animation: fadein 0.3s ease; }
+  .wr-feed-line b { color: #2dd4bf; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
+  .wr-rv-rows { display: grid; gap: clamp(6px, 1vh, 12px); width: 100%; max-width: 720px; }
+  .wr-rv-row { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line);
+               border-radius: 14px; padding: clamp(7px, 1vh, 13px) 18px; }
+  .wr-rv-row.win { border-color: #2dd4bf; box-shadow: 0 0 20px rgba(45,212,191,0.25); }
+  .wr-rv-row .rk-av { width: clamp(30px, 2.6vw, 44px); height: clamp(30px, 2.6vw, 44px); border-radius: 10px; display: grid;
+                      place-items: center; background: var(--bg); border: 1px solid var(--line); font-size: clamp(18px,1.8vw,26px); flex: none; overflow: hidden; }
+  .wr-rv-row .rk-av img.pfp { width: 100%; height: 100%; border-radius: 10px; box-shadow: none; }
+  .wr-rv-row .rk-nm { flex: 1; font-weight: 700; font-size: clamp(16px, 1.7vw, 26px); }
+  .wr-rv-row .rk-best { font-family: var(--mono); font-size: clamp(12px, 1.2vw, 18px); color: var(--muted); margin-left: 10px; }
+  .wr-rv-row .rk-sc { font-family: var(--mono); font-weight: 800; font-size: clamp(18px, 1.9vw, 28px); color: #2dd4bf; }
+  .wr-missed { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .wr-missed span { font-family: var(--mono); font-weight: 700; font-size: clamp(16px, 2vw, 30px); color: var(--yellow); }
+</style>
+</head>
+<body class="tv-body">
+<div class="tv">
+  <header class="tv-head">
+    <span class="tv-wordmark">📺 BIG SCREEN · <b>WORD RUSH</b></span>
+    <span id="tv-online" class="tv-online">connecting…</span>
+  </header>
+  <main class="tv-main">
+    <section class="tv-stage" id="tv-stage"></section>
+    <aside class="tv-rail">
+      <div class="tv-join">
+        <p class="tv-join-h">📱 SCAN TO PLAY</p>
+        <div class="tv-qr" id="tv-qr"></div>
+        <p class="tv-join-url" id="tv-url"></p>
+      </div>
+      <div class="tv-roster" id="tv-roster"></div>
+    </aside>
+  </main>
+  <div class="tv-banner" id="tv-banner" hidden></div>
+</div>
+<canvas id="confetti"></canvas>
+<script src="/shared/qr.js"></script>
+<script src="/shared/hubnet.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>
