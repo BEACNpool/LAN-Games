@@ -361,21 +361,6 @@
   .hub-foot b { background: var(--grad); -webkit-background-clip: text;
                 background-clip: text; color: transparent; font-style: italic; }
 
-  /* ---------- CRT overlay (toggle) ---------- */
-  .crt { position: fixed; inset: 0; z-index: 30; pointer-events: none;
-         display: none; }
-  body.crt-on .crt { display: block; }
-  .crt::before { content: ""; position: absolute; inset: 0;
-    background: repeating-linear-gradient(0deg,
-      rgba(0, 0, 0, 0.22) 0 1px, rgba(0, 0, 0, 0) 1px 3px);
-    opacity: 0.55; }
-  .crt::after { content: ""; position: absolute; inset: 0;
-    background:
-      radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.45) 100%),
-      linear-gradient(90deg, rgba(255, 0, 60, 0.05), transparent 8% 92%, rgba(0, 120, 255, 0.05));
-    animation: crt-flick 6s steps(60) infinite; }
-  @keyframes crt-flick { 0%, 96%, 100% { opacity: 1; } 97% { opacity: 0.86; } 98% { opacity: 0.97; } }
-
   /* ---------- power-on boot sweep ---------- */
   .boot { position: fixed; inset: 0; z-index: 90; pointer-events: none;
           background: #05070e; animation: boot-fade 0.6s ease 0.34s forwards; }
@@ -411,14 +396,12 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .tile, .spot, .spot-cta .arw { animation: none; transition: none; }
-    .crt::after { animation: none; }
     .boot { display: none; }
   }
 </style>
 </head>
 <body>
 <div class="bg-fx" aria-hidden="true"></div>
-<div class="crt" id="crt-layer" aria-hidden="true"></div>
 <div class="hub-wrap">
   <div class="hub-inner">
     <header class="hub-top">
@@ -429,10 +412,6 @@
       <div class="hub-actions">
         <button class="hub-btn" id="chat-jump" aria-label="jump to lobby chat" title="lobby chat">
           <span aria-hidden="true">💬</span><span class="pip" id="chat-pip">0</span>
-        </button>
-        <button class="hub-btn" id="crt-toggle" aria-label="toggle CRT scanlines"
-                aria-pressed="false" title="CRT mode">
-          <span aria-hidden="true">📺</span>
         </button>
         <button class="hub-btn" id="wifi-open" aria-label="guest Wi-Fi QR" title="guest Wi-Fi QR" hidden>
           <span aria-hidden="true">📶</span>

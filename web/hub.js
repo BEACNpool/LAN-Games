@@ -1,6 +1,6 @@
 // LAN GAMES hub — a console-style dashboard.
 // Featured spotlight + category rails + party-size filters (driven by /api/games)
-// + a docked lobby chat + classic-console flourishes (CRT, boot sweep, D-pad).
+// + a docked lobby chat + classic-console flourishes (boot sweep, D-pad).
 (() => {
   const $ = (id) => document.getElementById(id);
   const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -342,23 +342,6 @@
   }
 
   /* ---------- classic-console flourishes ---------- */
-  // CRT scanline toggle (persists)
-  (() => {
-    const btn = $("crt-toggle");
-    const set = (on) => {
-      document.body.classList.toggle("crt-on", on);
-      btn.classList.toggle("on", on);
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-    };
-    set(localStorage.getItem("lg-crt") === "1");
-    btn.onclick = () => {
-      const on = !document.body.classList.contains("crt-on");
-      localStorage.setItem("lg-crt", on ? "1" : "0");
-      set(on);
-      Hub.toast(on ? "📺 CRT mode on" : "CRT mode off");
-    };
-  })();
-
   // power-on boot sweep, once per tab session
   if (!REDUCED && !sessionStorage.getItem("lg-booted")) {
     sessionStorage.setItem("lg-booted", "1");
