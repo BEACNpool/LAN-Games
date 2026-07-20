@@ -22,6 +22,8 @@ from core.session import clean_name
 HISTORY = 60
 TEXT_MAX = 400
 RATE_N, RATE_WINDOW = 6, 4.0        # messages per rolling window per socket
+TYPING_GAP = 1.5                    # min seconds between a socket's typing pings
+REACTIONS = ("👍", "❤️", "😂", "🔥", "🎉", "😮")   # the only reactions accepted
 
 
 def _valid_token(token) -> bool:
@@ -39,10 +41,17 @@ class ChatHub:
         self.lock = asyncio.Lock()
         self.sockets: dict[WebSocket, dict] = {}   # ws -> {token, uid}
         self.history: deque = deque(maxlen=HISTORY)
+        self.reactions: dict[int, dict] = {}       # msg id -> {emoji: set(uid)}
         self._id = 0
 
     def _online(self) -> int:
         return len({m["token"] for m in self.sockets.values()})
+
+    def _with_reactions(self, m: dict) -> dict:
+        bag = self.reactions.get(m["id"])
+        if not bag:
+            return m
+        return {**m, "reactions": {e: sorted(u) for e, u in bag.items() if u}}
 
     async def _send(self, ws, obj):
         try:
@@ -72,14 +81,17 @@ class ChatHub:
             await ws.close()
             return
         uid = _uid(token)
+        sender_name = clean_name(hello.get("name")) if hello.get("name") else "PLAYER"
         async with self.lock:
             self.sockets[ws] = {"token": token, "uid": uid}
             await self._send(ws, {"type": "welcome", "you": uid})
             await self._send(ws, {"type": "history",
-                                  "messages": list(self.history)})
+                                  "messages": [self._with_reactions(m)
+                                               for m in self.history]})
             await self._presence()
 
         stamps: deque = deque()
+        last_typing = 0.0
         try:
             while True:
                 raw = await ws.receive_text()
@@ -90,11 +102,48 @@ class ChatHub:
                     assert isinstance(msg, dict)
                 except Exception:
                     continue
-                if msg.get("t") == "ping":
+                verb = msg.get("t")
+                if verb == "ping":
                     await self._send(ws, {"type": "pong",
                                           "now": int(time.time() * 1000)})
                     continue
-                if msg.get("t") != "msg":
+                if verb == "typing":
+                    now = time.time()
+                    if now - last_typing < TYPING_GAP:
+                        continue
+                    last_typing = now
+                    for other in list(self.sockets):
+                        if other is not ws:
+                            await self._send(other, {"type": "typing", "by": uid,
+                                                     "name": sender_name})
+                    continue
+                if verb == "clear":
+                    async with self.lock:
+                        self.history.clear()
+                        self.reactions.clear()
+                        await self._broadcast({"type": "cleared", "name": sender_name})
+                    continue
+                if verb == "react":
+                    mid, emoji = msg.get("id"), msg.get("emoji")
+                    if (not isinstance(mid, int) or isinstance(mid, bool)
+                            or emoji not in REACTIONS):
+                        continue
+                    async with self.lock:
+                        if not any(m["id"] == mid for m in self.history):
+                            continue
+                        bag = self.reactions.setdefault(mid, {})
+                        users = bag.setdefault(emoji, set())
+                        if uid in users:
+                            users.discard(uid)
+                        else:
+                            users.add(uid)
+                        if not users:
+                            bag.pop(emoji, None)
+                        await self._broadcast({
+                            "type": "react", "id": mid,
+                            "reactions": {e: sorted(u) for e, u in bag.items() if u}})
+                    continue
+                if verb != "msg":
                     continue
                 now = time.time()
                 stamps.append(now)
@@ -107,6 +156,10 @@ class ChatHub:
                     if out is None:
                         continue
                     self.history.append(out)
+                    if self.reactions:      # drop reactions for rolled-off messages
+                        live = {m["id"] for m in self.history}
+                        for dead in [k for k in self.reactions if k not in live]:
+                            self.reactions.pop(dead, None)
                     await self._broadcast({"type": "msg", **out})
         except WebSocketDisconnect:
             pass

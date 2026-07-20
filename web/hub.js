@@ -1,5 +1,5 @@
 // LAN GAMES hub — a console-style dashboard.
-// Featured spotlight + category rails + party-size filters (driven by /api/games)
+// Category rails + party-size filters (driven by /api/games)
 // + a docked lobby chat + classic-console flourishes (boot sweep, D-pad).
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -21,9 +21,6 @@
     { key: "few",  label: "3–4",     fn: (g) => g.min_p <= 4 && g.max_p >= 3 },
     { key: "crowd", label: "5+",     fn: (g) => g.max_p >= 5 },
   ];
-  // Curated marquee order for the featured spotlight (falls back to the rest).
-  const SPOT_ORDER = ["orbitriot", "poker", "snake", "werewolf", "bingo",
-                      "tanks", "charades", "spades"];
 
   const DEV = new URLSearchParams(location.search).has("dev");
   let games = [];            // launchable entries (registry + external)
@@ -78,7 +75,7 @@
     return hslToHex(h + dh, s + (ds || 0), l + (dl || 0));
   }
 
-  /* layered "cover art" background for a tile / spotlight */
+  /* layered "cover art" background for a game tile */
   function art(accent) {
     const a2 = shift(accent, 42, 0.06, -0.05);
     return [
@@ -104,7 +101,7 @@
     return null;
   }
 
-  /* players / mode chips shared by tiles + spotlight */
+  /* players / mode chips shown on the tiles */
   function playersRange(g) {
     let s = String(g.players || "");
     s = s.split("+")[0].split(",")[0].replace(/\bplayers?\b/i, "").trim();
@@ -210,7 +207,6 @@
       if (list.length) host.appendChild(railEl(r.title, r.ico, list, false));
     }
     if (soon.length) host.appendChild(railEl("COMING SOON", "🔜", soon, true));
-    renderSpotlight(matching);
   }
 
   function renderFilters() {
@@ -227,79 +223,6 @@
     }
   }
 
-  /* ---------- featured spotlight (rotating marquee) ---------- */
-  let spotPool = [], spotIdx = 0, spotTimer = null;
-
-  function buildSpotPool(matching) {
-    const rank = (g) => {
-      const i = SPOT_ORDER.indexOf(g.slug);
-      return i === -1 ? SPOT_ORDER.length + 1 : i;
-    };
-    return [...matching].sort((a, b) => rank(a) - rank(b)).slice(0, 6);
-  }
-
-  function showSpot(i) {
-    const host = $("spotlight");
-    if (!spotPool.length) { host.textContent = ""; return; }
-    spotIdx = (i + spotPool.length) % spotPool.length;
-    const g = spotPool[spotIdx];
-    const accent = g.accent || "#22d3ee";
-    const glyph = g.art || g.icon;
-    const kicker = g.tv ? "📺 BIG SCREEN" : (CAT_LABEL[g.category] || "PLAY");
-    const dots = spotPool.map((_, k) =>
-      `<button class="spot-dot ${k === spotIdx ? "on" : ""}" data-i="${k}"
-         aria-label="featured game ${k + 1}"></button>`).join("");
-    host.innerHTML = `
-      <div class="spot">
-        <div class="spot-art" style="background:${art(accent)}"></div>
-        <div class="spot-scan"></div>
-        <span class="spot-glyph" aria-hidden="true"
-          style="filter:drop-shadow(0 16px 30px rgba(0,0,0,0.6)) drop-shadow(0 0 44px ${rgba(accent, 0.7)})">${glyph}</span>
-        <div class="spot-scrim"></div>
-        <div class="spot-body">
-          <span class="spot-kicker" style="background:${accent}">${esc(kicker)}</span>
-          <span class="spot-title">${esc(g.title)}</span>
-          <span class="spot-tag">${esc(g.tagline || g.blurb || "")}</span>
-          <div class="spot-meta">${tagsHtml(g)}</div>
-          <a class="spot-cta" href="${launchUrl(g)}" style="background:linear-gradient(135deg, ${accent}, ${shift(accent, 42, 0.06, -0.05)})">
-            PLAY <span class="arw" aria-hidden="true">▶</span></a>
-        </div>
-        ${spotPool.length > 1 ? `<div class="spot-dots">${dots}</div>` : ""}
-      </div>`;
-    host.querySelectorAll(".spot-dot").forEach((d) => {
-      d.onclick = (e) => {
-        e.preventDefault(); e.stopPropagation();
-        showSpot(parseInt(d.dataset.i, 10)); armSpot();
-      };
-    });
-    // whole card launches; the CTA <a> stays the keyboard/AT target
-    host.querySelector(".spot").addEventListener("click", (e) => {
-      if (e.target.closest(".spot-dot") || e.target.closest(".spot-cta")) return;
-      location.href = launchUrl(g);
-    });
-  }
-
-  function armSpot() {
-    if (spotTimer) { clearInterval(spotTimer); spotTimer = null; }
-    if (REDUCED || spotPool.length < 2) return;
-    spotTimer = setInterval(() => {
-      if (document.hidden) return;
-      showSpot(spotIdx + 1);
-    }, 6500);
-  }
-
-  function renderSpotlight(matching) {
-    spotPool = buildSpotPool(matching);
-    spotIdx = 0;
-    document.querySelector(".spot-wrap").hidden = spotPool.length === 0;
-    showSpot(0);
-    armSpot();
-  }
-  // pause rotation while the pointer is on the spotlight
-  $("spotlight").addEventListener("pointerenter", () => {
-    if (spotTimer) { clearInterval(spotTimer); spotTimer = null; }
-  });
-  $("spotlight").addEventListener("pointerleave", armSpot);
 
   /* ---------- data ---------- */
   function ingest(data) {
@@ -319,7 +242,6 @@
       $("rails").innerHTML =
         `<p style="text-align:center;color:var(--muted);padding:40px">
            hub API unreachable — refresh to retry</p>`;
-      document.querySelector(".spot-wrap").hidden = true;
     }
   }
 
@@ -352,9 +274,9 @@
     setTimeout(() => b.remove(), 1200);
   }
 
-  // D-pad / arrow-key roving focus across tiles + the spotlight CTA
+  // D-pad / arrow-key roving focus across the game tiles
   function navTargets() {
-    return [...document.querySelectorAll(".spot-cta, a.tile")];
+    return [...document.querySelectorAll("a.tile")];
   }
   function spatialNav(dir) {
     const cur = document.activeElement;
@@ -620,9 +542,52 @@
       img.onload = () => { if (stick) scrollDown(); };
       bub.appendChild(img);
     }
+    const reacts = document.createElement("div");
+    reacts.className = "lc-reacts";
+    bub.appendChild(reacts);
+    row.dataset.mid = m.id;
     row.append(av, bub);
     $("lc-msgs").appendChild(row);
+    renderReacts(m.id, m.reactions || {});
     if (stick) scrollDown();
+  }
+
+  /* ---------- emoji reactions on a message ---------- */
+  const REACTS = ["👍", "❤️", "😂", "🔥", "🎉", "😮"];
+  function sendReact(id, emoji) {
+    if (chatWS && chatWS.readyState === 1)
+      chatWS.send(JSON.stringify({ t: "react", id, emoji }));
+  }
+  function renderReacts(id, map) {
+    const row = $("lc-msgs").querySelector(`.lc-row[data-mid="${id}"]`);
+    const host = row && row.querySelector(".lc-reacts");
+    if (!host) return;
+    host.textContent = "";
+    for (const e of REACTS) {
+      const users = map[e] || [];
+      if (!users.length) continue;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lc-react" + (users.includes(myUid) ? " mine" : "");
+      b.innerHTML = `${e}<span class="n">${users.length}</span>`;
+      b.onclick = () => sendReact(id, e);
+      host.appendChild(b);
+    }
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "lc-react lc-react-add";
+    add.textContent = "＋";
+    add.setAttribute("aria-label", "add a reaction");
+    add.onclick = () => {
+      host.querySelectorAll(".lc-pick").forEach((x) => x.remove());
+      for (const e of REACTS) {
+        const p = document.createElement("button");
+        p.type = "button"; p.className = "lc-react lc-pick"; p.textContent = e;
+        p.onclick = () => sendReact(id, e);
+        host.appendChild(p);
+      }
+    };
+    host.appendChild(add);
   }
 
   function lightbox(src) {
@@ -671,6 +636,16 @@
         renderMsg(m);
         if (m.by !== myUid && (isCollapsed() || !chatVisible)) setUnread(unread + 1);
       } else if (m.type === "presence") setOnline(m.online);
+      else if (m.type === "react") renderReacts(m.id, m.reactions || {});
+      else if (m.type === "typing") { if (m.by !== myUid) showTyping(m.name); }
+      else if (m.type === "cleared") {
+        $("lc-msgs").textContent = "";
+        const s = document.createElement("p");
+        s.className = "lc-sys";
+        s.textContent = `🧹 chat cleared by ${m.name || "someone"}`;
+        $("lc-msgs").appendChild(s);
+        $("lc-typing").textContent = "";
+      }
     };
     ws.onclose = () => {
       if (chatClosedByUs) return;
@@ -718,21 +693,15 @@
     $("lc-emoji-btn").classList.toggle("on", !p.hidden);
   };
 
-  // meme / gif upload
-  const gifInput = document.createElement("input");
-  gifInput.type = "file"; gifInput.accept = "image/*,image/gif"; gifInput.hidden = true;
-  document.body.appendChild(gifInput);
-  $("lc-gif-btn").onclick = () => gifInput.click();
-  gifInput.addEventListener("change", async () => {
-    const f = gifInput.files && gifInput.files[0];
-    gifInput.value = "";
-    if (!f) return;
+  /* ---------- images: picker, PASTE (mobile GIF keyboard), drag & drop ------- */
+  async function uploadImage(file) {
+    if (!file || !/^image\//.test(file.type || "")) return;
     $("lc-gif-btn").classList.add("on");
     try {
       const res = await fetch("/api/chatmedia", {
         method: "POST",
         headers: { "x-wc-token": Hub.identity.ensureToken() },
-        body: f,
+        body: file,
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "upload failed");
@@ -742,7 +711,70 @@
     } finally {
       $("lc-gif-btn").classList.remove("on");
     }
+  }
+
+  const gifInput = document.createElement("input");
+  gifInput.type = "file"; gifInput.accept = "image/*,image/gif"; gifInput.hidden = true;
+  document.body.appendChild(gifInput);
+  $("lc-gif-btn").onclick = () => gifInput.click();
+  gifInput.addEventListener("change", () => {
+    const f = gifInput.files && gifInput.files[0];
+    gifInput.value = "";
+    uploadImage(f);
   });
+
+  // GBoard / iOS GIF keyboards hand the image to the page as a PASTE — catch it
+  // on the message box (and anywhere in the dock) and upload it like any image.
+  function pasteHandler(ev) {
+    const items = (ev.clipboardData && ev.clipboardData.items) || [];
+    for (const it of items) {
+      if (it.kind === "file" && /^image\//.test(it.type || "")) {
+        const f = it.getAsFile();
+        if (f) { ev.preventDefault(); uploadImage(f); return; }
+      }
+    }
+  }
+  $("lc-text").addEventListener("paste", pasteHandler);
+  $("chat-section").addEventListener("paste", pasteHandler);
+
+  const dock = $("chat-section");
+  dock.addEventListener("dragover", (e) => {
+    if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")) {
+      e.preventDefault(); dock.classList.add("dropping");
+    }
+  });
+  dock.addEventListener("dragleave", (e) => {
+    if (e.target === dock) dock.classList.remove("dropping");
+  });
+  dock.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dock.classList.remove("dropping");
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) uploadImage(f);
+  });
+
+  /* ---------- "… is typing" ---------- */
+  let typingTimer = null, lastTypingSent = 0;
+  function showTyping(name) {
+    const el = $("lc-typing");
+    el.textContent = `${name || "someone"} is typing…`;
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => { el.textContent = ""; }, 2600);
+  }
+  $("lc-text").addEventListener("input", () => {
+    const now = Date.now();
+    if (now - lastTypingSent < 1600) return;
+    lastTypingSent = now;
+    if (chatWS && chatWS.readyState === 1) chatWS.send(JSON.stringify({ t: "typing" }));
+  });
+
+  /* ---------- clear / reset the room ---------- */
+  $("lc-clear").addEventListener("click", (e) => {
+    e.stopPropagation();                    // don't collapse the dock
+    if (!confirm("Clear the lobby chat for everyone?")) return;
+    if (chatWS && chatWS.readyState === 1) chatWS.send(JSON.stringify({ t: "clear" }));
+  });
+  $("lc-clear").addEventListener("keydown", (e) => e.stopPropagation());
 
   emptyHint();
   connectChat();

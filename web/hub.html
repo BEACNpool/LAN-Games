@@ -107,7 +107,7 @@
 
   @keyframes pulse { 50% { opacity: 0.35; } }
 
-  /* ---------- section heading (shared by spotlight + rails) ---------- */
+  /* ---------- section heading (shared by the rails) ---------- */
   .sec-eyebrow { display: flex; align-items: center; gap: 9px;
                  padding: 16px 20px 2px; }
   .sec-eyebrow .dot { width: 7px; height: 7px; border-radius: 2px;
@@ -115,59 +115,6 @@
                       box-shadow: 0 0 10px rgba(34, 211, 238, 0.6); }
   .sec-eyebrow .lbl { font-family: var(--mono); font-size: 10.5px; font-weight: 800;
                       letter-spacing: 0.22em; color: var(--muted); }
-
-  /* ---------- featured spotlight ---------- */
-  .spot-wrap { padding: 4px 16px 10px; }
-  .spot { position: relative; display: block; border-radius: 22px;
-          overflow: hidden; border: 1px solid var(--line);
-          background: #0c1226; min-height: 208px; isolation: isolate;
-          box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
-          transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  .spot:hover { border-color: rgba(34, 211, 238, 0.45); }
-  .spot-art { position: absolute; inset: 0; z-index: 0; }
-  .spot-scan { position: absolute; inset: 0; z-index: 1; pointer-events: none;
-               background: repeating-linear-gradient(0deg,
-                 rgba(0, 0, 0, 0.10) 0 1px, transparent 1px 3px);
-               mix-blend-mode: overlay; opacity: 0.5; }
-  .spot-glyph { position: absolute; z-index: 1; right: 3%; top: 50%;
-                transform: translateY(-50%) rotate(-8deg);
-                font-size: 150px; line-height: 1;
-                filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.6)); }
-  .spot-scrim { position: absolute; inset: 0; z-index: 2;
-    background: linear-gradient(88deg, rgba(7,11,20,0.94) 30%,
-                rgba(7,11,20,0.62) 56%, rgba(7,11,20,0.08) 92%); }
-  .spot-body { position: relative; z-index: 3; padding: 20px 22px 22px;
-               display: flex; flex-direction: column; align-items: flex-start;
-               gap: 9px; max-width: min(78%, 560px); }
-  .spot-kicker { display: inline-flex; align-items: center; gap: 7px;
-                 font-family: var(--mono); font-size: 9.5px; font-weight: 800;
-                 letter-spacing: 0.16em; color: #05070e; border-radius: 999px;
-                 padding: 4px 11px; }
-  .spot-title { font-weight: 800; font-style: italic; letter-spacing: 0.01em;
-                font-size: clamp(30px, 8vw, 44px); line-height: 0.98;
-                text-shadow: 0 3px 20px rgba(0, 0, 0, 0.5); }
-  .spot-tag { font-size: 13.5px; color: #cfd8ef; line-height: 1.4;
-              font-weight: 500; max-width: 42ch; }
-  .spot-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1px; }
-  .spot-cta { margin-top: 8px; display: inline-flex; align-items: center; gap: 9px;
-              font-family: var(--font); font-weight: 800; letter-spacing: 0.06em;
-              font-size: 15px; color: #05070e; border: none; border-radius: 13px;
-              padding: 12px 22px; background: var(--grad); cursor: pointer;
-              text-decoration: none;
-              box-shadow: 0 8px 26px rgba(129, 140, 248, 0.4);
-              transition: transform 0.09s ease, box-shadow 0.2s ease; }
-  .spot-cta:hover { box-shadow: 0 10px 34px rgba(129, 140, 248, 0.6); }
-  .spot { cursor: pointer; } /* whole card launches (JS) — CTA stays keyboard-focusable */
-  .spot:hover .spot-cta { transform: translateY(-1px); }
-  .spot-cta .arw { font-size: 12px; transition: transform 0.15s ease; }
-  .spot:hover .spot-cta .arw { transform: translateX(3px); }
-  .spot-dots { position: absolute; z-index: 4; right: 16px; bottom: 16px;
-               display: flex; gap: 7px; }
-  .spot-dot { width: 9px; height: 9px; border-radius: 999px; cursor: pointer;
-              border: 1px solid rgba(232, 237, 249, 0.5); background: transparent;
-              padding: 0; transition: all 0.18s ease; }
-  .spot-dot.on { background: var(--text); border-color: var(--text);
-                 width: 22px; box-shadow: 0 0 12px rgba(232, 237, 249, 0.6); }
 
   /* ---------- filters ---------- */
   .filters { display: flex; gap: 8px; padding: 6px 16px 12px;
@@ -296,7 +243,7 @@
                  letter-spacing: 0.22em; color: #05070e;
                  background: var(--yellow); padding: 4px 34px; }
 
-  /* ---------- lobby chat (now a compact dock below the games) ---------- */
+  /* ---------- lobby chat (docked at the top, above the games) ---------- */
   .lchat { margin: 8px 16px 6px; border: 1px solid var(--line); border-radius: 20px;
            background: var(--surface); overflow: hidden; display: flex;
            flex-direction: column; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
@@ -355,6 +302,31 @@
   .lc-lightbox { position: fixed; inset: 0; z-index: 65; display: grid; place-items: center;
                  background: rgba(7, 11, 20, 0.9); padding: 20px; }
   .lc-lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+  /* clear-the-room button in the dock header */
+  .lc-clear { flex: none; width: 30px; height: 30px; border-radius: 9px;
+              border: 1px solid var(--line); background: var(--bg); color: var(--muted);
+              font-size: 13px; line-height: 1; cursor: pointer; }
+  .lc-clear:hover { color: var(--danger); border-color: rgba(251, 113, 133, 0.55); }
+  /* "… is typing" line */
+  .lc-typing { min-height: 14px; padding: 0 14px 4px; font-family: var(--mono);
+               font-size: 10.5px; color: var(--faint); font-style: italic; }
+  /* emoji reactions under a message */
+  .lc-reacts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .lc-react { display: inline-flex; align-items: center; gap: 3px; cursor: pointer;
+              border: 1px solid var(--line); background: var(--bg); color: var(--text);
+              border-radius: 999px; padding: 2px 8px; font-size: 12px; line-height: 1.45; }
+  .lc-react:hover { border-color: rgba(34, 211, 238, 0.5); }
+  .lc-react.mine { border-color: var(--cyan); color: var(--cyan);
+                   box-shadow: 0 0 10px rgba(34, 211, 238, 0.22); }
+  .lc-react .n { font-family: var(--mono); font-size: 10px; opacity: 0.85; }
+  .lc-react-add { opacity: 0.4; }
+  .lc-row:hover .lc-react-add, .lc-react-add:focus-visible { opacity: 1; }
+  /* system notice (e.g. chat cleared) */
+  .lc-sys { text-align: center; font-family: var(--mono); font-size: 10.5px;
+            color: var(--faint); padding: 7px 0; }
+  /* drag a GIF/image anywhere onto the chat */
+  .lchat.dropping { border-color: var(--cyan);
+                    box-shadow: 0 0 0 1px var(--cyan), 0 0 26px rgba(34, 211, 238, 0.25); }
 
   .hub-foot { text-align: center; font-family: var(--mono); font-size: 11px;
               color: var(--faint); padding: 20px 20px 4px; letter-spacing: 0.08em; }
@@ -375,9 +347,6 @@
   @keyframes boot-fade { to { opacity: 0; visibility: hidden; } }
 
   @media (min-width: 760px) {
-    .spot { min-height: 268px; }
-    .spot-glyph { font-size: 210px; right: 5%; }
-    .spot-body { padding: 30px 34px; }
   }
   @media (max-width: 420px) {
     .hub-top { padding-left: 14px; padding-right: 14px; }
@@ -386,7 +355,6 @@
     .hub-profile { max-width: 32vw; padding-right: 9px; }
     .hp-name { font-size: 10.5px; }
     .pf-close { top: 4px; right: 4px; }
-    .spot-glyph { font-size: 118px; right: -4%; }
   }
   @media (pointer: coarse) {
     .hub-profile, .lc-icon, .lc-send, .lc-emoji button, .fchip, .hub-btn { min-height: 44px; }
@@ -395,7 +363,7 @@
     .tile-play { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .tile, .spot, .spot-cta .arw { animation: none; transition: none; }
+    .tile { animation: none; transition: none; }
     .boot { display: none; }
   }
 </style>
@@ -426,34 +394,34 @@
       </div>
     </header>
 
-    <section class="spot-wrap" aria-label="featured game">
-      <div class="sec-eyebrow"><span class="dot"></span><span class="lbl">FEATURED</span></div>
-      <div id="spotlight"></div>
-    </section>
-
-    <nav id="filters" class="filters" aria-label="party size"></nav>
-
-    <main id="rails"></main>
-
     <section class="lchat" id="chat-section" aria-label="lobby chat">
       <div class="lc-head" id="lc-head" role="button" tabindex="0"
            aria-expanded="true" aria-controls="lc-fold">
         <span class="lc-head-ico" aria-hidden="true">💬</span>
         <span class="lc-title">LOBBY CHAT</span>
         <span class="lc-online" id="lc-online">connecting…</span>
+        <button type="button" class="lc-clear" id="lc-clear"
+                title="clear the chat for everyone" aria-label="clear the chat for everyone">🧹</button>
         <span class="lc-chev" aria-hidden="true">▾</span>
       </div>
       <div class="lc-fold" id="lc-fold">
         <div class="lc-msgs" id="lc-msgs"></div>
+        <p class="lc-typing" id="lc-typing" aria-live="polite"></p>
         <div class="lc-emoji" id="lc-emoji" hidden></div>
         <form class="lc-input" id="lc-form" autocomplete="off">
           <button type="button" class="lc-icon" id="lc-emoji-btn" aria-label="emoji">😀</button>
           <button type="button" class="lc-icon" id="lc-gif-btn" aria-label="meme or gif">🖼️</button>
-          <input id="lc-text" maxlength="400" placeholder="say something…" aria-label="message">
+          <input id="lc-text" maxlength="400" placeholder="say something… or paste a GIF" aria-label="message">
           <button type="submit" class="lc-send" id="lc-send" aria-label="send">➤</button>
         </form>
       </div>
     </section>
+
+
+    <nav id="filters" class="filters" aria-label="party size"></nav>
+
+    <main id="rails"></main>
+
 
     <p class="hub-foot">no accounts · no cloud · winners get brag rights ·
       <b>LAN Games</b></p>
