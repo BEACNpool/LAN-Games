@@ -10,7 +10,7 @@ Each item: {prompt, emoji, answer, money, unit, fact, category}
   category grocery | stuff | body | world | space | animals | fun
 
 The full ~120-item bank lives in `_items_data.py` (authored separately, same
-pattern as fab5feud's surveys). `load()` uses it when present and falls back to
+pattern as famfeud's surveys). `load()` uses it when present and falls back to
 this small SEED bank so the game always runs.
 """
 

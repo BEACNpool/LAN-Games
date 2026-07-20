@@ -1,11 +1,9 @@
 // playtest_pricecheck.mjs — two phone controllers + a TV spectator play a full
 // PRICE CHECK game (enter a number on the keypad, lock, see the reveal).
 // Usage: node tests/playtest_pricecheck.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8097";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -17,7 +15,7 @@ let bad = 0;
 const fail = (m) => { console.error("FAIL: " + m); bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-pricecheck",
   args: ["--no-sandbox", "--disable-gpu"],
 });

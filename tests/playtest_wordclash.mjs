@@ -4,11 +4,9 @@
 // Requires: server running (default http://127.0.0.1:8096/games/wordclash), snap chromium.
 // NEVER pkill chromium — this closes only its own instance.
 
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096/games/wordclash";
 const OUT = process.argv[3] || os.homedir() + "/tmp/wordclash-shots";
@@ -27,7 +25,7 @@ function fail(msg) {
 }
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium",
+  executablePath: CHROME_PATH,
   headless: "new",
   userDataDir: os.homedir() + "/tmp/wcshot-profile",
   args: ["--no-sandbox", "--disable-gpu"],

@@ -1,4 +1,4 @@
-"""FAB5 FEUD survey bank + answer matching.
+"""FAM FEUD survey bank + answer matching.
 
 The bank itself lives in `_surveys_data.py` (pure data, big). This module owns
 the logic: normalizing a typed guess and matching it against a survey's ranked
@@ -85,5 +85,5 @@ def match_answer(guess, answers):
 def load() -> list:
     """The full survey bank (imported lazily so the data file is optional
     at import time — engine tests inject their own surveys)."""
-    from games.fab5feud._surveys_data import SURVEYS
+    from games.famfeud._surveys_data import SURVEYS
     return SURVEYS

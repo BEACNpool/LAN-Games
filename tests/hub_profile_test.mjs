@@ -2,10 +2,8 @@
 //   set name + character + photo (crop/zoom) once, it persists on the device
 //   and feeds into the games. Also covers remove-photo.
 // Usage: node tests/hub_profile_test.mjs [baseURL]
-import { createRequire } from "module";
 import os from "os";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -13,7 +11,7 @@ let bad = 0;
 const check = (ok, m) => { console.log((ok ? "PASS " : "FAIL ") + m); if (!ok) bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-hubprofile",
   args: ["--no-sandbox", "--disable-gpu"],
 });

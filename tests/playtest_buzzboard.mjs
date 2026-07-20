@@ -1,12 +1,10 @@
 // BUZZ BOARD: one TV + three isolated phone controllers play a complete quick
 // board through HOT CLUE, POWER SURGE, LAST CALL, podium, and brag card.
 // Usage: node tests/playtest_buzzboard.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
 
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 const BASE = process.argv[2] || "http://127.0.0.1:8797";
 const OUT = process.argv[3] || os.homedir() + "/tmp/buzzboard-shots";
 fs.mkdirSync(OUT, { recursive: true });
@@ -21,7 +19,7 @@ let bad = 0;
 const fail = (m) => { console.error("FAIL: " + m); bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-buzzboard",
   args: ["--no-sandbox", "--disable-gpu"],
 });

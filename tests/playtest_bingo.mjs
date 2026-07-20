@@ -1,11 +1,9 @@
 // playtest_bingo.mjs — BIG SCREEN integration: hub rail + badge, two phone
 // controllers + a TV spectator, a full AUTO game to the winner banner.
 // Usage: node tests/playtest_bingo.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8097";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -17,7 +15,7 @@ let bad = 0;
 const fail = (m) => { console.error("FAIL: " + m); bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-bingo",
   args: ["--no-sandbox", "--disable-gpu"],
 });

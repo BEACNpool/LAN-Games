@@ -1,4 +1,4 @@
-"""FAB5 FEUD — a Family-Feud-style survey game for the fab5.games hub.
+"""FAM FEUD — a Family-Feud-style survey game for the lan.games hub.
 
 Two sides (SIDE_A / SIDE_B). One player per side = head-to-head; more = teams.
 Each round:
@@ -19,7 +19,7 @@ from __future__ import annotations
 import time
 
 from core.session import GameSession
-from games.fab5feud import surveys
+from games.famfeud import surveys
 
 SIDES = ("A", "B")
 FACEOFF_SECONDS = 18
@@ -29,7 +29,7 @@ STEAL_SECONDS = 22
 REVEAL_SECONDS = 7
 
 
-class Fab5FeudSession(GameSession):
+class FamFeudSession(GameSession):
     MIN_PLAYERS = 2
     MAX_HUMANS = 10
     # mode: "teams" (two sides, split; 2v1 for odd) or "singles" (everyone for
@@ -531,7 +531,7 @@ class Fab5FeudSession(GameSession):
         if r["stage"] == "play":
             cur = self._current_answerer(r)
         st = {
-            "kind": "fab5feud",
+            "kind": "famfeud",
             "stage": r["stage"],
             "q": r["q"],
             "answers": answers,

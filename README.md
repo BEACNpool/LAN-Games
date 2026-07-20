@@ -29,7 +29,7 @@ server), open the URL on everyone's phones, and you've got game night.
   Spades, Hearts, Euchre, Rummikub
 - **Board** — Chess, Checkers, Backgammon, Connect Four (real rules engines)
 - **Party** (same room, phones as controllers) — Charades, Trivia Buzzer,
-  Category Blitz, Werewolf, FAB5 Feud
+  Category Blitz, Werewolf, Fam Feud
 - **Battle** — Battleship, Tanks (2D artillery), Fort Fling (two-player
   slingshot weapons), Snake Arena
 - **Word** — WordClash (multiplayer Wordle: duel / relay / sabotage)
@@ -71,6 +71,55 @@ outside service.
 
 > **Tip:** give the host a static IP (or a hostname on your router) so the URL
 > doesn't change, and bookmark it on everyone's phones.
+
+## Make it yours
+
+Everything specific to *your* house — the name on the wordmark, your guest
+Wi-Fi, a game renamed as your family's in-joke — lives in **`data/venue.json`**,
+which is gitignored. Nothing personal ever belongs in a tracked file.
+
+```bash
+cp venue.example.json data/venue.json   # then edit it
+```
+
+```json
+{
+  "brand": {
+    "name": "SMITH FAMILY ARCADE",
+    "presents": "SMITH FAMILY ARCADE PRESENTS",
+    "titles": { "famfeud": "SMITH FEUD" }
+  },
+  "wifi": { "ssid": "guest-wifi", "password": "hunter2", "security": "WPA" }
+}
+```
+
+- **`brand.name`** replaces the wordmark in page titles.
+- **`brand.presents`** is the big-screen splash kicker.
+- **`brand.titles`** renames individual games, keyed by registry slug.
+- **`wifi`** enables the 📶 button on the hub, which shows a QR that joins your
+  network — guests scan it, then scan the games QR. Omit the block and the
+  button stays hidden. Set `"hidden": true` for a non-broadcast SSID, or phones
+  won't join from the scan.
+
+Every key is optional. With no `venue.json` at all the hub reads as the generic
+"LAN GAMES" and simply hides the Wi-Fi button — which is exactly what a fresh
+clone should look like.
+
+> **Anyone on your LAN who opens the hub can read the Wi-Fi password.** That's
+> the point of the feature, but put your *guest* SSID there, not your main one.
+
+### Keeping personal data out of the repo
+
+If you contribute back, install the pre-push guard once per clone:
+
+```bash
+./ops/install_hooks.sh
+```
+
+It runs `tests/test_no_private_data.py`, which scans every **tracked** file for
+branding, LAN addresses, home paths, hostnames, emails and credentials, and
+**refuses the push** if it finds any. It also runs in the normal `pytest` suite.
+That way a personalization can't reach the public repo by accident.
 
 ### Best phone setup
 

@@ -21,7 +21,7 @@ from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from core import avatars, chatmedia
+from core import avatars, chatmedia, venue
 from core.chat import ChatHub
 from core.net import GameBinding
 from games.registry import REGISTRY, EXTERNAL, COMING_SOON
@@ -54,7 +54,11 @@ for entry in REGISTRY:
 async def api_games():
     return JSONResponse({
         "games": [{
-            "slug": e["slug"], "title": e["title"], "icon": e["icon"],
+            "slug": e["slug"],
+            # venue.json may rename a game for this house (see core/venue.py);
+            # the registry keeps the generic, public name.
+            "title": venue.title_for(e["slug"], e["title"]),
+            "icon": e["icon"],
             "blurb": e["blurb"], "players": e["players"],
             "category": e.get("category"), "accent": e.get("accent"),
             "art": e.get("art"),
@@ -74,15 +78,17 @@ async def api_games():
 
 @app.get("/api/venue")
 async def api_venue():
-    """Optional per-venue config (e.g. guest Wi-Fi for the join-QR) read from a
-    gitignored data/venue.json. Absent on public clones -> returns {} and the
-    hub simply hides the Wi-Fi button. Never commit venue.json (it holds the
-    Wi-Fi password); the /data/ gitignore already covers it."""
-    f = Path(__file__).parent / "data" / "venue.json"
-    try:
-        return JSONResponse(json.loads(f.read_text(encoding="utf-8")))
-    except Exception:
-        return JSONResponse({})
+    """This venue's personalization: branding + optional guest Wi-Fi.
+
+    Generic defaults live in core/venue.py; your own values go in the gitignored
+    data/venue.json (copy venue.example.json). A public clone with no venue.json
+    gets the generic "LAN GAMES" brand and no Wi-Fi block, so the hub simply
+    hides the Wi-Fi button.
+
+    NOTE: the Wi-Fi password is served to anyone who can reach this endpoint —
+    that is deliberate (guests scan the QR), but put your GUEST SSID here, not
+    your admin network."""
+    return JSONResponse(venue.load())
 
 
 def _valid_token(token):

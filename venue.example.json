@@ -1,0 +1,36 @@
+{
+  "_readme": [
+    "Copy this file to data/venue.json to personalize your own hub.",
+    "data/ is gitignored, so nothing you put here can ever be committed or pushed.",
+    "Every key is optional — omit anything you don't want to change.",
+    "Restart the server after editing (the file is read per request, but the",
+    "registry titles are resolved at import time)."
+  ],
+
+  "brand": {
+    "_name": "Wordmark in page titles, e.g. 'BINGO · SMITH FAMILY ARCADE'. Default: 'LAN GAMES'.",
+    "name": "SMITH FAMILY ARCADE",
+
+    "_presents": "Big-screen splash kicker. Default: 'LAN GAMES PRESENTS'.",
+    "presents": "SMITH FAMILY ARCADE PRESENTS",
+
+    "_titles": "Per-game display-name overrides, keyed by registry slug.",
+    "titles": {
+      "famfeud": "SMITH FEUD"
+    }
+  },
+
+  "wifi": {
+    "_readme": [
+      "Guest Wi-Fi for the hub's join-QR button. OMIT this whole block and the",
+      "button stays hidden. Anyone on your LAN who opens the hub can read this",
+      "password — that is the point (it's for guests), but don't put your admin",
+      "network here. Use your guest SSID."
+    ],
+    "ssid": "your-guest-ssid",
+    "password": "your-guest-password",
+    "security": "WPA",
+    "_hidden": "true if the SSID is not broadcast — required or phones won't join from a scan.",
+    "hidden": false
+  }
+}

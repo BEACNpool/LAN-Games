@@ -3,10 +3,8 @@
 // name + character + PHOTO all appear, with no re-entry. Also confirms the
 // hub card links to the merged path.
 // Usage: node tests/wordclash_merge_test.mjs [hubBase]
-import { createRequire } from "module";
 import os from "os";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -14,7 +12,7 @@ let bad = 0;
 const check = (ok, m) => { console.log((ok ? "PASS " : "FAIL ") + m); if (!ok) bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-wcmerge",
   args: ["--no-sandbox", "--disable-gpu"],
 });

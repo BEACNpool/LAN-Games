@@ -1,4 +1,4 @@
-/* FAB5 FEUD client — survey board, team scores, contextual answering. */
+/* FAM FEUD client — survey board, team scores, contextual answering. */
 "use strict";
 const $ = (id) => document.getElementById(id);
 
@@ -290,7 +290,7 @@ if (window.Brag) {
     if (r.mode === "singles") {
       const win = r.standings[0];
       return {
-        title: "Fab5 Feud", icon: "📋",
+        title: "Fam Feud", icon: "📋",
         winner: { name: win.name, avatar: win.avatar || "📋", pfp: win.pfp || null },
         headline: `${win.score} points`,
         beaten: r.standings.slice(1, 5).map((x) => ({ name: x.name, score: x.score })),
@@ -301,7 +301,7 @@ if (window.Brag) {
     let av = "📋", pfp = null;
     if (win.members.length === 1) { const p = playerByPid(win.members[0]); if (p) { av = p.avatar; pfp = p.pfp; } }
     return {
-      title: "Fab5 Feud", icon: "📋",
+      title: "Fam Feud", icon: "📋",
       winner: { name: r.winner_name, avatar: av, pfp },
       headline: `${win.score} points`,
       beaten: [{ name: lose.name, score: lose.score }],
@@ -331,7 +331,7 @@ window.__st = () => S.st;    // test hook (read-only)
 
 /* ---------------- boot ---------------- */
 function connect() {
-  S.conn = Hub.connect("/games/fab5feud/ws", { onWelcome: (m) => { S.pid = m.pid; }, onState, onFx });
+  S.conn = Hub.connect("/games/famfeud/ws", { onWelcome: (m) => { S.pid = m.pid; }, onState, onFx });
 }
 let avatarPick = Hub.identity.avatar || Hub.AVATARS[(Math.random() * Hub.AVATARS.length) | 0];
 Hub.buildAvatarGrid($("avatar-grid"), avatarPick, (a) => { avatarPick = a; });

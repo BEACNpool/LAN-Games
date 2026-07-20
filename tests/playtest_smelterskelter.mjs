@@ -1,12 +1,10 @@
 // SMELTER SKELTER: read-only TV + three isolated phone controllers complete a
 // two-shift live-physics match with real hold-state input and responsive checks.
 // Usage: node tests/playtest_smelterskelter.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
 
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 const BASE = process.argv[2] || "http://127.0.0.1:8797";
 const OUT = process.argv[3] || os.homedir() + "/tmp/smelterskelter-shots";
 fs.mkdirSync(OUT, { recursive: true });
@@ -21,7 +19,7 @@ let failed = 0, step = "boot";
 function fail(message) { failed++; console.error(`FAIL @ ${step}: ${message}`); }
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-smelterskelter",
   args: ["--no-sandbox", "--disable-gpu"],
 });

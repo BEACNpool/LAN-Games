@@ -31,7 +31,7 @@ from games.snake.game import SnakeSession
 from games.werewolf.game import WerewolfSession
 from games.blitz.game import BlitzSession
 from games.poker.game import PokerSession
-from games.fab5feud.game import Fab5FeudSession
+from games.famfeud.game import FamFeudSession
 from games.bingo.game import BingoSession
 from games.pricecheck.game import PriceCheckSession
 from games.wordrush.game import WordRushSession
@@ -240,17 +240,17 @@ REGISTRY = [
         "hidden": False,
     },
     {
-        "slug": "fab5feud",
+        "slug": "famfeud",
         "category": "party", "accent": "#f59e0b",
         "tagline": "Survey says\u2026 head-to-head or teams.",
         "min_p": 2, "max_p": 10, "solo": False,
-        "title": "FAB5 FEUD",
+        "title": "FAM FEUD",
         "icon": "\U0001f4cb",
         "blurb": "Our take on the family survey showdown \u2014 face-off, three "
                  "strikes, steal the pot. 1v1 or split into teams.",
         "players": "2\u201310, teams",
-        "session": Fab5FeudSession,
-        "web": GAMES_DIR / "fab5feud" / "web",
+        "session": FamFeudSession,
+        "web": GAMES_DIR / "famfeud" / "web",
         "hidden": False,
     },
     {

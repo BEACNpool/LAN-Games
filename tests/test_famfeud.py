@@ -4,8 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from games.fab5feud.game import Fab5FeudSession, SIDES
-from games.fab5feud import surveys
+from games.famfeud.game import FamFeudSession, SIDES
+from games.famfeud import surveys
 
 # deterministic bank: answers descending by pts, distinct aliases
 BANK = [
@@ -19,7 +19,7 @@ BANK = [
 
 
 def make(n=2, seed=1, rounds=3, teams=None, mode="teams"):
-    s = Fab5FeudSession(rng=random.Random(seed), bank=BANK)
+    s = FamFeudSession(rng=random.Random(seed), bank=BANK)
     toks = ["feudtok%03d" % i for i in range(n)]
     for i, t in enumerate(toks):
         s.join(t, "P%d" % i, None)
@@ -78,7 +78,7 @@ def test_teams_mode_splits_and_labels():
 
 
 def test_lobby_team_pick_before_start():
-    s = Fab5FeudSession(rng=random.Random(1), bank=BANK)
+    s = FamFeudSession(rng=random.Random(1), bank=BANK)
     for i in range(2):
         s.join("feudtok%03d" % i, "P%d" % i, None)
         s.set_ready("feudtok%03d" % i, True)
@@ -128,7 +128,7 @@ def test_singles_podium_ranks_individuals():
 
 
 def test_singles_lobby_has_mode_not_picker():
-    s = Fab5FeudSession(rng=random.Random(1), bank=BANK)
+    s = FamFeudSession(rng=random.Random(1), bank=BANK)
     for i in range(3):
         s.join("feudtok%03d" % i, "P%d" % i, None)
         s.set_ready("feudtok%03d" % i, True)
@@ -287,7 +287,7 @@ def test_unrevealed_answers_are_hidden():
 
 
 def test_bot_free_min_players():
-    assert Fab5FeudSession.MIN_PLAYERS == 2
+    assert FamFeudSession.MIN_PLAYERS == 2
     s, toks = make(2)
     assert all(not p.is_bot for p in s.players.values())
 
@@ -333,7 +333,7 @@ def test_answerer_disconnect_reseats_with_fresh_clock():
 
 
 def test_real_bank_integrity():
-    from games.fab5feud._surveys_data import SURVEYS
+    from games.famfeud._surveys_data import SURVEYS
     assert len(SURVEYS) >= 110
     seen = set()
     for s in SURVEYS:
@@ -350,7 +350,7 @@ def test_real_bank_integrity():
 def test_real_bank_every_answer_reachable():
     # each answer must be matchable via at least one of its own text/aliases,
     # and none of its terms should whiff entirely — catches ambiguous content
-    from games.fab5feud._surveys_data import SURVEYS
+    from games.famfeud._surveys_data import SURVEYS
     for s in SURVEYS:
         a = s["answers"]
         for i, ans in enumerate(a):

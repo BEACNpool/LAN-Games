@@ -6,11 +6,9 @@
 // otherwise.
 // Usage: node tests/playtest_battleship.mjs [baseURL] [shotdir]
 
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8123";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -24,7 +22,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fail(msg) { console.error("FAIL @ " + step + ": " + msg); process.exitCode = 1; }
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-battleship",
   args: ["--no-sandbox", "--disable-gpu"],
 });

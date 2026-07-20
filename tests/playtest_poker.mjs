@@ -4,11 +4,9 @@
 // runout -> showdown -> gameover -> brag. A second desktop pass validates the
 // 6-max seat layout.  Usage: node tests/playtest_poker.mjs [baseURL] [shotdir]
 
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots/poker";
@@ -24,7 +22,7 @@ function fail(msg) { console.error("FAIL @ " + step + ": " + msg); process.exitC
 const shot = (pg, name) => pg.screenshot({ path: `${OUT}/${name}.png` }).then(() => log("shot " + name));
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-poker",
   args: ["--no-sandbox", "--disable-gpu"],
 });

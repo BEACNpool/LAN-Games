@@ -1,11 +1,9 @@
 // playtest_wordrush.mjs — two phone controllers + a TV spectator play a full
 // WORD RUSH round: tap-build a word, submit a real word, see the reveal + winner.
 // Usage: node tests/playtest_wordrush.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8097";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -28,7 +26,7 @@ const canMake = (w, rack) => {
 };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-wordrush",
   args: ["--no-sandbox", "--disable-gpu"],
 });

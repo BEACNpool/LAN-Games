@@ -1,9 +1,9 @@
 # GAMEHUB — How to Add a Game
 
 This is the canonical guide for adding a new game to the LAN GAMES / GAMEHUB
-platform (`~/projects/gamehub`, live at **http://<lan-ip>:8096** and
-`http://<lan-ip>:8096`). A fresh context should be able to read this top to
-bottom and ship a new game that matches every existing one.
+platform. The server listens on **port 8096**, so once it's running the hub is
+live at `http://<host>:8096` on your LAN. A fresh context should be able to read
+this top to bottom and ship a new game that matches every existing one.
 
 **Golden rule:** a new game plugs in through ONE registry entry + ONE game
 directory. You never edit the core, and you never touch another game's files.
@@ -25,8 +25,8 @@ Copy the closest existing game and adapt it.
    WebSocket, the static client, and the hub card automatically.
 5. **Test it** — `tests/test_<slug>.py` (pytest) + `tests/playtest_<slug>.mjs`
    (headless browser) (§7).
-6. **Deploy & verify** — rsync to your-server, restart if Python changed, confirm
-   via LAN Games (§8).
+6. **Deploy & verify** — sync to whatever host runs the games, restart if Python
+   changed, confirm over the LAN (§8).
 
 Then run the full suite and, for anything non-trivial, an adversarial review
 pass. **Read §9 (footguns) before you start** — every one of them cost real time.
@@ -327,56 +327,64 @@ Cover: setup/deal, every rule, scoring, win/end conditions, **state masking per
 viewer**, disconnect+reconnect, and **full seeded bot-only games producing only
 legal actions**. Match the style of `tests/test_spades.py`. Run:
 ```
-cd ~/projects/gamehub && .venv/bin/python -m pytest -q         # whole suite
-.venv/bin/python -m pytest tests/test_<slug>.py -q             # just yours
+.venv/bin/python -m pytest -q                       # whole suite (from the repo root)
+.venv/bin/python -m pytest tests/test_<slug>.py -q  # just yours
 ```
 
 ### `tests/playtest_<slug>.mjs` — headless browser
 Copy `tests/playtest_tanks.mjs` verbatim and adapt. The fixed harness idioms:
 ```js
-import { createRequire } from "module";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
-  userDataDir: os.homedir() + "/tmp/ghshot-<slug>",   // snap CAN'T read /tmp or dotdirs
+  executablePath: CHROME_PATH, headless: "new",
+  userDataDir: os.homedir() + "/tmp/ghshot-<slug>",   // some sandboxed browsers CAN'T read /tmp or dotdirs
   args: ["--no-sandbox", "--disable-gpu"],
 });
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 ```
+`tests/_resolve.mjs` is the one place that finds the browser driver, so no test
+hard-codes a path. It resolves `puppeteer-core` from this repo (`npm i
+puppeteer-core`) or from `$GAMEHUB_NODE_MODULES` if you'd rather reuse an
+install you already have elsewhere, and it throws a message telling you exactly
+that if neither works. `CHROME_PATH` (or `PUPPETEER_EXECUTABLE_PATH`) points at
+the browser binary; set it if yours isn't at the default.
+
 Drive: join → pin settings → ready → GO → play a full game to the result screen
 → assert the brag card renders (`img#brag-img` `naturalWidth === 1080`). Multi-
 player games open 2+ browser contexts (see `playtest_charades.mjs`). **Screenshot
 key moments, Read the PNGs, and fix visual jank before finishing.** Run against a
 live local server:
 ```
-cd ~/projects/gamehub && ops/dev_restart.sh          # (re)start local on :8096
+ops/dev_restart.sh                                   # (re)start local on :8096
 node tests/playtest_<slug>.mjs http://127.0.0.1:8096
 ```
 
 ### The webdesign loop for the UI
 Before shipping the client, screenshot it at mobile/tablet/desktop and actually
-critique it: `node <your-screenshot-tool> <url> <outdir>`. 2–4 rounds.
-**Never `pkill chromium`** (kills your desktop browser); `shot.mjs` closes itself.
+critique it — any small puppeteer screenshot script will do (the playtests
+already show the shape). 2–4 rounds. **Never `pkill chromium`** — a broad
+`pkill` kills your own desktop browser too; always close the browser you
+launched via `browser.close()` or kill it by exact PID.
 
 ---
 
 ## 8. Deploy & verify
 
-Claude Code runs on the **dev machine (<dev-machine>)**; the games run on **your-server
-(<lan-ip>, ssh alias `your-server`)** as `systemctl --user` units.
+Typical setup: you develop on a workstation and the games run on an always-on
+box on the LAN (`$HOST` below), served by a long-running process — a
+`systemctl --user` unit, a system service, or a container, whichever you set up.
+Adapt the commands to yours.
 
 ```bash
-cd ~/projects/gamehub
 git add -A && git commit -m "Add <GAME>: …"
 rsync -a --delete --exclude .venv --exclude __pycache__ --exclude .git \
-      --exclude data/avatars ~/projects/gamehub/ your-server:~/projects/gamehub/
+      --exclude data/avatars ./ "$HOST":~/gamehub/
 # Python changed (new/edited .py)  -> restart the service:
-ssh your-server 'systemctl --user restart gamehub && sleep 2 && systemctl --user is-active gamehub'
+ssh "$HOST" 'systemctl --user restart gamehub && sleep 2 && systemctl --user is-active gamehub'
 # UI-ONLY change (html/css/js)     -> NO restart needed: StaticFiles serves web/ off disk.
-# verify live through the real nginx path:
-curl -s -o /dev/null -w "%{http_code}\n" http://<lan-ip>:8096/games/<slug>/
-node tests/playtest_<slug>.mjs http://<lan-ip>:8096      # optional: playtest live
+# verify live over the LAN:
+curl -s -o /dev/null -w "%{http_code}\n" "http://$HOST:8096/games/<slug>/"
+node tests/playtest_<slug>.mjs "http://$HOST:8096"       # optional: playtest live
 ```
 Notes: `data/avatars` is excluded so user uploads on the server aren't wiped.
 `systemctl --user status gamehub` in the **system** scope wrongly reads
@@ -407,9 +415,9 @@ for a new game — it rides the same proxy).
 5. **Use `self.rng`, never bare `random`/`Math.random`.** Tests seed the rng for
    reproducibility; wall-clock/`Math.random` in game logic breaks that. (Vary
    bot behavior by index/seed, not by `Date.now`.)
-6. **Snap chromium can't read `/tmp` or dot-dirs.** Playtest/`shot.mjs`
-   `userDataDir` must be under `~/tmp/...`. Use the scratchpad or `~/tmp`, never
-   `/tmp`.
+6. **A sandboxed browser may not be able to read `/tmp` or dot-dirs.** Snap- and
+   flatpak-packaged Chromium are confined and silently fail on the default temp
+   profile. Keep the playtest `userDataDir` under `~/tmp/...`, never `/tmp`.
 7. **Never `pkill -f chromium`** (and never a broad `pkill` matching your own
    shell). It kills your real desktop browser. Kill by exact PID / use
    `browser.close()` / `ops/dev_restart.sh` (which uses `fuser -k <port>/tcp`).
@@ -417,10 +425,11 @@ for a new game — it rides the same proxy).
    glyph art on `--bg #070b14`; a near-black emoji (♠️) vanishes. Set the
    optional `"art"` field to a **text-presentation** variant (`"♠︎"`)
    so it takes the accent color. Spades does this.
-9. **`systemctl --user`, with `Linger`.** The games are user units on the server;
-   the system scope lies (`inactive`). `ssh your-server` lands as the right user
-   (`ubuntudesktop`); `ssh your-server` is a DIFFERENT account with none of these
-   services (see workspace `TOOLS.md`).
+9. **If you run the games as a `systemctl --user` unit, enable `Linger`** for
+   that account (`loginctl enable-linger <user>`) or the service dies when the
+   SSH session ends. Query it with `systemctl --user`: the system scope has no
+   idea the unit exists and reports `inactive`, which looks exactly like an
+   outage. Make sure you SSH in as the account that actually owns the unit.
 10. **Rate limit is 20 msgs / 2s per socket.** Send discrete user actions only;
     coalesce anything chatty client-side (blitz batches typed answers).
 11. **Reject room-full BEFORE bumping `seq`.** `join` returns `(None, fx)` when
@@ -443,13 +452,12 @@ for a new game — it rides the same proxy).
 [ ] game_state masks every per-viewer secret
 [ ] web/index.html loads /shared/shared.css + hubnet.js + brag.js + own css/js
 [ ] client uses Hub.connect/fillAvatar/toast; brag card wired on game-over
-[ ] mobile-first: clean at 390 / 820 / 1440 (ran shot.mjs, read the PNGs)
+[ ] mobile-first: clean at 390 / 820 / 1440 (took screenshots, read the PNGs)
 [ ] registry.py: one entry with slug/title/icon/category/accent/tagline/
     blurb/players/min_p/max_p/solo/session/web (+ art if the emoji is dark)
 [ ] tests/test_<slug>.py green; full suite `.venv/bin/python -m pytest -q` green
 [ ] tests/playtest_<slug>.mjs PASS against http://127.0.0.1:8096
-[ ] deployed (rsync); restarted gamehub if Python changed; verified via LAN Games
-[ ] daily memory + (if notable) MEMORY.md updated
+[ ] deployed (rsync); restarted gamehub if Python changed; verified over the LAN
 ```
 
 ---

@@ -3,10 +3,8 @@
 // switch from emoji to the image. Tests gamehub (spades page) and wordclash.
 // Usage: node tests/pfp_test.mjs [gamehubURL] [wordclashURL]
 
-import { createRequire } from "module";
 import os from "os";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const HUB = process.argv[2] || "http://127.0.0.1:8096";
 const WC = process.argv[3] || "http://127.0.0.1:8095";
@@ -17,7 +15,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function fail(msg) { console.error("FAIL @ " + step + ": " + msg); process.exitCode = 1; }
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-profile",
   args: ["--no-sandbox", "--disable-gpu"],
 });

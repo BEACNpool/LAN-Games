@@ -1,4 +1,4 @@
-"""Survey bank for FAB5 FEUD — a Family-Feud-style party game.
+"""Survey bank for FAM FEUD — a Family-Feud-style party game.
 
 Pure data module: a single module-level list ``SURVEYS`` of survey dicts.
 Each survey is ``{"q": <prompt>, "answers": [{"text","pts","aliases"}, ...]}``

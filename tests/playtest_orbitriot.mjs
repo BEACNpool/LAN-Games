@@ -2,12 +2,10 @@
 // sling, power-up, three complete physics heats, podium, responsive layout,
 // and winner brag card.
 
-import { createRequire } from "module";
 import os from "os";
 import fs from "fs";
 
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 const BASE = process.argv[2] || "http://127.0.0.1:8797";
 const OUT = process.argv[3] || os.homedir() + "/tmp/orbitriot-shots";
 fs.mkdirSync(OUT, { recursive: true });
@@ -22,7 +20,7 @@ const log = (message) => console.log(`[${new Date().toISOString().slice(11,19)}]
 function fail(message) { console.error(`FAIL @ ${step}: ${message}`); process.exitCode = 1; }
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-orbitriot",
   args: ["--no-sandbox", "--disable-gpu"],
 });

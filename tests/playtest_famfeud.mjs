@@ -1,13 +1,11 @@
-// playtest_fab5feud.mjs — 2 humans head-to-head. Picks sides, plays every phase
+// playtest_famfeud.mjs — 2 humans head-to-head. Picks sides, plays every phase
 // (face-off, play/pass, three strikes, steal, round progression) to game over.
 // Answers are masked server-side, so it guesses "wrong" and drives the flow via
-// strikes/steals — correctness is covered by tests/test_fab5feud.py.
-// Usage: node tests/playtest_fab5feud.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
+// strikes/steals — correctness is covered by tests/test_famfeud.py.
+// Usage: node tests/playtest_famfeud.mjs [baseURL] [shotdir]
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -19,7 +17,7 @@ let step = "boot", bad = 0;
 const fail = (m) => { console.error("FAIL @ " + step + ": " + m); bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-feud",
   args: ["--no-sandbox", "--disable-gpu"],
 });
@@ -32,7 +30,7 @@ async function join(name, avIdx) {
   await pg.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
   pg.on("console", (m) => { if (m.type() === "error") errors.push(`${name}: ${m.text()}`); });
   pg.on("pageerror", (e) => errors.push(`${name} pageerror: ${e.message}`));
-  await pg.goto(BASE + "/games/fab5feud/", { waitUntil: "networkidle2" });
+  await pg.goto(BASE + "/games/famfeud/", { waitUntil: "networkidle2" });
   await pg.waitForSelector("#scr-join:not([hidden])", { timeout: 5000 });
   await pg.type("#name-input", name);
   await pg.evaluate((i) => document.querySelectorAll("#avatar-grid .avatar-cell")[i].click(), avIdx);
@@ -137,10 +135,10 @@ try {
   step = "done";
   log(errors.length ? "CONSOLE ERRORS:\n" + errors.join("\n") : "zero console errors");
   if (errors.length) bad++;
-  console.log(bad ? "FAB5 FEUD PLAYTEST FAIL" : "FAB5 FEUD PLAYTEST PASS");
+  console.log(bad ? "FAM FEUD PLAYTEST FAIL" : "FAM FEUD PLAYTEST PASS");
 } catch (e) {
   fail(e.message);
-  console.log("FAB5 FEUD PLAYTEST FAIL");
+  console.log("FAM FEUD PLAYTEST FAIL");
 } finally {
   await browser.close();
 }

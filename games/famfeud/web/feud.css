@@ -1,4 +1,4 @@
-/* FAB5 FEUD — survey board, team scores, contextual input */
+/* FAM FEUD — survey board, team scores, contextual input */
 
 .scr { position: relative; z-index: 1; min-height: 100dvh; display: flex;
        flex-direction: column; max-width: 720px; margin: 0 auto; }

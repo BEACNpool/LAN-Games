@@ -1,12 +1,10 @@
-// playtest_fab5feud_singles.mjs — 3 players in SINGLES (free-for-all) mode.
+// playtest_famfeud_singles.mjs — 3 players in SINGLES (free-for-all) mode.
 // Verifies the mode toggle hides the team picker, the standings strip renders,
 // and an odd-count game plays to a finish.
-// Usage: node tests/playtest_fab5feud_singles.mjs [baseURL] [shotdir]
-import { createRequire } from "module";
+// Usage: node tests/playtest_famfeud_singles.mjs [baseURL] [shotdir]
 import os from "os";
 import fs from "fs";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
@@ -18,7 +16,7 @@ let bad = 0;
 const fail = (m) => { console.error("FAIL: " + m); bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-feuds",
   args: ["--no-sandbox", "--disable-gpu"],
 });
@@ -32,7 +30,7 @@ async function join(name, i) {
   await pg.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
   pg.on("console", (m) => { if (m.type() === "error") errors.push(`${name}: ${m.text()}`); });
   pg.on("pageerror", (e) => errors.push(`${name} pageerror: ${e.message}`));
-  await pg.goto(BASE + "/games/fab5feud/", { waitUntil: "networkidle2" });
+  await pg.goto(BASE + "/games/famfeud/", { waitUntil: "networkidle2" });
   await pg.waitForSelector("#scr-join:not([hidden])", { timeout: 5000 });
   await pg.type("#name-input", name);
   await pg.evaluate((k) => document.querySelectorAll("#avatar-grid .avatar-cell")[k].click(), i);
@@ -119,10 +117,10 @@ try {
 
   log(errors.length ? "CONSOLE ERRORS:\n" + errors.join("\n") : "zero console errors");
   if (errors.length) bad++;
-  console.log(bad ? "FAB5 FEUD SINGLES PLAYTEST FAIL" : "FAB5 FEUD SINGLES PLAYTEST PASS");
+  console.log(bad ? "FAM FEUD SINGLES PLAYTEST FAIL" : "FAM FEUD SINGLES PLAYTEST PASS");
 } catch (e) {
   fail(e.message);
-  console.log("FAB5 FEUD SINGLES PLAYTEST FAIL");
+  console.log("FAM FEUD SINGLES PLAYTEST FAIL");
 } finally {
   await browser.close();
 }

@@ -3,17 +3,15 @@
 //   * the lobby STEERING seg switches scheme, persists it, and shows/hides
 //     the d-pad (only the D-PAD scheme renders it)
 // Usage: node tests/snake_controls_test.mjs [baseURL]
-import { createRequire } from "module";
 import os from "os";
-const require = createRequire("/home/ubuntudesktop/projects/webdev-toolkit/x.js");
-const puppeteer = require("puppeteer-core");
+import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8096";
 let bad = 0;
 const check = (ok, msg) => { console.log((ok ? "PASS " : "FAIL ") + msg); if (!ok) bad++; };
 
 const browser = await puppeteer.launch({
-  executablePath: "/snap/bin/chromium", headless: "new",
+  executablePath: CHROME_PATH, headless: "new",
   userDataDir: os.homedir() + "/tmp/ghshot-snakectrl",
   args: ["--no-sandbox", "--disable-gpu"],
 });
