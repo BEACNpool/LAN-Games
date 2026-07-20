@@ -77,31 +77,32 @@ REGISTRY = [
     },
     {
         "slug": "bingo",
-        "category": "bigscreen", "accent": "#22d3ee", "tv": True,
-        "tagline": "Caller on the TV. Your card's on your phone.",
+        "category": "party", "accent": "#22d3ee",
+        "tagline": "Daub your card. First to the pattern shouts BINGO.",
         "min_p": 1, "max_p": 12, "solo": True,
         "title": "BINGO",
         "icon": "🎱",
-        "blurb": "The TV calls the numbers; every phone is a card. Number or "
-                 "picture bingo, lines / corners / blackout. Tap to daub, shout "
-                 "BINGO — or let little kids auto-play.",
-        "players": "1–12 + TV",
+        "blurb": "Every phone is a card and the caller runs right on your screen. "
+                 "Number or picture bingo, lines / corners / blackout. Tap to daub, "
+                 "shout BINGO — or let little kids auto-play. Optional big-screen "
+                 "caller board.",
+        "players": "1–12",
         "session": BingoSession,
         "web": GAMES_DIR / "bingo" / "web",
         "hidden": False,
     },
     {
         "slug": "pricecheck",
-        "category": "bigscreen", "accent": "#10c96e", "tv": True,
+        "category": "party", "accent": "#10c96e",
         "tagline": "Guess the price. Closest wins.",
         "min_p": 1, "max_p": 12, "solo": True,
         "title": "PRICE CHECK",
         "icon": "🏷️",
         "art": "🏷",
-        "blurb": "The TV shows an item; everyone locks a price on their phone. "
-                 "Closest wins — or closest without going over. 120-item bank, "
-                 "real-guess reveal.",
-        "players": "1–12 + TV",
+        "blurb": "An item comes up and everyone locks in a price on their phone. "
+                 "Closest wins — or closest without going over. 112-item bank, "
+                 "real-guess reveal. Optional big-screen view.",
+        "players": "1–12",
         "session": PriceCheckSession,
         "web": GAMES_DIR / "pricecheck" / "web",
         "hidden": False,
@@ -254,16 +255,16 @@ REGISTRY = [
     },
     {
         "slug": "wordrush",
-        "category": "party", "accent": "#2dd4bf", "tv": True,
+        "category": "party", "accent": "#2dd4bf",
         "tagline": "Same 7 letters. Race to find the most words.",
         "min_p": 1, "max_p": 12, "solo": True,
         "title": "WORD RUSH",
         "icon": "🔤",
         "blurb": "One rack of letters, everyone races to spell as many words as "
                  "they can before the clock runs out. Longer words score more; a "
-                 "full-rack word earns a bonus. 80,000-word dictionary, big-screen "
-                 "leaderboard.",
-        "players": "1–12 + TV",
+                 "full-rack word earns a bonus. 80,000-word dictionary; optional "
+                 "big-screen leaderboard.",
+        "players": "1–12",
         "session": WordRushSession,
         "web": GAMES_DIR / "wordrush" / "web",
         "hidden": False,
@@ -437,8 +438,9 @@ EXTERNAL = [
         "icon": "🟩",
         "category": "party", "accent": "#10c96e",
         "tagline": "Duel. Relay. Sabotage.",
-        "min_p": 2, "max_p": 8, "solo": False, "tv": True,
-        "blurb": "Multiplayer wordle: duel, relay, sabotage. Wall-tablet TV view at /tv.",
+        "min_p": 2, "max_p": 8, "solo": False,
+        "blurb": "Multiplayer wordle: duel, relay, sabotage. Everyone plays their own "
+                 "board on their phone; optional wall-tablet spectator view at /tv.",
         "players": "2–8",
         "url": "/games/wordclash/",   # merged into this server (same origin)
     },
