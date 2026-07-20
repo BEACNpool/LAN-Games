@@ -1,13 +1,3 @@
-
-
-https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
-
-
-
-
-
-<img width="1630" height="1106" alt="image" src="https://github.com/user-attachments/assets/b1105395-0bff-46c8-af46-e8d7f5a74617" />
-<img width="1563" height="1185" alt="image" src="https://github.com/user-attachments/assets/a80e1ef4-704d-4587-8568-03fca09cbd44" />
 # LAN Games
 
 A self-hosted **game hub for your local network**. One page, 24 games, bots to
@@ -16,6 +6,16 @@ own phone/laptop on the same Wi‑Fi — **no accounts, no cloud, no build step.
 
 Run it on any always-on box on your LAN (a spare laptop, a Raspberry Pi, a home
 server), open the URL on everyone's phones, and you've got game night.
+
+### 90-second tour
+
+https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
+
+<sub>(A copy also ships in the repo as
+`2026-07-17_LAN-GAMES_explainer_web.mp4`.)</sub>
+
+<img alt="The hub: lobby chat and the big-screen rail" src="docs/hub-lobby.png" width="820">
+<img alt="The shelf: cards, board classics, arcade and battle" src="docs/hub-shelf.png" width="820">
 
 ---
 
