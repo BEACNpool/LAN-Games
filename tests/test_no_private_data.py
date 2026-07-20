@@ -22,6 +22,11 @@ import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 
+# Values that are plainly stand-ins rather than someone's real network. Used by
+# the ssid rule below so documentation can show the config shape.
+PLACEHOLDER = (r"your[-_]|my[-_]|some[-_]|example|changeme|"
+               r"guest-wifi|network-name|ssid[\"']")
+
 # (label, regex) — case-insensitive. Keep each pattern tight enough not to
 # false-positive on ordinary game content (see ALLOW for known exceptions).
 PATTERNS = [
@@ -39,8 +44,12 @@ PATTERNS = [
      r"[\w.+-]+@(gmail|yahoo|outlook|hotmail|icloud)\.com"),
     ("wifi credential",
      r"WIFI:T:[^;]*;S:[^;$]"),          # a literal QR payload, not the builder
+    # A network name assigned a literal value. Obvious placeholders are excused
+    # so docs and the example config can show the shape of it without the whole
+    # file needing a blanket exemption — a real SSID in those files still fails.
     ("hardcoded ssid/password",
-     r"^\s*[\"']?(ssid|passphrase|psk)[\"']?\s*[:=]\s*[\"'][^\"'{$<]"),
+     r"^\s*[\"']?(ssid|passphrase|psk)[\"']?\s*[:=]\s*[\"']"
+     rf"(?!{PLACEHOLDER})[^\"'{{$<]"),
     ("private workspace doc",
      r"\b(TOOLS|MEMORY|HEARTBEAT|SOUL|IDENTITY)\.md\b"),
 ]
@@ -57,11 +66,9 @@ SKIP_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
 
 # Known-good exceptions: (path, label) pairs that are allowed to match.
 ALLOW = {
-    # venue.example.json must show the wifi keys to document them; the values are
-    # obvious placeholders. Only this one label is exempted for that file —
-    # "personal branding" stays enforced there, see the note below.
-    ("venue.example.json", "hardcoded ssid/password"),
-    # NOTE: venue.example.json is otherwise NOT exempted. The example config
+    # NOTE: venue.example.json gets NO exemption at all — its placeholder values
+    # pass on their own merits via PLACEHOLDER above, so a real SSID or a real
+    # venue name dropped into the example still fails. The example config
     # must use a fictional venue ("SMITH FAMILY ARCADE"), never the real one —
     # otherwise the personalization ships as the documented sample, which is the
     # exact leak this whole mechanism exists to prevent.

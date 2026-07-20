@@ -6,7 +6,7 @@ give a game — belongs in `data/venue.json`, which is gitignored. This module
 merges that file over the generic defaults below.
 
 A fresh public clone has no venue.json, gets DEFAULTS, and works fine: it reads
-as "LAN GAMES" and simply hides the Wi-Fi button. Your box reads venue.json and
+as "LAN GAMES" with an unconfigured Wi-Fi button. Your box reads venue.json and
 shows your branding. Neither ever leaks into the other.
 
 See venue.example.json for every knob, and ops/install_hooks.sh for the

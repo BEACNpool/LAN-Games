@@ -49,6 +49,15 @@
   .hub-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   .hub-btn.on { border-color: var(--cyan); color: var(--cyan);
                 box-shadow: 0 0 0 1px var(--cyan), 0 0 18px rgba(34, 211, 238, 0.28); }
+  /* Guest Wi-Fi with nothing configured: present but visibly blank, so it reads
+     as "set me up" rather than as a broken control. Clicking opens setup. */
+  .hub-btn.wifi-unset { color: transparent; border-style: dashed;
+                        border-color: rgba(148, 163, 184, 0.42); }
+  .hub-btn.wifi-unset::after { content: "+"; position: absolute;
+                               color: var(--muted); font-size: 20px;
+                               line-height: 1; font-weight: 600; }
+  .hub-btn.wifi-unset:hover { border-color: rgba(34, 211, 238, 0.55); }
+  .hub-btn.wifi-unset:hover::after { color: var(--cyan); }
   .hub-btn .pip { position: absolute; top: -4px; right: -4px; min-width: 17px;
                   height: 17px; padding: 0 4px; border-radius: 999px;
                   background: var(--pink); color: #180310; font-family: var(--mono);
@@ -99,6 +108,13 @@
               background: #fff; padding: 12px; }
   .share-qr svg { width: 100%; height: 100%; display: block; }
   .share-hint { color: var(--muted); font-size: 13px; line-height: 1.55; }
+  .wifi-snippet { margin: 10px 0; padding: 11px 13px; border-radius: 10px;
+                  background: rgba(2, 6, 23, 0.66); border: 1px solid var(--line);
+                  overflow-x: auto; text-align: left; }
+  .wifi-snippet code { font-family: var(--mono); font-size: 12px;
+                       line-height: 1.5; color: var(--text); white-space: pre; }
+  .wifi-warn { border-left: 2px solid var(--pink); padding-left: 10px;
+               margin-top: 12px; }
   .share-url { display: block; margin: 12px 0 16px; padding: 10px 12px;
                border: 1px solid var(--line); border-radius: 10px;
                background: var(--bg); color: var(--cyan); font-family: var(--mono);
@@ -382,7 +398,7 @@
         <button class="hub-btn" id="chat-jump" aria-label="jump to lobby chat" title="lobby chat">
           <span aria-hidden="true">💬</span><span class="pip" id="chat-pip">0</span>
         </button>
-        <button class="hub-btn" id="wifi-open" aria-label="guest Wi-Fi QR" title="guest Wi-Fi QR" hidden>
+        <button class="hub-btn wifi-unset" id="wifi-open" aria-label="guest Wi-Fi — not set up yet" title="guest Wi-Fi — not set up yet">
           <span aria-hidden="true">📶</span>
         </button>
         <button class="hub-btn" id="share-open" aria-label="games join QR" title="games QR — scan to open the games">
@@ -449,11 +465,34 @@
   <div class="modal-card share-card">
     <button class="pf-close" id="wifi-close" aria-label="close">✕</button>
     <p class="modal-title" id="wifi-title">📶 JOIN THE WI-FI</p>
-    <div class="share-qr" id="wifi-qr" aria-label="QR code to join the guest Wi-Fi"></div>
-    <p class="share-hint">Scan to hop on the guest Wi-Fi — then tap the ⌁ button for the games.</p>
-    <code class="share-url">📶 <b id="wifi-ssid"></b>&nbsp;&nbsp;·&nbsp;&nbsp;🔑 <span id="wifi-pass"></span></code>
-    <p class="share-hint" id="wifi-note" hidden>Hidden network — the QR includes it, but a
-      phone or two may need you to add it by name.</p>
+
+    <div id="wifi-ready" hidden>
+      <div class="share-qr" id="wifi-qr" aria-label="QR code to join the guest Wi-Fi"></div>
+      <p class="share-hint">Scan to hop on the guest Wi-Fi — then tap the ⌁ button for the games.</p>
+      <code class="share-url">📶 <b id="wifi-ssid"></b>&nbsp;&nbsp;·&nbsp;&nbsp;🔑 <span id="wifi-pass"></span></code>
+      <p class="share-hint" id="wifi-note" hidden>Hidden network — the QR includes it, but a
+        phone or two may need you to add it by name.</p>
+    </div>
+
+    <div id="wifi-setup" hidden>
+      <p class="share-hint">Put your guest Wi-Fi here and this button shows a QR code
+        that joins your network — guests scan it, then scan ⌁ for the games.</p>
+      <p class="share-hint">On the machine running the hub, create
+        <code>data/venue.json</code>:</p>
+      <pre class="wifi-snippet"><code>{
+  "wifi": {
+    "ssid": "your-guest-ssid",
+    "password": "your-guest-password",
+    "security": "WPA",
+    "hidden": false
+  }
+}</code></pre>
+      <p class="share-hint">Then reload this page. Set <code>"hidden": true</code> for a
+        network that doesn't broadcast its name, or phones won't join from the scan.</p>
+      <p class="share-hint wifi-warn">Anyone who can open this hub can read that password —
+        that's the point, but use your <b>guest</b> network, not your main one.
+        <code>data/venue.json</code> is gitignored, so it never lands in the repo.</p>
+    </div>
   </div>
 </div>
 

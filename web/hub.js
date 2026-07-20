@@ -384,14 +384,21 @@
     const sec = w.security || (w.password ? "WPA" : "nopass");
     return `WIFI:T:${sec};S:${esc(w.ssid)};P:${esc(w.password)};${w.hidden ? "H:true;" : ""};`;
   }
+  // The button is ALWAYS shown. Unconfigured it opens setup instructions rather
+  // than hiding, so the feature is discoverable on a fresh clone instead of
+  // being invisible until you happen to read the README.
   let venueWifi = null;
   function openWifi() {
-    if (!venueWifi) return;
+    const ready = !!venueWifi;
+    $("wifi-title").textContent = ready ? "📶 JOIN THE WI-FI" : "📶 SET UP GUEST WI-FI";
+    $("wifi-ready").hidden = !ready;
+    $("wifi-setup").hidden = ready;
+    $("wifi-sheet").hidden = false;
+    if (!ready) return;
     const qr = $("wifi-qr"); qr.textContent = "";
     $("wifi-ssid").textContent = venueWifi.ssid || "";
     $("wifi-pass").textContent = venueWifi.password || "(open)";
     $("wifi-note").hidden = !venueWifi.hidden;
-    $("wifi-sheet").hidden = false;
     try { renderQR(qr, wifiQRString(venueWifi)); }
     catch (e) { qr.textContent = "QR unavailable"; }
   }
@@ -401,8 +408,14 @@
     if (e.target.id === "wifi-sheet") $("wifi-sheet").hidden = true;
   });
   fetch("/api/venue").then((r) => r.json()).then((v) => {
-    if (v && v.wifi && v.wifi.ssid) { venueWifi = v.wifi; $("wifi-open").hidden = false; }
-  }).catch(() => { /* no venue config (e.g. public clone) — Wi-Fi button stays hidden */ });
+    if (v && v.wifi && v.wifi.ssid) {
+      venueWifi = v.wifi;
+      const btn = $("wifi-open");
+      btn.classList.remove("wifi-unset");
+      btn.setAttribute("aria-label", "guest Wi-Fi QR");
+      btn.title = "guest Wi-Fi QR";
+    }
+  }).catch(() => { /* no venue config — button stays in its set-up state */ });
 
   /* ---------- profile (name + character + photo, shared with every game) ---------- */
   let pfAvatar = "";

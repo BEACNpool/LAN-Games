@@ -82,8 +82,8 @@ async def api_venue():
 
     Generic defaults live in core/venue.py; your own values go in the gitignored
     data/venue.json (copy venue.example.json). A public clone with no venue.json
-    gets the generic "LAN GAMES" brand and no Wi-Fi block, so the hub simply
-    hides the Wi-Fi button.
+    gets the generic "LAN GAMES" brand and no Wi-Fi block, so the hub shows a
+    blank Wi-Fi button that opens setup instructions.
 
     NOTE: the Wi-Fi password is served to anyone who can reach this endpoint —
     that is deliberate (guests scan the QR), but put your GUEST SSID here, not

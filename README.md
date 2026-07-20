@@ -96,13 +96,15 @@ cp venue.example.json data/venue.json   # then edit it
 - **`brand.name`** replaces the wordmark in page titles.
 - **`brand.presents`** is the big-screen splash kicker.
 - **`brand.titles`** renames individual games, keyed by registry slug.
-- **`wifi`** enables the 📶 button on the hub, which shows a QR that joins your
-  network — guests scan it, then scan the games QR. Omit the block and the
-  button stays hidden. Set `"hidden": true` for a non-broadcast SSID, or phones
-  won't join from the scan.
+- **`wifi`** fills in the 📶 button on the hub, which shows a QR that joins your
+  network — guests scan it, then scan the games QR. Set `"hidden": true` for a
+  non-broadcast SSID, or phones won't join from the scan.
+
+The 📶 button is always there; until you configure it, it renders blank and
+tapping it shows these setup instructions in-app.
 
 Every key is optional. With no `venue.json` at all the hub reads as the generic
-"LAN GAMES" and simply hides the Wi-Fi button — which is exactly what a fresh
+"LAN GAMES" with an unconfigured Wi-Fi button — which is exactly what a fresh
 clone should look like.
 
 > **Anyone on your LAN who opens the hub can read the Wi-Fi password.** That's

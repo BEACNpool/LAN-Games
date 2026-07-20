@@ -23,7 +23,8 @@
   "wifi": {
     "_readme": [
       "Guest Wi-Fi for the hub's join-QR button. OMIT this whole block and the",
-      "button stays hidden. Anyone on your LAN who opens the hub can read this",
+      "button renders blank and offers these setup steps instead. Anyone on your",
+      "LAN who opens the hub can read this",
       "password — that is the point (it's for guests), but don't put your admin",
       "network here. Use your guest SSID."
     ],
