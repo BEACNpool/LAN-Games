@@ -81,9 +81,14 @@ def title_for(slug: str, default: str) -> str:
     return (brand().get("titles") or {}).get(slug, default)
 
 
-def route_aliases(known_slugs) -> dict[str, str]:
-    """Return safe aliases whose targets exist and do not shadow real games."""
-    known = set(known_slugs)
+def route_aliases(occupied_slugs, binding_slugs=None) -> dict[str, str]:
+    """Return safe aliases that do not shadow any mounted game.
+
+    Alias WebSockets are backed by regular GameBinding instances, so external
+    mounted apps may occupy an alias key but are not valid alias targets.
+    """
+    occupied = set(occupied_slugs)
+    targets = set(binding_slugs if binding_slugs is not None else occupied)
     raw = load().get("route_aliases") or {}
     if not isinstance(raw, dict):
         return {}
@@ -92,5 +97,5 @@ def route_aliases(known_slugs) -> dict[str, str]:
         for alias, target in raw.items()
         if isinstance(alias, str) and isinstance(target, str)
         and _SLUG.fullmatch(alias) and _SLUG.fullmatch(target)
-        and alias not in known and target in known and alias != target
+        and alias not in occupied and target in targets and alias != target
     }

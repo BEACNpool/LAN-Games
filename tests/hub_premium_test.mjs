@@ -116,6 +116,9 @@ try {
     `game detail sheet has art, context and CTA (${details.title})`);
   await page.screenshot({ path: path.join(OUT, "02-game-details-360.png") });
   await page.click("#game-sheet-close");
+  await sleep(30);
+  check(await page.evaluate(() => document.activeElement?.classList.contains("tile-info")),
+    "closing game details restores focus to its tile");
 
   await page.click("#search-open");
   await page.type("#game-search", "poker");
@@ -128,6 +131,9 @@ try {
     "search finds Texas Hold'em from the natural “poker” query");
   await page.screenshot({ path: path.join(OUT, "03-search-360.png") });
   await page.click("#search-close");
+  await sleep(30);
+  check(await page.evaluate(() => document.activeElement?.id === "search-open"),
+    "closing search restores focus to search");
 
   await page.click("#profile-chip");
   await page.waitForSelector("#profile-sheet:not([hidden])");
@@ -148,7 +154,25 @@ try {
   check(/Add to Home Screen/i.test(installText) && /iPhone/i.test(installText) &&
       /Android/i.test(installText), "home-screen guide is honest and cross-platform");
   await page.click("#install-close");
+  await sleep(30);
+  check(await page.evaluate(() =>
+    document.activeElement?.id === "install-open"
+      && !document.getElementById("profile-sheet").hidden),
+  "closing the install guide returns to the open profile dialog");
+  await page.click("#pf-close");
+  await sleep(30);
+  check(await page.evaluate(() => document.activeElement?.id === "profile-chip"),
+    "closing profile restores focus to its opener");
+  await page.click("#welcome-setup");
+  await page.type("#pf-name", "PLAYER");
+  await page.click("#pf-save");
+  await sleep(30);
+  check(await page.evaluate(() =>
+    document.activeElement?.id === "profile-chip"
+      && document.getElementById("welcome-card").hidden),
+    "first-time profile save returns focus after hiding its setup card");
 
+  await page.evaluate(() => localStorage.removeItem("wc-name"));
   await page.goto(BASE + "/games/poker/", { waitUntil: "networkidle2" });
   await page.waitForSelector("#scr-join:not([hidden])", { timeout: 6000 });
   await page.waitForSelector(".suite-home", { timeout: 3000 });

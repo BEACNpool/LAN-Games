@@ -28,6 +28,34 @@
   let filter = "all";
   const tileLive = {};       // slug -> tile element (for badge updates)
   let selectedGame = null;
+  const modalOpeners = new WeakMap();
+
+  function showSheet(id, focusId, fallbackOpenerId) {
+    const sheet = $(id);
+    let opener = document.activeElement;
+    if (!(opener instanceof HTMLElement) || opener === document.body
+        || opener.closest("[hidden]")) {
+      opener = fallbackOpenerId ? $(fallbackOpenerId) : null;
+    }
+    modalOpeners.set(sheet, {
+      opener,
+      fallback: fallbackOpenerId ? $(fallbackOpenerId) : null,
+    });
+    sheet.hidden = false;
+    if (focusId) setTimeout(() => $(focusId)?.focus(), 20);
+  }
+
+  function hideSheet(id) {
+    const sheet = $(id);
+    sheet.hidden = true;
+    const state = modalOpeners.get(sheet);
+    modalOpeners.delete(sheet);
+    let target = state?.opener;
+    if (!target?.isConnected || target.closest("[hidden]")) target = state?.fallback;
+    if (target?.isConnected && !target.closest("[hidden]")) {
+      setTimeout(() => target.focus({ preventScroll: true }), 0);
+    }
+  }
 
   const readList = (key) => {
     try {
@@ -45,7 +73,7 @@
     orbitriot: "8–12 min", poker: "20–45 min", spades: "25–45 min",
     hearts: "15–25 min", euchre: "15–25 min", charades: "10–20 min",
     trivia: "15–30 min", blitz: "10–15 min", werewolf: "20–35 min",
-    famfeud: "15–25 min", fab5feud: "15–25 min", wordrush: "5–10 min",
+    famfeud: "15–25 min", wordrush: "5–10 min",
     wordclash: "10–20 min", chess: "10–45 min", checkers: "10–20 min",
     backgammon: "15–30 min", connect4: "5–10 min", fortfling: "5–10 min",
     tanks: "10–20 min", battleship: "10–20 min", snake: "5–10 min",
@@ -281,13 +309,12 @@
     play.href = launchUrl(g);
     play.onclick = () => rememberGame(g);
     renderGameFavorite();
-    $("game-sheet").hidden = false;
-    $("game-sheet-play").focus();
+    showSheet("game-sheet", "game-sheet-play");
     Hub.feedback.select(); Hub.feedback.haptic(14);
   }
 
   function closeGameSheet() {
-    $("game-sheet").hidden = true;
+    hideSheet("game-sheet");
     selectedGame = null;
   }
 
@@ -325,13 +352,12 @@
   }
 
   function openSearch() {
-    $("search-sheet").hidden = false;
     $("game-search").value = "";
     renderSearch();
-    setTimeout(() => $("game-search").focus(), 20);
+    showSheet("search-sheet", "game-search", "search-open");
     Hub.feedback.tap();
   }
-  function closeSearch() { $("search-sheet").hidden = true; }
+  function closeSearch() { hideSheet("search-sheet"); }
 
   /* the LIVE badge sits at the top-left of the badges row */
   function setLiveBadge(el, text) {
@@ -523,10 +549,10 @@
     if (event.key === "Escape") {
       if (!$("search-sheet").hidden) closeSearch();
       else if (!$("game-sheet").hidden) closeGameSheet();
-      else if (!$("install-sheet").hidden) $("install-sheet").hidden = true;
+      else if (!$("install-sheet").hidden) closeInstall();
       else if (!$("profile-sheet").hidden) closeProfile();
       else if (!$("share-sheet").hidden) closeShare();
-      else if (!$("wifi-sheet").hidden) $("wifi-sheet").hidden = true;
+      else if (!$("wifi-sheet").hidden) closeWifi();
       return;
     }
     if (event.key === "/" && !/^(INPUT|TEXTAREA)$/.test(event.target?.tagName || "")
@@ -560,7 +586,7 @@
   const localOnlyHost = ["localhost", "127.0.0.1", "0.0.0.0", "::1"]
     .includes(location.hostname);
 
-  function closeShare() { $("share-sheet").hidden = true; }
+  function closeShare() { hideSheet("share-sheet"); }
 
   function openShare() {
     const qr = $("share-qr");
@@ -569,10 +595,9 @@
     $("share-hint").textContent = localOnlyHost
       ? "This address only works on the host. Reopen LAN Games using the host's LAN IP, then share again."
       : "Connect to the same Wi-Fi, then scan this code.";
-    $("share-sheet").hidden = false;
+    showSheet("share-sheet", "share-copy", "share-open");
     try { renderQR(qr, shareUrl); }
     catch (e) { qr.textContent = "QR unavailable"; }
-    $("share-copy").focus();
   }
 
   async function copyJoinLink() {
@@ -629,13 +654,13 @@
   // than hiding, so the feature is discoverable on a fresh clone instead of
   // being invisible until you happen to read the README.
   let venueWifi = null;
+  function closeWifi() { hideSheet("wifi-sheet"); }
   function openWifi() {
     const ready = !!venueWifi;
     $("wifi-title").textContent = ready ? "📶 JOIN THE WI-FI" : "📶 SET UP GUEST WI-FI";
     $("wifi-ready").hidden = !ready;
     $("wifi-setup").hidden = ready;
-    $("wifi-sheet").hidden = false;
-    setTimeout(() => $("wifi-close").focus(), 20);
+    showSheet("wifi-sheet", "wifi-close", "wifi-open");
     if (!ready) return;
     const qr = $("wifi-qr"); qr.textContent = "";
     $("wifi-ssid").textContent = venueWifi.ssid || "";
@@ -648,9 +673,9 @@
     event.stopPropagation();
     openWifi();
   };
-  $("wifi-close").onclick = () => { $("wifi-sheet").hidden = true; };
+  $("wifi-close").onclick = closeWifi;
   $("wifi-sheet").addEventListener("click", (e) => {
-    if (e.target.id === "wifi-sheet") $("wifi-sheet").hidden = true;
+    if (e.target.id === "wifi-sheet") closeWifi();
   });
   fetch("/api/venue").then((r) => r.json()).then((v) => {
     if (v && v.wifi && v.wifi.ssid) {
@@ -704,10 +729,9 @@
     renderPfPreview();
     renderProfileStats();
     renderPrefs();
-    $("profile-sheet").hidden = false;
-    setTimeout(() => $("pf-name").focus(), 20);
+    showSheet("profile-sheet", "pf-name", "profile-chip");
   }
-  const closeProfile = () => { $("profile-sheet").hidden = true; };
+  function closeProfile() { hideSheet("profile-sheet"); }
 
   $("profile-chip").onclick = openProfile;
   $("welcome-setup").onclick = openProfile;
@@ -739,16 +763,15 @@
   $("pf-motion").onclick = () => { Hub.prefs.reducedFx = !Hub.prefs.reducedFx; renderPrefs(); };
   $("pf-contrast").onclick = () => { Hub.prefs.contrast = !Hub.prefs.contrast; renderPrefs(); };
   $("install-open").onclick = () => {
-    closeProfile();
-    $("install-sheet").hidden = false;
     $("install-note").textContent = window.isSecureContext
       ? "On supported browsers, the suite can launch full screen."
       : "This private LAN uses HTTP, so your browser saves a home-screen shortcut rather than an offline app.";
-    setTimeout(() => $("install-close").focus(), 20);
+    showSheet("install-sheet", "install-close", "install-open");
   };
-  $("install-close").onclick = () => { $("install-sheet").hidden = true; };
+  function closeInstall() { hideSheet("install-sheet"); }
+  $("install-close").onclick = closeInstall;
   $("install-sheet").addEventListener("click", (event) => {
-    if (event.target.id === "install-sheet") $("install-sheet").hidden = true;
+    if (event.target.id === "install-sheet") closeInstall();
   });
   renderChip();
   renderWelcome();

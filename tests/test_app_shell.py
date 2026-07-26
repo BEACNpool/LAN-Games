@@ -15,6 +15,12 @@ def manifest_payload() -> dict:
     return json.loads(response.body)
 
 
+def venue_payload() -> dict:
+    response = asyncio.run(server.api_venue())
+    assert response.media_type == "application/json"
+    return json.loads(response.body)
+
+
 def test_manifest_uses_public_default_without_venue_file(tmp_path, monkeypatch):
     monkeypatch.setattr(venue, "VENUE_FILE", tmp_path / "missing.json")
     payload = manifest_payload()
@@ -45,11 +51,47 @@ def test_route_aliases_only_accept_safe_existing_targets(tmp_path, monkeypatch):
         "route_aliases": {
             "old-family-feud": "famfeud",
             "poker": "famfeud",          # cannot shadow a real route
+            "wordclash": "famfeud",      # cannot shadow a mounted external app
             "retired-game": "missing",   # target must exist
             "../escape": "famfeud",      # route text must be a slug
         },
     }), encoding="utf-8")
     monkeypatch.setattr(venue, "VENUE_FILE", config)
-    assert venue.route_aliases({"famfeud", "poker"}) == {
+    assert venue.route_aliases(
+        {"famfeud", "poker", "wordclash"}, {"famfeud", "poker"}) == {
         "old-family-feud": "famfeud",
+    }
+
+
+def test_client_venue_payload_excludes_server_only_config(tmp_path, monkeypatch):
+    config = tmp_path / "venue.json"
+    config.write_text(json.dumps({
+        "brand": {
+            "name": "NORTH STAR ARCADE",
+            "presents": "NORTH STAR ARCADE PRESENTS",
+            "titles": {"famfeud": "NORTH STAR FEUD"},
+        },
+        "route_aliases": {"old-family-feud": "famfeud"},
+        "wifi": {
+            "ssid": "guest-wifi",
+            "password": "changeme",
+            "security": "WPA",
+            "hidden": True,
+            "admin_note": "server only",
+        },
+        "future_server_setting": "private",
+    }), encoding="utf-8")
+    monkeypatch.setattr(venue, "VENUE_FILE", config)
+    payload = venue_payload()
+    assert payload == {
+        "brand": {
+            "name": "NORTH STAR ARCADE",
+            "presents": "NORTH STAR ARCADE PRESENTS",
+        },
+        "wifi": {
+            "ssid": "guest-wifi",
+            "password": "changeme",
+            "security": "WPA",
+            "hidden": True,
+        },
     }

@@ -395,12 +395,14 @@ ops/deploy.sh \
 
 The apply pass:
 
-1. reruns the privacy gate and full Python suite;
+1. freezes the committed release in a detached worktree, then runs the privacy
+   gate and full Python suite against those exact bytes;
 2. performs a remote preflight;
 3. shows the exact `rsync` dry-run again;
 4. creates an off-tree code rollback point plus permission-restricted
    archives of `data/` and `.git`;
-5. fingerprints `data/`, `.git`, `.venv`, and `venv` before and after sync;
+5. fingerprints stable protected paths (`.git`, `.venv`, and `venv`) before and
+   after sync, while the release fixture proves mutable `data/` is excluded;
 6. restarts the `systemctl --user` unit only for Python changes; and
 7. polls `/health`, automatically restoring old code if health never returns.
 
@@ -408,10 +410,11 @@ Uploaded avatars, chat media, the private venue configuration, Git metadata,
 virtualenvs, Node/Python caches, and logs are never copied over or deleted.
 Future runtime files placed under `data/` inherit the same protection.
 
-If `requirements.txt` changed, inspect it and add `--install-deps`; the script
-updates the existing production `.venv` instead of replacing it. Use
-`--restart` to force a restart for an unusual static release, or `--no-restart`
-to assert that a release must be static-only.
+Dependency releases are intentionally refused: mutating a live virtualenv is
+not an atomic rollback. Build and verify a replacement virtualenv under a
+separate reviewed migration, then cut it over deliberately. Use `--restart` to
+force a restart for an unusual static release, or `--no-restart` to assert that
+a release must be static-only.
 
 Every successful deploy prints the exact rollback command. You can also inspect
 one without changing production:

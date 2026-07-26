@@ -3,13 +3,16 @@
 /data/
 
 # python
+.venv
 .venv/
+venv
 venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 
 # node (playtest harness)
+node_modules
 node_modules/
 
 # logs / scratch

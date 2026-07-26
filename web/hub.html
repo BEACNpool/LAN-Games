@@ -517,10 +517,11 @@
   </div>
 </div>
 
-<div id="profile-sheet" class="modal" hidden>
+<div id="profile-sheet" class="modal" role="dialog" aria-modal="true"
+     aria-labelledby="profile-title" hidden>
   <div class="modal-card profile-card">
     <button class="pf-close" id="pf-close" aria-label="close">✕</button>
-    <p class="modal-title">YOUR PROFILE</p>
+    <p class="modal-title" id="profile-title">YOUR PROFILE</p>
     <div class="pf-top">
       <span class="pf-av" id="pf-av">🎮</span>
       <div class="pf-photo-col">

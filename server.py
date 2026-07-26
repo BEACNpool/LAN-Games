@@ -52,7 +52,9 @@ for entry in REGISTRY:
 # Private venue aliases preserve old bookmarks after a game is renamed, while
 # the public repository remains generic. They are read at process start because
 # routes themselves are part of the FastAPI application.
-for old_slug, current_slug in venue.route_aliases(bindings).items():
+occupied_game_slugs = set(bindings) | {entry["slug"] for entry in EXTERNAL}
+for old_slug, current_slug in venue.route_aliases(
+        occupied_game_slugs, bindings).items():
     app.add_api_websocket_route(
         "/games/%s/ws" % old_slug, _make_ws(bindings[current_slug]),
         name="legacy-ws-%s" % old_slug)
@@ -109,7 +111,22 @@ async def api_venue():
     NOTE: the Wi-Fi password is served to anyone who can reach this endpoint —
     that is deliberate (guests scan the QR), but put your GUEST SSID here, not
     your admin network."""
-    return JSONResponse(venue.load())
+    config = venue.load()
+    brand = config.get("brand") if isinstance(config.get("brand"), dict) else {}
+    wifi = config.get("wifi") if isinstance(config.get("wifi"), dict) else None
+    return JSONResponse({
+        "brand": {
+            "name": brand.get("name") or venue.DEFAULTS["brand"]["name"],
+            "presents": (brand.get("presents")
+                         or venue.DEFAULTS["brand"]["presents"]),
+        },
+        "wifi": ({
+            "ssid": wifi.get("ssid") or "",
+            "password": wifi.get("password") or "",
+            "security": wifi.get("security") or "",
+            "hidden": bool(wifi.get("hidden")),
+        } if wifi else None),
+    })
 
 
 def _valid_token(token):

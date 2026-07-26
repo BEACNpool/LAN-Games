@@ -31,7 +31,7 @@ PLACEHOLDER = (r"your[-_]|my[-_]|some[-_]|example|changeme|"
 # false-positive on ordinary game content (see ALLOW for known exceptions).
 PATTERNS = [
     ("personal branding",
-     r"\bfab[\s._-]?5\b"),
+     r"\bfab[\s._-]?5"),
     ("private LAN address",
      r"\b10\.30\.0\.\d{1,3}\b"),
     ("internal hostname",

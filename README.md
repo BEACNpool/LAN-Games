@@ -153,10 +153,10 @@ That way a personalization can't reach the public repo by accident.
 
 ## Updating a production host safely
 
-`ops/deploy.sh` is deliberately a dry run unless you pass `--apply`. It tests
-the exact source tree, shows every planned file change, creates an off-tree
-rollback point, and protects all runtime data, Git metadata, virtualenvs,
-caches, and logs from `rsync --delete`.
+`ops/deploy.sh` is deliberately a dry run unless you pass `--apply`. It freezes
+and tests the exact committed tree, shows every planned file change, creates an
+off-tree rollback point, and protects all runtime data, Git metadata,
+virtualenvs, caches, and logs from `rsync --delete`.
 
 ```bash
 # 1. Review only — production is untouched.

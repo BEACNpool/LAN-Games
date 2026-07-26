@@ -22,10 +22,7 @@ Required:
 Safety and behavior:
   --apply                  Apply after showing the dry-run (default: plan only)
   --yes                    Skip the typed confirmation (automation only)
-  --allow-dirty            Permit a non-clean source tree (strongly discouraged)
   --skip-tests             Skip pytest; the privacy gate still runs
-  --install-deps           Update the preserved production venv when
-                           requirements.txt changes
   --restart                Restart even for a static-only release
   --no-restart             Never restart (rejected when Python changes)
 
@@ -53,9 +50,7 @@ service="gamehub"
 health_url="http://127.0.0.1:8096/health"
 apply=0
 assume_yes=0
-allow_dirty=0
 skip_tests=0
-install_deps=0
 restart_mode="auto"
 
 while (($#)); do
@@ -67,9 +62,7 @@ while (($#)); do
     --health-url) [[ $# -ge 2 ]] || lan_games_die "--health-url needs a value"; health_url="$2"; shift 2 ;;
     --apply) apply=1; shift ;;
     --yes) assume_yes=1; shift ;;
-    --allow-dirty) allow_dirty=1; shift ;;
     --skip-tests) skip_tests=1; shift ;;
-    --install-deps) install_deps=1; shift ;;
     --restart) restart_mode="always"; shift ;;
     --no-restart) restart_mode="never"; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -102,14 +95,36 @@ cd "$repo_root"
 commit="$(git rev-parse HEAD)"
 short_commit="${commit:0:12}"
 branch="$(git symbolic-ref --short -q HEAD || echo detached)"
+[[ "$commit" =~ ^[0-9a-f]{40}$ ]] || lan_games_die "unexpected commit id"
+[[ "$branch" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$ ]] \
+  || lan_games_die "unsafe branch name; release from a conventionally named branch"
 release_id="$(date -u +%Y%m%dT%H%M%SZ)-$short_commit"
 release_dir="$backup_root/$release_id"
 
 dirty="$(git status --porcelain --untracked-files=all)"
-if [[ -n "$dirty" && "$allow_dirty" -ne 1 ]]; then
+if [[ -n "$dirty" ]]; then
   echo "$dirty" >&2
-  lan_games_die "source tree is dirty; commit the exact release or pass --allow-dirty"
+  lan_games_die "source tree is dirty; commit the exact release before deploying"
 fi
+
+# Freeze the committed release into its own worktree before tests or review.
+# Every later test, dry-run and applied rsync reads these same immutable bytes,
+# so a concurrent edit to the developer worktree cannot change the release.
+release_parent="$(mktemp -d -t lan-games-release.XXXXXXXX)"
+release_source="$release_parent/source"
+plan_file="$release_parent/rsync-plan"
+cleanup() {
+  local status=$?
+  trap - EXIT
+  rm -f -- "$plan_file"
+  if [[ -d "$release_source" ]]; then
+    git -C "$repo_root" worktree remove --force "$release_source" >/dev/null 2>&1 || true
+  fi
+  rmdir -- "$release_parent" >/dev/null 2>&1 || true
+  exit "$status"
+}
+trap cleanup EXIT
+git worktree add --quiet --detach "$release_source" "$commit"
 
 python_bin="$repo_root/.venv/bin/python"
 [[ -x "$python_bin" ]] || python_bin="$(command -v python3)"
@@ -117,13 +132,15 @@ python_bin="$repo_root/.venv/bin/python"
 "$python_bin" -c 'import pytest' 2>/dev/null \
   || lan_games_die "pytest is unavailable; install requirements-dev.txt before releasing"
 echo "privacy gate"
-"$python_bin" tests/test_no_private_data.py
+(cd "$release_source" && "$python_bin" tests/test_no_private_data.py)
 if [[ "$skip_tests" -ne 1 ]]; then
   echo "full Python suite"
-  "$python_bin" -m pytest -q
+  (cd "$release_source" && "$python_bin" -m pytest -q)
 else
   echo "warning: full test suite skipped" >&2
 fi
+[[ -z "$(git -C "$release_source" status --porcelain --untracked-files=no)" ]] \
+  || lan_games_die "tests modified tracked release files"
 
 echo "remote preflight: $host:$dest"
 ssh "$host" "bash -s -- '$dest'" <<'REMOTE'
@@ -137,8 +154,6 @@ command -v sha256sum >/dev/null
 REMOTE
 
 lan_games_rsync_args
-plan_file="$(mktemp)"
-trap 'rm -f "$plan_file"' EXIT
 
 echo
 echo "release: $branch@$short_commit"
@@ -146,7 +161,7 @@ echo "target:  $host:$dest"
 echo "backup:  $host:$release_dir"
 echo
 echo "rsync dry-run (protected: all data, git metadata, virtualenvs, caches, logs)"
-rsync "${LAN_GAMES_RSYNC_ARGS[@]}" --dry-run "$repo_root/" "$host:$dest/" | tee "$plan_file"
+rsync "${LAN_GAMES_RSYNC_ARGS[@]}" --dry-run "$release_source/" "$host:$dest/" | tee "$plan_file"
 
 python_changed=0
 requirements_changed=0
@@ -158,8 +173,8 @@ while IFS= read -r line; do
   esac
 done < "$plan_file"
 
-if [[ "$requirements_changed" -eq 1 && "$install_deps" -ne 1 ]]; then
-  lan_games_die "requirements.txt changes; review them, then rerun with --install-deps"
+if [[ "$requirements_changed" -eq 1 ]]; then
+  lan_games_die "requirements.txt changed; this code-only deploy refuses non-atomic virtualenv changes"
 fi
 if [[ "$python_changed" -eq 1 && "$restart_mode" == "never" ]]; then
   lan_games_die "Python changes require a restart; remove --no-restart"
@@ -237,7 +252,11 @@ fingerprint() {
   fi
 }
 {
-  for rel in data .git .venv venv; do
+  # Runtime data is deliberately excluded from this equality check: avatars
+  # and chat uploads may change legitimately while a release is in flight.
+  # The rsync policy/fixture proves data is excluded and protected; fingerprint
+  # only stable protected paths here.
+  for rel in .git .venv venv; do
     printf '%s %s\n' "$rel" "$(fingerprint "$rel")"
   done
 } > "$release_dir/preserved.before"
@@ -247,10 +266,28 @@ find "$release_dir" -maxdepth 1 -type f ! -name SHA256SUMS -print0 \
 echo "$release_dir"
 REMOTE
 
-echo "applying reviewed plan"
-rsync "${LAN_GAMES_RSYNC_ARGS[@]}" "$repo_root/" "$host:$dest/"
+deploy_started=0
+rollback_on_error() {
+  local status="${1:-$?}"
+  trap - ERR
+  if [[ "$deploy_started" -eq 1 ]]; then
+    deploy_started=0
+    echo "deployment step failed; restoring pre-deploy code automatically" >&2
+    if ! "$script_dir/rollback.sh" \
+      --host "$host" --dest "$dest" --backup "$release_dir" \
+      --service "$service" --health-url "$health_url" --apply --yes; then
+      echo "CRITICAL: automatic rollback also failed; use $release_dir manually" >&2
+    fi
+  fi
+  exit "$status"
+}
+trap rollback_on_error ERR
 
-echo "verifying protected paths were untouched by rsync"
+echo "applying reviewed plan"
+deploy_started=1
+rsync "${LAN_GAMES_RSYNC_ARGS[@]}" "$release_source/" "$host:$dest/"
+
+echo "verifying stable protected paths were untouched by rsync"
 ssh "$host" "bash -s -- '$dest' '$release_dir'" <<'REMOTE'
 set -euo pipefail
 dest="$1"
@@ -265,17 +302,12 @@ fingerprint() {
   fi
 }
 {
-  for rel in data .git .venv venv; do
+  for rel in .git .venv venv; do
     printf '%s %s\n' "$rel" "$(fingerprint "$rel")"
   done
 } > "$release_dir/preserved.after"
 diff -u "$release_dir/preserved.before" "$release_dir/preserved.after"
 REMOTE
-
-if [[ "$requirements_changed" -eq 1 ]]; then
-  echo "installing reviewed runtime dependencies into preserved .venv"
-  ssh "$host" "test -x '$dest/.venv/bin/python' && '$dest/.venv/bin/python' -m pip install -r '$dest/requirements.txt'"
-fi
 
 should_restart=0
 case "$restart_mode" in
@@ -301,12 +333,12 @@ if [[ "$health_ok" -eq 1 ]]; then
 fi
 
 if [[ "$health_ok" -ne 1 ]]; then
-  echo "health check failed; restoring pre-deploy code automatically" >&2
-  "$script_dir/rollback.sh" \
-    --host "$host" --dest "$dest" --backup "$release_dir" \
-    --service "$service" --health-url "$health_url" --apply --yes
-  lan_games_die "release failed health checks and was rolled back"
+  echo "health check failed" >&2
+  rollback_on_error 1
 fi
+
+deploy_started=0
+trap - ERR
 
 echo
 echo "DEPLOYED $short_commit"

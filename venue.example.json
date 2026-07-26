@@ -3,8 +3,8 @@
     "Copy this file to data/venue.json to personalize your own hub.",
     "data/ is gitignored, so nothing you put here can ever be committed or pushed.",
     "Every key is optional — omit anything you don't want to change.",
-    "Restart the server after editing (the file is read per request, but the",
-    "registry titles are resolved at import time)."
+    "Brand, game titles, and Wi-Fi are read per request. Restart only after",
+    "changing route_aliases, because URL routes are registered at startup."
   ],
 
   "brand": {
