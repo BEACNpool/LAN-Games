@@ -34,9 +34,12 @@
 <!-- ============ LOBBY ============ -->
 <section id="scr-lobby" class="scr" hidden>
   <header class="topbar">
-    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <a href="/" class="icon-btn" style="display:grid;place-items:center" aria-label="Back to LAN Games">🕹</a>
     <span class="wordmark-sm"><span class="wm-a">PRICE</span> <span class="wm-b">CHECK</span></span>
-    <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+    <div class="topbar-right">
+      <button id="mute-btn" class="icon-btn sound-toggle" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button>
+      <button id="pfp-btn2" class="icon-btn" type="button" title="your photo" aria-label="Change your photo">📷</button>
+    </div>
   </header>
   <div class="lobby-body">
     <a id="tv-open" class="tv-cta" href="tv.html" target="_blank" rel="noopener">
@@ -66,9 +69,10 @@
 <!-- ============ GAME ============ -->
 <section id="scr-game" class="scr" hidden>
   <header class="pc-head">
-    <a href="/" class="head-link">🕹</a>
+    <a href="/" class="head-link" aria-label="Back to LAN Games">🕹</a>
     <span id="pc-header" class="pc-header">WHAT'S THE PRICE?</span>
     <span id="pc-round" class="pc-round">1/5</span>
+    <button id="mute-btn2" class="icon-btn sound-toggle game-mute" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button>
   </header>
 
   <div class="pc-item">
@@ -78,9 +82,9 @@
 
   <!-- guessing -->
   <div id="pc-guess" class="pc-guess" hidden>
-    <div id="pc-readout" class="pc-readout"><span id="pc-value">0</span></div>
-    <div id="pc-pad" class="pc-pad"></div>
-    <button id="lock-btn" class="btn btn-primary btn-big">LOCK IT IN</button>
+    <div id="pc-readout" class="pc-readout" aria-live="polite"><span id="pc-value">0</span></div>
+    <div id="pc-pad" class="pc-pad" role="group" aria-label="Number pad"></div>
+    <button id="lock-btn" class="btn btn-primary btn-big" type="button">LOCK IT IN</button>
   </div>
 
   <!-- locked (waiting) -->
@@ -112,6 +116,7 @@
 
 <div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
 <canvas id="confetti"></canvas>
+<p id="game-status" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></p>
 
 <script src="/shared/hubnet.js"></script>
 <script src="/shared/brag.js"></script>

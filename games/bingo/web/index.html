@@ -34,9 +34,12 @@
 <!-- ============ LOBBY ============ -->
 <section id="scr-lobby" class="scr" hidden>
   <header class="topbar">
-    <a href="/" class="icon-btn" style="display:grid;place-items:center">🕹</a>
+    <a href="/" class="icon-btn" style="display:grid;place-items:center" aria-label="Back to LAN Games">🕹</a>
     <span class="wordmark-sm"><span class="wm-a">BIN</span><span class="wm-b">GO</span></span>
-    <button id="pfp-btn2" class="icon-btn" title="your photo">📷</button>
+    <div class="topbar-right">
+      <button id="mute-btn" class="icon-btn sound-toggle" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button>
+      <button id="pfp-btn2" class="icon-btn" type="button" title="your photo" aria-label="Change your photo">📷</button>
+    </div>
   </header>
   <div class="lobby-body">
     <a id="tv-open" class="tv-cta" href="tv.html" target="_blank" rel="noopener">
@@ -68,21 +71,24 @@
 <!-- ============ GAME ============ -->
 <section id="scr-game" class="scr" hidden>
   <header class="bg-head">
-    <a href="/" class="head-link">🕹</a>
+    <a href="/" class="head-link" aria-label="Back to LAN Games">🕹</a>
     <div class="call-now">
       <span class="call-kick">NOW CALLING</span>
       <span id="call-chip" class="call-chip">—</span>
     </div>
-    <span id="bg-round" class="bg-round">R1</span>
+    <div class="bg-actions">
+      <span id="bg-round" class="bg-round">R1</span>
+      <button id="mute-btn2" class="icon-btn sound-toggle game-mute" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button>
+    </div>
   </header>
 
   <p id="bg-goal" class="bg-goal"></p>
 
-  <div id="card" class="card"></div>
+  <div id="card" class="card" role="grid" aria-label="Your BINGO card"></div>
 
   <div class="bg-foot">
     <label class="auto-toggle"><input id="auto-me" type="checkbox"><span>auto-daub my card</span></label>
-    <button id="bingo-btn" class="btn btn-bingo btn-big">BINGO!</button>
+    <button id="bingo-btn" class="btn btn-bingo btn-big" type="button" aria-describedby="bg-goal">BINGO!</button>
   </div>
 </section>
 
@@ -108,6 +114,7 @@
 
 <div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
 <canvas id="confetti"></canvas>
+<p id="game-status" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></p>
 
 <script src="/shared/hubnet.js"></script>
 <script src="/shared/brag.js"></script>

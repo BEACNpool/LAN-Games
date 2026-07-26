@@ -2,12 +2,23 @@
   "name": "LAN Games",
   "short_name": "LAN Games",
   "description": "A phone-first multiplayer game night hub for your local network.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#070b14",
   "theme_color": "#070b14",
+  "categories": ["games", "entertainment", "family"],
+  "shortcuts": [
+    {
+      "name": "Choose a game",
+      "short_name": "Play",
+      "url": "/?from=shortcut",
+      "icons": [{ "src": "/shared/app-icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/shared/app-icon-192.png",

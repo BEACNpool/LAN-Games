@@ -14,25 +14,44 @@ const MODES = {
   sabotage: { icon: "💣", name: "SABOTAGE",
     desc: "Relay with teeth. Spend your turn to cut timers, ban letters, or force a start." },
 };
-const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "!zxcvbnm<"];
+// Seven keys per row keeps every on-screen control at least 44px wide on a
+// 360px phone without horizontal scrolling. The order still follows QWERTY.
+const KEY_ROWS = ["qwertyu", "iopasdf", "ghjklzx", "cvbnm!<"];
 const REASONS = { solved: "SOLVED", time: "TIME'S UP", exhausted: "BOARD EXHAUSTED",
                   all_done: "ALL BOARDS IN" };
 
 const $ = (id) => document.getElementById(id);
+const SYSTEM_REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)");
+const reduceMotion = () => {
+  const saved = localStorage.getItem("lg-motion");
+  return saved === "reduced" || (saved !== "full" && SYSTEM_REDUCE_MOTION.matches);
+};
+function applySuitePrefs() {
+  document.documentElement.classList.toggle("lg-reduced-fx", reduceMotion());
+  document.documentElement.classList.toggle(
+    "lg-high-contrast", localStorage.getItem("lg-contrast") === "1");
+}
+applySuitePrefs();
+SYSTEM_REDUCE_MOTION.addEventListener?.("change", applySuitePrefs);
+addEventListener("storage", (event) => {
+  if (event.key === "lg-motion" || event.key === "lg-contrast") applySuitePrefs();
+});
 const els = {};
 ["screen-join", "screen-lobby", "screen-game", "screen-roundend", "screen-podium",
  "name-input", "avatar-grid", "join-btn", "player-grid", "ready-count", "mode-cards",
  "rounds-val", "rounds-minus", "rounds-plus", "ready-btn", "go-btn", "lobby-hint",
  "turn-row", "turn-val", "turn-minus", "turn-plus",
  "hud-round", "hud-timer", "hud-timer-fill", "hud-clock", "hud-scores",
+ "board-label", "board-progress",
  "turn-banner", "turn-avatar", "turn-name", "turn-sub", "ring-fg",
  "opp-strip", "board-scroll", "board", "sabotage-bar", "sab-charges", "pending-note",
- "keyboard", "spectate-note", "re-reason", "re-word", "re-scores", "re-next",
- "podium", "podium-rest", "rematch-btn", "podium-auto",
+ "keyboard", "spectate-note", "roundend-wrap", "re-emblem", "re-outcome",
+ "re-reason", "re-word", "re-scores", "re-next",
+ "podium", "podium-rest", "podium-kicker", "rematch-btn", "podium-auto",
  "letter-modal", "letter-modal-title", "letter-grid", "letter-cancel",
  "profile-modal", "profile-name", "profile-avatars", "profile-cancel", "profile-save",
  "countdown-overlay", "countdown-num", "toasts", "conn-banner", "mute-btn",
- "edit-profile-btn", "confetti"].forEach((id) => { els[id] = $(id); });
+ "edit-profile-btn", "confetti", "wc-live", "wc-alert"].forEach((id) => { els[id] = $(id); });
 
 /* ---------------- local state ---------------- */
 
@@ -95,6 +114,7 @@ const Confetti = (() => {
   function fit() { cv.width = innerWidth; cv.height = innerHeight; }
   addEventListener("resize", fit); fit();
   function burst(n = 120) {
+    if (reduceMotion()) return;
     for (let i = 0; i < n; i++) {
       parts.push({
         x: innerWidth / 2 + (Math.random() - 0.5) * innerWidth * 0.6,
@@ -124,11 +144,31 @@ const Confetti = (() => {
 
 /* ---------------- helpers ---------------- */
 
+let currentScreen = "";
 function show(screenId) {
   for (const id of ["screen-join", "screen-lobby", "screen-game",
                     "screen-roundend", "screen-podium"]) {
     els[id].hidden = id !== screenId;
   }
+  document.body.dataset.screen = screenId.replace("screen-", "");
+  if (currentScreen !== screenId) {
+    currentScreen = screenId;
+    const labels = {
+      "screen-join": "Join WordClash",
+      "screen-lobby": "WordClash lobby",
+      "screen-game": "Match started",
+      "screen-roundend": "Round complete",
+      "screen-podium": "Final standings",
+    };
+    announce(labels[screenId] || "");
+  }
+}
+
+function announce(msg, urgent = false) {
+  const host = urgent ? els["wc-alert"] : els["wc-live"];
+  if (!host || !msg) return;
+  host.textContent = "";
+  requestAnimationFrame(() => { host.textContent = msg; });
 }
 
 function toast(msg, cls = "") {
@@ -136,6 +176,7 @@ function toast(msg, cls = "") {
   t.className = "toast " + cls;
   t.textContent = msg;
   els["toasts"].appendChild(t);
+  announce(msg, cls === "err" || cls === "sab");
   setTimeout(() => t.remove(), 3200);
 }
 
@@ -161,7 +202,10 @@ function fmtClock(ms) {
   return `${(s / 60) | 0}:${String(s % 60).padStart(2, "0")}`;
 }
 
-function vibrate(pat) { try { navigator.vibrate && navigator.vibrate(pat); } catch (e) {} }
+function vibrate(pat) {
+  if (localStorage.getItem("lg-haptics") === "0") return;
+  try { navigator.vibrate && navigator.vibrate(pat); } catch (e) {}
+}
 
 /* custom pfp support: render photo if the player has one, else emoji */
 function fillAvatar(el, p) {
@@ -170,7 +214,7 @@ function fillAvatar(el, p) {
     const img = document.createElement("img");
     img.className = "pfp";
     img.src = p.pfp;
-    img.alt = "";
+    img.alt = p.name ? `${p.name}'s player photo` : "Player photo";
     img.draggable = false;
     el.appendChild(img);
   } else {
@@ -351,6 +395,8 @@ function renderLobby(st) {
   for (const p of players) {
     const card = document.createElement("div");
     card.className = "player-card" + (p.ready ? " is-ready" : "") + (p.connected ? "" : " is-away");
+    card.setAttribute("role", "listitem");
+    card.setAttribute("aria-label", `${p.name}, ${!p.connected ? "away" : p.ready ? "ready" : "not ready"}${p.pid === S.pid ? ", you" : ""}`);
     const av = document.createElement("div"); av.className = "pc-avatar"; fillAvatar(av, p);
     const meta = document.createElement("div"); meta.className = "pc-meta";
     const nm = document.createElement("div"); nm.className = "pc-name"; nm.textContent = p.name;
@@ -368,6 +414,7 @@ function renderLobby(st) {
   if (players.length < 3) {
     const inv = document.createElement("div");
     inv.className = "player-card empty-slot";
+    inv.setAttribute("role", "listitem");
     inv.textContent = `join at ${location.host}`;
     grid.appendChild(inv);
   }
@@ -381,6 +428,9 @@ function renderLobby(st) {
   for (const [key, m] of Object.entries(MODES)) {
     const b = document.createElement("button");
     b.className = "mode-card" + (st.settings.mode === key ? " sel" : "");
+    b.type = "button";
+    b.setAttribute("aria-pressed", st.settings.mode === key ? "true" : "false");
+    b.setAttribute("aria-label", `${m.name}. ${m.desc}`);
     const ic = document.createElement("span"); ic.className = "mc-icon"; ic.textContent = m.icon;
     const tx = document.createElement("span");
     const nm = document.createElement("div"); nm.className = "mc-name"; nm.textContent = m.name;
@@ -399,6 +449,7 @@ function renderLobby(st) {
   const amReady = !!(my && my.ready);
   els["ready-btn"].textContent = amReady ? "READY ✓" : "READY UP";
   els["ready-btn"].classList.toggle("is-ready", amReady);
+  els["ready-btn"].setAttribute("aria-pressed", amReady ? "true" : "false");
   const canGo = readyN >= 2 && amReady && st.phase === "lobby";
   els["go-btn"].hidden = !canGo;
   els["lobby-hint"].textContent =
@@ -423,9 +474,18 @@ function keyStates(rows) {
   return ks;
 }
 
+function markName(mark) {
+  return mark === "g" ? "correct"
+    : mark === "y" ? "present in another position"
+    : mark === "b" ? "not in the word" : "empty";
+}
+
 function makeRow(word, marks, opts = {}) {
   const row = document.createElement("div");
   row.className = "brow" + (opts.cls ? " " + opts.cls : "");
+  row.setAttribute("role", "group");
+  const label = opts.label || (opts.rowNumber ? `Guess ${opts.rowNumber}` : "Word row");
+  row.setAttribute("aria-label", label);
   for (let i = 0; i < 5; i++) {
     const t = document.createElement("div");
     let cls = "tile";
@@ -438,6 +498,10 @@ function makeRow(word, marks, opts = {}) {
     }
     t.className = cls;
     t.textContent = ch ? ch.toUpperCase() : "";
+    t.setAttribute("role", "img");
+    t.setAttribute("aria-label", ch
+      ? `${ch.toUpperCase()}, ${marks ? markName(marks[i]) : "entered"}`
+      : `Position ${i + 1}, empty`);
     row.appendChild(t);
   }
   return row;
@@ -455,11 +519,19 @@ function renderGame(st) {
     .sort((a, b) => b.score - a.score);
   for (const p of inMatch) {
     const chip = document.createElement("span");
-    chip.className = "score-chip";
+    chip.className = "score-chip" + (p.pid === S.pid ? " is-me" : "");
+    chip.setAttribute("aria-label", `${p.pid === S.pid ? "You" : p.name}: ${p.score} points`);
     const cav = document.createElement("span");
     fillAvatar(cav, p);
     chip.appendChild(cav);
-    chip.appendChild(document.createTextNode(" " + p.score));
+    const name = document.createElement("span");
+    name.className = "sc-name";
+    name.textContent = p.pid === S.pid ? "YOU" : p.name;
+    const score = document.createElement("span");
+    score.className = "sc-score";
+    score.textContent = p.score;
+    chip.appendChild(name);
+    chip.appendChild(score);
     chip.style.borderColor = p.pid === S.pid ? p.color : "";
     hs.appendChild(chip);
   }
@@ -477,6 +549,11 @@ function renderDuel(st, rd) {
   els["opp-strip"].hidden = false;
 
   const myBoard = rd.boards[S.pid];
+  els["board-label"].textContent = S.spectating ? "MATCH BOARDS" : "YOUR BOARD";
+  els["board-progress"].textContent = !myBoard
+    ? "SPECTATING"
+    : myBoard.solved ? "SOLVED"
+    : `${myBoard.n} / ${myBoard.max}`;
 
   // opponents strip (or all boards for spectators)
   const strip = els["opp-strip"];
@@ -487,6 +564,8 @@ function renderDuel(st, rd) {
     if (!b) continue;
     const card = document.createElement("div");
     card.className = "opp-card" + (b.solved ? " done-solved" : b.done ? " done-bust" : "");
+    card.setAttribute("role", "status");
+    card.setAttribute("aria-label", `${p.name}: ${b.solved ? "solved" : b.done ? "out of guesses" : `${b.n} of ${b.max} guesses`}`);
     const head = document.createElement("div"); head.className = "opp-head";
     const av = document.createElement("span"); av.className = "oh-av"; fillAvatar(av, p);
     const nm = document.createElement("span"); nm.className = "oh-name"; nm.textContent = p.name;
@@ -525,13 +604,16 @@ function renderDuel(st, rd) {
     board.appendChild(makeRow(r.w, r.m, {
       flip: idx >= prevN,
       cls: r.w && r.m && r.m.every((x) => x === "g") ? "win" : "",
+      rowNumber: idx + 1,
     }));
   });
   S.lastRows["me"] = rows.length;
 
   S.inputRowEl = null;
   if (!myBoard.done && rows.length < myBoard.max) {
-    const inputRow = makeRow(S.typed.padEnd(0), null, {});
+    const inputRow = makeRow(S.typed.padEnd(0), null, {
+      label: `Current guess, ${S.typed.length} of 5 letters`,
+    });
     // fill typed letters
     for (let i = 0; i < 5; i++) {
       const t = inputRow.children[i];
@@ -540,9 +622,13 @@ function renderDuel(st, rd) {
     }
     board.appendChild(inputRow);
     S.inputRowEl = inputRow;
-    for (let r = rows.length + 1; r < myBoard.max; r++) board.appendChild(makeRow(null, null));
+    for (let r = rows.length + 1; r < myBoard.max; r++) {
+      board.appendChild(makeRow(null, null, { rowNumber: r + 1 }));
+    }
   } else {
-    for (let r = rows.length; r < myBoard.max; r++) board.appendChild(makeRow(null, null));
+    for (let r = rows.length; r < myBoard.max; r++) {
+      board.appendChild(makeRow(null, null, { rowNumber: r + 1 }));
+    }
   }
 
   renderKeyboard(keyStates(rows), !myBoard.done, null);
@@ -551,6 +637,8 @@ function renderDuel(st, rd) {
 function renderRelay(st, rd) {
   els["opp-strip"].hidden = true;
   const myTurn = !S.spectating && rd.turn === S.pid;
+  els["board-label"].textContent = rd.kind === "sabotage" ? "SABOTAGE BOARD" : "SQUAD BOARD";
+  els["board-progress"].textContent = `${rd.rows.length} / ${rd.rows_max}`;
 
   // turn banner
   const tb = els["turn-banner"];
@@ -562,6 +650,9 @@ function renderRelay(st, rd) {
   els["turn-name"].textContent = rd.paused ? "PAUSED" : myTurn ? "YOUR TURN" : (turnP ? turnP.name : "—");
   els["turn-sub"].textContent = rd.paused ? "waiting for players"
     : myTurn ? "type a word!" : "is thinking…";
+  tb.setAttribute("aria-label", rd.paused ? "Game paused, waiting for players"
+    : myTurn ? "Your turn. Type a five letter word."
+    : `${turnP ? turnP.name : "Another player"} is taking their turn.`);
 
   // shared board
   const board = els["board"];
@@ -585,6 +676,7 @@ function renderRelay(st, rd) {
       wrap.appendChild(makeRow(r.w, r.m, {
         flip: idx >= prevN,
         cls: r.m && r.m.every((x) => x === "g") ? "win" : "",
+        label: `${owner ? owner.name : "Player"}'s guess ${idx + 1}`,
       }));
     }
     board.appendChild(wrap);
@@ -599,7 +691,7 @@ function renderRelay(st, rd) {
     tag.className = "rr-owner me";
     if (me()) fillAvatar(tag, me()); else tag.textContent = "▶";
     wrap.appendChild(tag);
-    const inputRow = makeRow(null, null);
+    const inputRow = makeRow(null, null, { label: `Your current guess, ${S.typed.length} of 5 letters` });
     for (let i = 0; i < 5; i++) {
       const ch = S.typed[i];
       if (ch) {
@@ -618,7 +710,7 @@ function renderRelay(st, rd) {
     wrap.className = "relay-row";
     const tag = document.createElement("span"); tag.className = "rr-owner"; tag.textContent = "";
     wrap.appendChild(tag);
-    wrap.appendChild(makeRow(null, null));
+    wrap.appendChild(makeRow(null, null, { label: `Open guess ${r + 1}` }));
     board.appendChild(wrap);
   }
   // keep the action in view: the input row if it's my turn, else the latest
@@ -645,6 +737,7 @@ function renderRelay(st, rd) {
     const mine = rd.charges[S.pid] || 0;
     sb.hidden = mine <= 0;
     els["sab-charges"].textContent = "⚡".repeat(mine);
+    els["sab-charges"].setAttribute("aria-label", `${mine} sabotage charge${mine === 1 ? "" : "s"}`);
     sb.querySelectorAll(".sab-btn").forEach((b) => { b.disabled = mine <= 0; });
   } else sb.hidden = true;
 
@@ -667,18 +760,28 @@ function renderKeyboard(ks, enabled, bannedLetter) {
     kr.className = "krow";
     for (const ch of rowStr) {
       const k = document.createElement("button");
-      if (ch === "!") { k.className = "key wide"; k.textContent = "ENTER"; k.dataset.k = "enter"; }
-      else if (ch === "<") { k.className = "key wide"; k.textContent = "⌫"; k.dataset.k = "back"; }
+      k.type = "button";
+      if (ch === "!") {
+        k.className = "key wide"; k.textContent = "ENTER"; k.dataset.k = "enter";
+        k.setAttribute("aria-label", "Submit word");
+      }
+      else if (ch === "<") {
+        k.className = "key wide"; k.textContent = "⌫"; k.dataset.k = "back";
+        k.setAttribute("aria-label", "Delete last letter");
+      }
       else {
         k.className = "key" + (ks[ch] ? " " + ks[ch] : "");
         if (bannedLetter === ch) k.className = "key banned";
         k.textContent = ch; k.dataset.k = ch;
+        k.setAttribute("aria-label", `${ch.toUpperCase()}${ks[ch] ? `, ${markName(ks[ch])}` : ""}${bannedLetter === ch ? ", banned" : ""}`);
       }
+      k.disabled = !enabled || bannedLetter === ch;
       kr.appendChild(k);
     }
     kb.appendChild(kr);
   }
   kb.classList.toggle("locked", !enabled);
+  kb.setAttribute("aria-disabled", enabled ? "false" : "true");
 }
 
 /* ---------------- input ---------------- */
@@ -712,11 +815,13 @@ function pressKey(k) {
 
 function refreshTypedRow() {
   if (!S.inputRowEl) { renderGame(S.st); return; }
+  S.inputRowEl.setAttribute("aria-label", `Current guess, ${S.typed.length} of 5 letters`);
   for (let i = 0; i < 5; i++) {
     const t = S.inputRowEl.children[i];
     const ch = S.typed[i];
     t.textContent = ch ? ch.toUpperCase() : "";
     t.className = ch ? "tile typed" : "tile";
+    t.setAttribute("aria-label", ch ? `${ch.toUpperCase()}, entered` : `Position ${i + 1}, empty`);
   }
 }
 
@@ -725,6 +830,14 @@ els["keyboard"].addEventListener("click", (e) => {
   if (b) { SFX.unlock(); pressKey(b.dataset.k); }
 });
 addEventListener("keydown", (e) => {
+  const openModal = [els["letter-modal"], els["profile-modal"]].find((m) => m && !m.hidden);
+  if (openModal) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeModal(openModal);
+    }
+    return;
+  }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (!els["screen-game"].hidden) {
     if (e.key === "Enter") pressKey("enter");
@@ -769,7 +882,15 @@ els["sabotage-bar"].addEventListener("click", (e) => {
 });
 
 let letterKind = null;
+let modalReturnFocus = null;
+function closeModal(modal) {
+  modal.hidden = true;
+  if (modalReturnFocus && modalReturnFocus.isConnected) modalReturnFocus.focus();
+  modalReturnFocus = null;
+}
+
 function openLetterModal(kind) {
+  modalReturnFocus = document.activeElement;
   letterKind = kind;
   els["letter-modal-title"].textContent =
     kind === "ban" ? "BAN A LETTER" : "FORCE A STARTING LETTER";
@@ -786,17 +907,20 @@ function openLetterModal(kind) {
   for (const ch of "abcdefghijklmnopqrstuvwxyz") {
     const b = document.createElement("button");
     b.className = "letter-cell";
+    b.type = "button";
     b.textContent = ch;
     b.disabled = revealed.has(ch);
+    b.setAttribute("aria-label", `${kind === "ban" ? "Ban" : "Force starting"} letter ${ch.toUpperCase()}`);
     b.onclick = () => {
       send({ t: "sabotage", kind: letterKind, letter: ch });
-      els["letter-modal"].hidden = true;
+      closeModal(els["letter-modal"]);
     };
     grid.appendChild(b);
   }
   els["letter-modal"].hidden = false;
+  requestAnimationFrame(() => grid.querySelector("button:not(:disabled)")?.focus());
 }
-els["letter-cancel"].onclick = () => { els["letter-modal"].hidden = true; };
+els["letter-cancel"].onclick = () => closeModal(els["letter-modal"]);
 
 /* ---------------- round end ---------------- */
 
@@ -809,29 +933,53 @@ function renderRoundEnd(st) {
   if (reRendered === key) return;   // render once; timer handled in raf
   reRendered = key;
 
+  const scoreEntries = Object.entries(m.reveal.round_scores);
+  const myScore = m.reveal.round_scores[S.pid];
+  const best = Math.max(...scoreEntries.map(([, sc]) => sc.pts));
+  const leaders = scoreEntries.filter(([, sc]) => sc.pts === best);
+  const outcome = !myScore ? "neutral"
+    : myScore.pts !== best ? "loss"
+    : leaders.length > 1 ? "tie" : "win";
+  els["roundend-wrap"].dataset.outcome = outcome;
+  els["re-emblem"].textContent = outcome === "win" ? "✦" : outcome === "tie" ? "=" : outcome === "loss" ? "↺" : "◆";
+  els["re-outcome"].textContent = outcome === "win" ? "ROUND WON"
+    : outcome === "tie" ? "ROUND TIED"
+    : outcome === "loss" ? (myScore?.solved ? "SOLVED — KEEP PUSHING" : "REGROUP") : "ROUND COMPLETE";
+  announce(`${els["re-outcome"].textContent}. The word was ${m.reveal.secret}.`
+    + (myScore ? ` You scored ${myScore.pts} points.` : ""));
+
   els["re-reason"].textContent = REASONS[m.reveal.reason] || "ROUND OVER";
   const w = els["re-word"];
   w.textContent = "";
+  w.setAttribute("aria-label", `The word was ${m.reveal.secret.toUpperCase()}`);
   m.reveal.secret.split("").forEach((ch, i) => {
     const t = document.createElement("div");
     t.className = "tile g flip";
     t.style.animationDelay = `${i * 120}ms`;
     t.textContent = ch.toUpperCase();
+    t.setAttribute("aria-hidden", "true");
     w.appendChild(t);
   });
 
   const rs = els["re-scores"];
   rs.textContent = "";
-  const entries = Object.entries(m.reveal.round_scores)
-    .sort((a, b) => b[1].pts - a[1].pts);
+  const entries = scoreEntries.sort((a, b) => b[1].pts - a[1].pts);
   for (const [pid, sc] of entries) {
     const p = playerByPid(pid);
     if (!p) continue;
     const row = document.createElement("div");
-    row.className = "re-row" + (sc.solved ? " winner" : "");
+    row.className = "re-row" + (sc.solved ? " winner" : "") + (pid === S.pid ? " is-you" : "");
+    row.setAttribute("aria-label", `${pid === S.pid ? "You" : p.name}: ${sc.pts >= 0 ? "plus " : "minus "}${Math.abs(sc.pts)} points, ${m.scores[pid] ?? 0} total`);
     const av = document.createElement("span"); av.className = "rr-av"; fillAvatar(av, p);
     const nm = document.createElement("span"); nm.className = "rr-name";
     nm.textContent = p.name + (sc.solved ? " 🏆" : "");
+    if (pid === S.pid) {
+      const you = document.createElement("span");
+      you.className = "you-pill";
+      you.textContent = "YOU";
+      nm.appendChild(document.createTextNode(" "));
+      nm.appendChild(you);
+    }
     const dl = document.createElement("span");
     dl.className = "rr-delta" + (sc.pts < 0 ? " neg" : "");
     dl.textContent = (sc.pts >= 0 ? "+" : "") + sc.pts;
@@ -850,12 +998,20 @@ function renderPodium(st) {
   const pod = els["podium"];
   pod.textContent = "";
   const p = m.podium;
+  const mine = p.find((e) => e.pid === S.pid);
+  const champion = mine?.rank === 1;
+  const podiumWrap = document.querySelector(".podium-wrap");
+  podiumWrap.dataset.outcome = champion ? "champion" : "complete";
+  els["podium-kicker"].textContent = champion ? "YOU ARE THE CHAMPION"
+    : mine ? `YOU FINISHED #${mine.rank}` : "MATCH COMPLETE";
+  announce(`${els["podium-kicker"].textContent}. ${mine ? `${mine.score} points.` : ""}`);
   const orderIdx = p.length >= 3 ? [1, 0, 2] : [1, 0];
   for (const i of orderIdx) {
     if (!p[i]) continue;
     const e = p[i];
     const col = document.createElement("div");
-    col.className = `pod-col pod-${e.rank}`;
+    col.className = `pod-col pod-${e.rank}` + (e.pid === S.pid ? " is-me" : "");
+    col.setAttribute("aria-label", `Rank ${e.rank}, ${e.name}, ${e.score} points${e.pid === S.pid ? ", you" : ""}`);
     if (e.rank === 1) {
       const cr = document.createElement("div"); cr.className = "pod-crown"; cr.textContent = "👑";
       col.appendChild(cr);
@@ -871,7 +1027,8 @@ function renderPodium(st) {
   rest.textContent = "";
   for (const e of p.slice(3)) {
     const row = document.createElement("div");
-    row.className = "re-row";
+    row.className = "re-row" + (e.pid === S.pid ? " is-you" : "");
+    row.setAttribute("aria-label", `Rank ${e.rank}, ${e.name}, ${e.score} points${e.pid === S.pid ? ", you" : ""}`);
     const av = document.createElement("span"); av.className = "rr-av"; fillAvatar(av, e);
     const nm = document.createElement("span"); nm.className = "rr-name"; nm.textContent = `${e.rank}. ${e.name}`;
     const tt = document.createElement("span"); tt.className = "rr-total"; tt.textContent = e.score;
@@ -880,8 +1037,8 @@ function renderPodium(st) {
   }
   if (!S.podiumDone) {
     S.podiumDone = true;
-    Confetti.burst(220);
-    setTimeout(() => Confetti.burst(160), 700);
+    Confetti.burst(champion ? 220 : 48);
+    if (champion) setTimeout(() => Confetti.burst(160), 700);
   }
 }
 els["rematch-btn"].onclick = () => { SFX.click(); send({ t: "again" }); };
@@ -929,6 +1086,8 @@ function raf() {
     else total = (rd.turn_seconds || 15) * 1000;
     const frac = st.deadline ? Math.min(1, rem / total) : 0;
     els["hud-timer-fill"].style.transform = `scaleX(${frac})`;
+    els["hud-timer"].setAttribute("aria-valuenow", String(Math.round(frac * 100)));
+    els["hud-timer"].setAttribute("aria-valuetext", `${Math.ceil(rem / 1000)} seconds remaining`);
     els["hud-timer"].classList.toggle("low", rem < 10500 && rem > 0);
     els["hud-clock"].textContent = fmtClock(rem);
     els["hud-clock"].classList.toggle("low", rem < 10500 && rem > 0);
@@ -962,13 +1121,20 @@ requestAnimationFrame(raf);
 
 function buildAvatarGrid(host, current, onPick) {
   host.textContent = "";
-  for (const a of AVATARS) {
+  for (const [index, a] of AVATARS.entries()) {
     const c = document.createElement("button");
     c.className = "avatar-cell" + (a === current ? " sel" : "");
     c.textContent = a;
+    c.type = "button";
+    c.setAttribute("aria-label", `Choose player ${index + 1}: ${a}`);
+    c.setAttribute("aria-pressed", a === current ? "true" : "false");
     c.onclick = () => {
-      host.querySelectorAll(".avatar-cell").forEach((x) => x.classList.remove("sel"));
+      host.querySelectorAll(".avatar-cell").forEach((x) => {
+        x.classList.remove("sel");
+        x.setAttribute("aria-pressed", "false");
+      });
       c.classList.add("sel");
+      c.setAttribute("aria-pressed", "true");
       onPick(a);
     };
     host.appendChild(c);
@@ -994,22 +1160,26 @@ function initJoin() {
 }
 
 els["edit-profile-btn"].onclick = () => {
+  modalReturnFocus = document.activeElement;
   els["profile-name"].value = localStorage.getItem("wc-name") || "";
   buildAvatarGrid(els["profile-avatars"], S.avatarPick, (a) => { S.avatarPick = a; });
   els["profile-modal"].hidden = false;
+  requestAnimationFrame(() => els["profile-name"].focus());
 };
-els["profile-cancel"].onclick = () => { els["profile-modal"].hidden = true; };
+els["profile-cancel"].onclick = () => closeModal(els["profile-modal"]);
 els["profile-save"].onclick = () => {
   const name = els["profile-name"].value.trim() || "PLAYER";
   localStorage.setItem("wc-name", name);
   localStorage.setItem("wc-avatar", S.avatarPick);
   send({ t: "profile", name, avatar: S.avatarPick });
-  els["profile-modal"].hidden = true;
+  closeModal(els["profile-modal"]);
 };
 
 els["mute-btn"].onclick = () => {
   const m = SFX.toggle();
   els["mute-btn"].textContent = m ? "🔇" : "🔊";
+  els["mute-btn"].setAttribute("aria-label", m ? "Unmute game sound" : "Mute game sound");
+  els["mute-btn"].setAttribute("aria-pressed", m ? "true" : "false");
 };
 
 els["ready-btn"].onclick = () => {
@@ -1041,6 +1211,8 @@ initJoin();
 wirePfpButton($("pfp-btn"));
 wirePfpButton($("pfp-btn2"));
 els["mute-btn"].textContent = SFX.muted ? "🔇" : "🔊";
+els["mute-btn"].setAttribute("aria-label", SFX.muted ? "Unmute game sound" : "Mute game sound");
+els["mute-btn"].setAttribute("aria-pressed", SFX.muted ? "true" : "false");
 if (localStorage.getItem("wc-name")) {
   // returning player: skip the join screen, connect straight away
   S.joined = true;

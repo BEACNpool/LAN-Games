@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/shared/app.webmanifest">
+<link rel="manifest" href="/app.webmanifest">
 <link rel="apple-touch-icon" sizes="180x180" href="/shared/app-icon-180.png">
 <link rel="icon" href="/shared/app-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/shared/shared.css">
@@ -383,6 +383,8 @@
     .boot { display: none; }
   }
 </style>
+  <link rel="stylesheet" href="/shared/gameart.css">
+  <link rel="stylesheet" href="/shared/hub-premium.css">
   <script src="/shared/brand.js" defer></script>
 </head>
 <body>
@@ -391,18 +393,15 @@
   <div class="hub-inner">
     <header class="hub-top">
       <div class="hub-brand">
-        <span class="hub-logo"><span class="b1">LAN</span><span class="b2">GAMES</span></span>
-        <span class="hub-plate">GAME&nbsp;NIGHT&nbsp;OS</span>
+        <span class="hub-logo" data-brand-logo><span class="b1">LAN</span><span class="b2">GAMES</span></span>
+        <span class="hub-plate">PLAY&nbsp;TOGETHER</span>
       </div>
       <div class="hub-actions">
+        <button class="hub-btn" id="search-open" aria-label="search games" title="search games">
+          <span class="line-icon" aria-hidden="true">⌕</span>
+        </button>
         <button class="hub-btn" id="chat-jump" aria-label="jump to lobby chat" title="lobby chat">
           <span aria-hidden="true">💬</span><span class="pip" id="chat-pip">0</span>
-        </button>
-        <button class="hub-btn wifi-unset" id="wifi-open" aria-label="guest Wi-Fi — not set up yet" title="guest Wi-Fi — not set up yet">
-          <span aria-hidden="true">📶</span>
-        </button>
-        <button class="hub-btn" id="share-open" aria-label="games join QR" title="games QR — scan to open the games">
-          <span aria-hidden="true">⌁</span>
         </button>
         <button class="hub-profile" id="profile-chip" aria-label="your profile">
           <span class="hp-av" id="hp-av">🎮</span>
@@ -417,6 +416,14 @@
         <span class="lc-head-ico" aria-hidden="true">💬</span>
         <span class="lc-title">LOBBY CHAT</span>
         <span class="lc-online" id="lc-online">connecting…</span>
+        <button class="hub-btn lc-tool wifi-unset" id="wifi-open"
+                aria-label="guest Wi-Fi — not set up yet" title="guest Wi-Fi">
+          <span aria-hidden="true">📶</span>
+        </button>
+        <button class="hub-btn lc-tool" id="share-open" aria-label="invite players"
+                title="scan to join the games">
+          <span aria-hidden="true">⌁</span>
+        </button>
         <button type="button" class="lc-clear" id="lc-clear"
                 title="clear the chat for everyone" aria-label="clear the chat for everyone">🧹</button>
         <span class="lc-chev" aria-hidden="true">▾</span>
@@ -434,6 +441,20 @@
       </div>
     </section>
 
+    <section class="welcome-card" id="welcome-card" hidden>
+      <span class="welcome-mark" aria-hidden="true">✦</span>
+      <span class="welcome-copy"><b>BUILD YOUR PLAYER CARD</b>
+        <small>One name and character follows you into every game.</small></span>
+      <button class="btn btn-primary" id="welcome-setup">SET UP</button>
+    </section>
+
+    <section class="quick-section" id="quick-section" hidden>
+      <div class="quick-head">
+        <span><i aria-hidden="true">✦</i> YOUR LINEUP</span>
+        <small>favorites + recently played</small>
+      </div>
+      <div class="rail-track quick-track" id="quick-track"></div>
+    </section>
 
     <nav id="filters" class="filters" aria-label="party size"></nav>
 
@@ -441,7 +462,7 @@
 
 
     <p class="hub-foot">no accounts · no cloud · winners get brag rights ·
-      <b>LAN Games</b></p>
+      <b data-brand>LAN GAMES</b></p>
   </div>
 </div>
 
@@ -512,13 +533,87 @@
     <input id="pf-name" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
     <label class="field-label">CHARACTER</label>
     <div id="pf-grid" class="avatar-grid"></div>
+    <div class="pf-stats" id="pf-stats">
+      <span><b id="pf-played">0</b><small>PLAYED</small></span>
+      <span><b id="pf-faves">0</b><small>FAVORITES</small></span>
+    </div>
+    <div class="pf-settings">
+      <p class="field-label">COMFORT &amp; FEEDBACK</p>
+      <div class="pf-toggle-grid">
+        <button class="pref-btn" id="pf-sound" type="button"><span>🔊</span><b>SOUND</b><i></i></button>
+        <button class="pref-btn" id="pf-haptics" type="button"><span>〰</span><b>HAPTICS</b><i></i></button>
+        <button class="pref-btn" id="pf-motion" type="button"><span>◉</span><b>MOTION</b><i></i></button>
+        <button class="pref-btn" id="pf-contrast" type="button"><span>◐</span><b>CONTRAST</b><i></i></button>
+      </div>
+      <button class="btn btn-ghost install-guide-btn" id="install-open" type="button">
+        ＋ ADD TO HOME SCREEN
+      </button>
+    </div>
     <button id="pf-save" class="btn btn-primary btn-big" style="margin-top:18px">SAVE PROFILE</button>
     <p class="pf-note">🔒 saved on this device · used across every game</p>
   </div>
 </div>
 
+<div id="search-sheet" class="modal search-modal" role="dialog" aria-modal="true"
+     aria-labelledby="search-title" hidden>
+  <div class="modal-card search-card">
+    <div class="search-head">
+      <div>
+        <p class="modal-title" id="search-title">FIND YOUR NEXT GAME</p>
+        <p class="search-sub">Search by title, mood or way to play.</p>
+      </div>
+      <button class="pf-close search-close" id="search-close" aria-label="close">✕</button>
+    </div>
+    <label class="search-box">
+      <span aria-hidden="true">⌕</span>
+      <input id="game-search" type="search" autocomplete="off"
+             placeholder="Try “cards”, “solo”, “fast”…" aria-label="search games">
+    </label>
+    <button class="surprise-btn" id="surprise-game" type="button">
+      <span aria-hidden="true">✦</span><b>SURPRISE ME</b><small>pick from your party-size filter</small>
+    </button>
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<div id="game-sheet" class="modal game-modal" role="dialog" aria-modal="true"
+     aria-labelledby="game-sheet-title" hidden>
+  <div class="modal-card game-card">
+    <button class="pf-close" id="game-sheet-close" aria-label="close">✕</button>
+    <div class="game-card-art" id="game-sheet-art"></div>
+    <div class="game-card-body">
+      <p class="game-kicker" id="game-sheet-category"></p>
+      <h2 id="game-sheet-title"></h2>
+      <p class="game-tagline" id="game-sheet-tagline"></p>
+      <div class="game-meta" id="game-sheet-meta"></div>
+      <p class="game-description" id="game-sheet-description"></p>
+      <div class="game-card-actions">
+        <button class="btn game-fav-btn" id="game-sheet-fav" type="button">☆ FAVORITE</button>
+        <a class="btn btn-primary" id="game-sheet-play" href="#">PLAY NOW ▶</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="install-sheet" class="modal" role="dialog" aria-modal="true"
+     aria-labelledby="install-title" hidden>
+  <div class="modal-card install-card">
+    <button class="pf-close" id="install-close" aria-label="close">✕</button>
+    <p class="modal-title" id="install-title">KEEP GAME NIGHT ONE TAP AWAY</p>
+    <div class="install-icon" aria-hidden="true">▰</div>
+    <p class="install-lede">Save <b data-brand>LAN GAMES</b> to your home screen for a
+      full-screen, app-like launch.</p>
+    <div class="install-steps">
+      <p><b>iPHONE / iPAD</b><span>Safari → Share ↑ → Add to Home Screen</span></p>
+      <p><b>ANDROID</b><span>Chrome ⋮ → Add to Home screen</span></p>
+    </div>
+    <p class="install-note" id="install-note">Your games stay private on this network.</p>
+  </div>
+</div>
+
 <script src="/shared/hubnet.js"></script>
 <script src="/shared/qr.js"></script>
+<script src="/shared/gameart.js"></script>
 <script src="/shared/hub.js"></script>
 </body>
 </html>

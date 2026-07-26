@@ -8,6 +8,7 @@ const SUIT = { S: "♠", H: "♥", D: "♦", C: "♣" };
 const S = {
   st: null, pid: null, conn: null, joined: false,
   raiseOpen: false, lastBoard: 0, lastHand: "", lastTick: -1,
+  lastHole: "", lastBets: {},
   muted: localStorage.getItem("wc-muted") === "1",
 };
 
@@ -60,6 +61,8 @@ function remainMs() { return S.st?.deadline ? Math.max(0, S.st.deadline - S.conn
 function cardEl(card, cls = "") {
   const d = document.createElement("div");
   d.className = "card " + cls + ("HD".includes(card[1]) ? " red" : "");
+  d.dataset.suit = SUIT[card[1]];
+  d.setAttribute("aria-label", (card[0] === "T" ? "10" : card[0]) + " of " + SUIT[card[1]]);
   const r = document.createElement("span"); r.className = "cr";
   r.textContent = card[0] === "T" ? "10" : card[0];
   const s = document.createElement("span"); s.className = "cs";
@@ -70,6 +73,7 @@ function cardEl(card, cls = "") {
 function backEl(cls = "") {
   const d = document.createElement("div");
   d.className = "card back " + cls;
+  d.setAttribute("aria-label", "Face-down card");
   return d;
 }
 function show(id) {
@@ -154,6 +158,7 @@ function seatFor(seat) { return $("seats").querySelector(`[data-seat="${seat}"]`
 function renderSeats(st) {
   const g = game(), n = g.n, host = $("seats");
   host.textContent = "";
+  const nextBets = {};
   const showdownWinners = new Set((g.hand_result && g.stage === "hand_end")
     ? g.hand_result.winner_seats : []);
   for (const info of g.seats) {
@@ -171,12 +176,14 @@ function renderSeats(st) {
     if (info.all_in) el.classList.add("allin");
     if (info.bot === false && !info.connected) el.classList.add("away");
     if (showdownWinners.has(seat)) el.classList.add("winner");
+    if (seat === mySeat()) el.classList.add("is-me");
 
     // last-action badge (above avatar)
     if (info.last_action && betting) {
       const badge = document.createElement("div");
       const aggr = ["bet", "raise", "allin"].includes(info.last_action);
       badge.className = "act-badge " + (aggr ? "aggr" : "pass");
+      if (["sb", "bb"].includes(info.last_action)) badge.classList.add("blind");
       badge.textContent = info.last_action.toUpperCase();
       badge.style.left = "50%"; badge.style.top = "-8px";
       el.appendChild(badge);
@@ -191,20 +198,29 @@ function renderSeats(st) {
     if (p) Hub.fillAvatar(disc, p); else disc.textContent = "🪑";
     avw.appendChild(disc); el.appendChild(avw);
 
+    const meta = document.createElement("div"); meta.className = "seat-meta";
     const nm = document.createElement("div"); nm.className = "seat-name";
     nm.textContent = info.name;
     if (seat === mySeat()) { const y = document.createElement("span"); y.className = "you-badge"; y.textContent = " YOU"; nm.appendChild(y); }
     else if (info.bot && info.tier) { const b = document.createElement("span"); b.className = "bot-badge"; b.textContent = " " + info.tier; nm.appendChild(b); }
-    el.appendChild(nm);
+    meta.appendChild(nm);
 
     const stk = document.createElement("div"); stk.className = "seat-stack";
     stk.textContent = info.all_in ? "ALL-IN" : fmt(info.stack);
-    el.appendChild(stk);
+    meta.appendChild(stk);
+    el.appendChild(meta);
 
-    // seat cards: mine + revealed face-up, others as backs
+    // My hole cards have one clear home in the dedicated hand zone below.
+    // Opponents stay at their seats and reveal there at showdown.
     const cards = document.createElement("div"); cards.className = "seat-cards";
-    if (info.cards) { for (const c of info.cards) cards.appendChild(cardEl(c, "mini")); }
-    else if (info.has_cards) { cards.appendChild(backEl("mini")); cards.appendChild(backEl("mini")); }
+    if (seat !== mySeat()) {
+      if (info.cards) {
+        cards.classList.add("revealed");
+        for (const c of info.cards) cards.appendChild(cardEl(c, "mini"));
+      } else if (info.has_cards) {
+        cards.appendChild(backEl("mini")); cards.appendChild(backEl("mini"));
+      }
+    }
     el.appendChild(cards);
     host.appendChild(el);
 
@@ -219,11 +235,15 @@ function renderSeats(st) {
     if (info.committed > 0 && betting) {
       const [cx, cy] = lerp(px, py, CX, CY, 0.42);
       const chip = document.createElement("div"); chip.className = "bet-chip";
+      const betKey = `${g.hand_no}:${g.stage}:${seat}`;
+      if (info.committed > (S.lastBets[betKey] || 0)) chip.classList.add("chip-in");
+      nextBets[betKey] = info.committed;
       chip.textContent = fmt(info.committed);
       chip.style.left = cx + "%"; chip.style.top = cy + "%";
       host.appendChild(chip);
     }
   }
+  S.lastBets = nextBets;
 }
 
 function renderBoard(st) {
@@ -231,6 +251,7 @@ function renderBoard(st) {
   board.textContent = "";
   g.board.forEach((c, i) => {
     const el = cardEl(c, i >= S.lastBoard ? "deal-in" : "");
+    el.style.setProperty("--deal-order", i);
     board.appendChild(el);
   });
   S.lastBoard = g.board.length;
@@ -253,8 +274,22 @@ function renderMyHand(st) {
   if (ms === null) return;
   const me = g.seats[ms];
   fan.classList.toggle("fold", !me.in_hand);
-  if (me.cards) for (const c of me.cards) fan.appendChild(cardEl(c, "big"));
-  else if (me.has_cards) { fan.appendChild(backEl("big")); fan.appendChild(backEl("big")); }
+  const holeSig = `${g.hand_no}:${(me.cards || []).join(",")}:${me.has_cards ? 1 : 0}`;
+  const fresh = holeSig !== S.lastHole;
+  if (me.cards) {
+    me.cards.forEach((c, i) => {
+      const el = cardEl(c, "big" + (fresh ? " hole-deal" : ""));
+      el.style.setProperty("--deal-order", i);
+      fan.appendChild(el);
+    });
+  } else if (me.has_cards) {
+    [0, 1].forEach((i) => {
+      const el = backEl("big" + (fresh ? " hole-deal" : ""));
+      el.style.setProperty("--deal-order", i);
+      fan.appendChild(el);
+    });
+  }
+  S.lastHole = holeSig;
 }
 
 function renderShowdown(st) {
@@ -356,7 +391,14 @@ function onState(st) {
   } else if (st.game) {
     show("scr-table");
     const g = st.game;
-    if (g.hand_no + "" !== S.lastHand) { S.lastBoard = 0; S.lastHand = g.hand_no + ""; }
+    if (g.hand_no + "" !== S.lastHand) {
+      S.lastBoard = 0; S.lastBets = {}; S.lastHand = g.hand_no + "";
+    }
+    const table = $("table-zone");
+    table.dataset.stage = g.stage;
+    table.dataset.seats = g.n;
+    table.classList.toggle("my-turn", !!g.me);
+    $("scr-table").classList.toggle("my-turn", !!g.me);
     renderSeats(st); renderBoard(st); renderMyHand(st);
     renderShowdown(st); renderAction(st);
   }

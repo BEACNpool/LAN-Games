@@ -70,6 +70,19 @@ try {
   const p1 = await phone("Ava", 0);
   const p2 = await phone("Ben", 5);
   await sleep(500);
+  const feedbackUI = await p1.evaluate(() => {
+    const mute = document.querySelector("#mute-btn");
+    const box = mute.getBoundingClientRect();
+    return { w: box.width, h: box.height, label: mute.getAttribute("aria-label"),
+      live: document.querySelector("#game-status")?.getAttribute("aria-live") };
+  });
+  if (feedbackUI.w < 44 || feedbackUI.h < 44 || !feedbackUI.label)
+    fail("mute control is not an accessible 44px touch target");
+  if (feedbackUI.live !== "polite") fail("missing polite game status live region");
+  await p1.click("#mute-btn");
+  if (await p1.evaluate(() => localStorage.getItem("wc-muted")) !== "1")
+    fail("shared mute preference was not persisted");
+  await p1.click("#mute-btn"); // restore sound for the playtest
 
   // host sets AUTO / FAST / 1 round / LINE
   await clickText(p1, "#opt-auto button", "HANDS-OFF");
@@ -90,6 +103,14 @@ try {
   if (cells !== 25) fail("card did not render 25 cells: " + cells);
   const freeCentre = await p1.$eval("#card .cell:nth-child(13)", (e) => e.classList.contains("free")).catch(() => false);
   if (!freeCentre) fail("centre cell is not FREE");
+  const controllerA11y = await p1.evaluate(() => ({
+    claimWired: typeof document.querySelector("#bingo-btn").onclick === "function",
+    labelledCells: [...document.querySelectorAll("#card .cell")].every((el) => el.hasAttribute("aria-label")),
+    gameMute: document.querySelector("#mute-btn2").getBoundingClientRect().height,
+  }));
+  if (!controllerA11y.claimWired) fail("BINGO claim button has no action");
+  if (!controllerA11y.labelledCells) fail("BINGO cells are not labelled");
+  if (controllerA11y.gameMute < 44) fail("in-game mute target is too small");
   await sleep(600);
   await p1.screenshot({ path: `${OUT}/61-bingo-card.png` }); log("shot: controller card");
   await tv.screenshot({ path: `${OUT}/62-bingo-tv-board.png` }); log("shot: TV board");

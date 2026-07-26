@@ -65,6 +65,19 @@ try {
   const p1 = await phone("Ava", 0);
   const p2 = await phone("Ben", 5);
   await sleep(500);
+  const feedbackUI = await p1.evaluate(() => {
+    const mute = document.querySelector("#mute-btn");
+    const box = mute.getBoundingClientRect();
+    return { w: box.width, h: box.height, label: mute.getAttribute("aria-label"),
+      live: document.querySelector("#game-status")?.getAttribute("aria-live") };
+  });
+  if (feedbackUI.w < 44 || feedbackUI.h < 44 || !feedbackUI.label)
+    fail("mute control is not an accessible 44px touch target");
+  if (feedbackUI.live !== "polite") fail("missing polite game status live region");
+  await p1.click("#mute-btn");
+  if (await p1.evaluate(() => localStorage.getItem("wc-muted")) !== "1")
+    fail("shared mute preference was not persisted");
+  await p1.click("#mute-btn"); // restore sound for the playtest
 
   await clickText(p1, "#opt-size button", "7");
   await clickText(p1, "#opt-rounds button", "2");
@@ -81,6 +94,16 @@ try {
   // rack renders as tappable tiles
   const nTiles = await p1.$$eval("#wr-rack .wr-tile", (e) => e.length);
   if (nTiles !== 7) fail("rack did not render 7 tiles: " + nTiles);
+  const rackA11y = await p1.evaluate(() => {
+    const tiles = [...document.querySelectorAll(".wr-tile")];
+    return { minW: Math.min(...tiles.map((el) => el.getBoundingClientRect().width)),
+      minH: Math.min(...tiles.map((el) => el.getBoundingClientRect().height)),
+      labelled: tiles.every((el) => el.hasAttribute("aria-label")),
+      gameMute: document.querySelector("#mute-btn2").getBoundingClientRect().height };
+  });
+  if (rackA11y.minW < 44 || rackA11y.minH < 44 || !rackA11y.labelled)
+    fail("rack accessibility/touch targets regressed: " + JSON.stringify(rackA11y));
+  if (rackA11y.gameMute < 44) fail("in-game mute target is too small");
 
   // tap 3 tiles -> current word builds -> ENTER enables
   await p1.$$eval("#wr-rack .wr-tile:not(.used)", (els) => { els.slice(0, 3).forEach((e) => e.click()); });

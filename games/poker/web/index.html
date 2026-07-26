@@ -18,9 +18,14 @@
 <!-- ============ JOIN ============ -->
 <section id="scr-join" class="scr" hidden>
   <div class="join-wrap">
+    <p class="join-kicker"><span class="live-dot"></span>
+      <span data-brand>LAN GAMES</span> PRIVATE TABLE</p>
     <h1 class="wordmark"><span class="wm-a">HOLD</span><span class="wm-b">'EM</span></h1>
     <p class="tagline">NO-LIMIT TEXAS HOLD'EM. LAST STACK STANDING.</p>
     <div class="join-card">
+      <div class="join-card-head" aria-hidden="true">
+        <span>PLAYER ACCESS</span><span>♠︎ ♥︎ ♣︎ ♦︎</span>
+      </div>
       <label class="field-label" for="name-input">CALL SIGN</label>
       <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
       <label class="field-label">AVATAR</label>
@@ -74,17 +79,19 @@
 <!-- ============ TABLE ============ -->
 <section id="scr-table" class="scr" hidden>
   <header class="table-head">
-    <a href="/" class="head-link">🕹</a>
+    <a href="/" class="head-link" aria-label="Back to GameHub">🕹</a>
     <div class="head-mid">
+      <span class="head-game"><span data-brand>LAN GAMES</span> · NO LIMIT</span>
       <span id="head-hand" class="head-hand">HAND 1</span>
-      <span id="head-blinds" class="head-blinds">10 / 20</span>
+      <span class="blind-lockup"><span class="blind-label">BLINDS</span><span id="head-blinds" class="head-blinds">10 / 20</span></span>
     </div>
-    <button id="mute-btn2" class="icon-btn head-mute">🔊</button>
+    <button id="mute-btn2" class="icon-btn head-mute" aria-label="Toggle sound">🔊</button>
   </header>
 
   <div class="table-zone" id="table-zone">
     <div class="felt"></div>
     <div class="felt-ring"></div>
+    <div class="table-mark" aria-hidden="true"><span data-brand>LAN GAMES</span><small>HIGH ROLLER</small></div>
     <div id="seats" class="seats"></div>
     <div class="center">
       <div id="pot" class="pot" hidden><span class="pot-label">POT</span><span id="pot-amt">0</span></div>

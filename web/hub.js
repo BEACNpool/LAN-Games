@@ -3,7 +3,7 @@
 // + a docked lobby chat + classic-console flourishes (boot sweep, D-pad).
 (() => {
   const $ = (id) => document.getElementById(id);
-  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const REDUCED = Hub.prefs.reducedFx;
 
   const RAILS = [
     { key: "bigscreen", title: "BIG SCREEN", ico: "📺" },
@@ -27,6 +27,34 @@
   let soon = [];
   let filter = "all";
   const tileLive = {};       // slug -> tile element (for badge updates)
+  let selectedGame = null;
+
+  const readList = (key) => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
+    } catch (error) { return []; }
+  };
+  let favorites = new Set(readList("lg-favorites"));
+  let recent = readList("lg-recent");
+  let playTotal = Math.max(0, Number(localStorage.getItem("lg-play-total")) || 0);
+
+  const TIMES = {
+    brickade: "5–10 min", dodgeball: "5–10 min", smelterskelter: "8–12 min",
+    buzzboard: "20–35 min", bingo: "10–25 min", pricecheck: "10–15 min",
+    orbitriot: "8–12 min", poker: "20–45 min", spades: "25–45 min",
+    hearts: "15–25 min", euchre: "15–25 min", charades: "10–20 min",
+    trivia: "15–30 min", blitz: "10–15 min", werewolf: "20–35 min",
+    famfeud: "15–25 min", fab5feud: "15–25 min", wordrush: "5–10 min",
+    wordclash: "10–20 min", chess: "10–45 min", checkers: "10–20 min",
+    backgammon: "15–30 min", connect4: "5–10 min", fortfling: "5–10 min",
+    tanks: "10–20 min", battleship: "10–20 min", snake: "5–10 min",
+    rummikub: "25–45 min",
+  };
+  const MOODS = {
+    bigscreen: "TV PARTY", party: "GROUP CHAOS", cards: "STRATEGY",
+    board: "CLASSIC", battle: "QUICK COMPETITION",
+  };
 
   const esc = (s) => String(s).replace(/[&<>"']/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -122,45 +150,192 @@
 
   /* ---------- tiles ---------- */
   function tile(g, i, isSoon) {
-    const el = document.createElement(isSoon ? "div" : "a");
+    const el = document.createElement("article");
     el.className = "tile" + (isSoon ? " soon" : "");
+    el.dataset.slug = g.slug || "";
     el.style.animationDelay = `${Math.min(i * 45, 400)}ms`;
     const accent = g.accent || "#8b96b3";
     el.style.setProperty("--tile-accent", accent);
-    const glyph = g.art || g.icon;
-    if (!isSoon) {
-      el.href = launchUrl(g);
-      el.setAttribute("aria-label", `play ${g.title}`);
-    }
+    const artHtml = window.GameArt
+      ? GameArt.html(g)
+      : `<div class="game-art" style="background:${art(accent)}"></div>`;
     el.innerHTML = `
-      <div class="tile-art" style="background:${art(accent)}"></div>
-      <span class="tile-glyph-ghost" aria-hidden="true">${glyph}</span>
-      <span class="tile-glyph" aria-hidden="true"
-        style="filter:drop-shadow(0 10px 22px rgba(0,0,0,0.55)) drop-shadow(0 0 28px ${rgba(accent, 0.8)})">${glyph}</span>
-      <div class="tile-gloss"></div>
-      <div class="tile-scan"></div>
-      <div class="tile-scrim"></div>
-      ${isSoon ? '<span class="tile-ribbon">SOON</span>' : ""}
-      ${!isSoon ? `<div class="tile-badges">
-        ${g.tv ? '<span class="tile-tv-badge">📺 TV</span>' : ""}
-      </div>` : ""}
-      <div class="tile-body">
-        <span class="tile-title">${esc(g.title)}</span>
-        ${isSoon
-          ? `<span class="tile-sub">${esc(g.blurb || "")}</span>`
-          : `<div class="tile-tags">${tagsHtml(g)}</div>`}
-      </div>
-      ${isSoon ? "" : '<span class="tile-play">PLAY ▶</span>'}`;
+      ${isSoon ? "" : `<a class="tile-launch" href="${esc(launchUrl(g))}"
+        aria-label="play ${esc(g.title)}">`}
+        <div class="tile-art">${artHtml}</div>
+        <div class="tile-gloss"></div>
+        <div class="tile-scan"></div>
+        <div class="tile-scrim"></div>
+        ${isSoon ? '<span class="tile-ribbon">SOON</span>' : ""}
+        ${!isSoon ? `<div class="tile-badges">
+          ${g.tv ? '<span class="tile-tv-badge">📺 TV</span>' : ""}
+        </div>` : ""}
+        <div class="tile-body">
+          <span class="tile-title">${esc(g.title)}</span>
+          ${isSoon
+            ? `<span class="tile-sub">${esc(g.blurb || "")}</span>`
+            : `<div class="tile-tags">${tagsHtml(g)}</div>`}
+        </div>
+        ${isSoon ? "" : '<span class="tile-play">PLAY ▶</span>'}
+      ${isSoon ? "" : "</a>"}
+      ${isSoon ? "" : `
+        <button class="tile-fav${favorites.has(g.slug) ? " on" : ""}" type="button"
+          aria-label="${favorites.has(g.slug) ? "remove from" : "add to"} favorites"
+          title="favorite">${favorites.has(g.slug) ? "★" : "☆"}</button>
+        <button class="tile-info" type="button" aria-label="details for ${esc(g.title)}"
+          title="game details">i</button>`}`;
     if (!isSoon) {
       const live = liveText(g);
       if (live) setLiveBadge(el, live);
       tileLive[g.slug] = el;
+      if (g.tv) el.classList.add("has-tv");
+      el.querySelector(".tile-launch").addEventListener("click", () => rememberGame(g));
+      el.querySelector(".tile-info").addEventListener("click", (event) => {
+        event.preventDefault(); event.stopPropagation(); openGameSheet(g);
+      });
+      el.querySelector(".tile-fav").addEventListener("click", (event) => {
+        event.preventDefault(); event.stopPropagation(); toggleFavorite(g.slug);
+      });
+      wireTilt(el);
     }
     return el;
   }
 
+  function saveFavorites() {
+    localStorage.setItem("lg-favorites", JSON.stringify([...favorites]));
+  }
+  function rememberGame(g) {
+    recent = [g.slug, ...recent.filter((slug) => slug !== g.slug)].slice(0, 8);
+    localStorage.setItem("lg-recent", JSON.stringify(recent));
+    playTotal += 1;
+    localStorage.setItem("lg-play-total", String(playTotal));
+  }
+  function toggleFavorite(slug) {
+    if (favorites.has(slug)) favorites.delete(slug);
+    else favorites.add(slug);
+    saveFavorites();
+    Hub.feedback.select(); Hub.feedback.haptic(16);
+    document.querySelectorAll(`.tile[data-slug="${CSS.escape(slug)}"] .tile-fav`)
+      .forEach((button) => {
+        const on = favorites.has(slug);
+        button.classList.toggle("on", on);
+        button.textContent = on ? "★" : "☆";
+        button.setAttribute("aria-label", `${on ? "remove from" : "add to"} favorites`);
+      });
+    if (selectedGame && selectedGame.slug === slug) renderGameFavorite();
+    renderQuick();
+    renderProfileStats();
+  }
+
+  function wireTilt(el) {
+    if (matchMedia("(pointer: coarse)").matches) return;
+    el.addEventListener("pointermove", (event) => {
+      if (Hub.prefs.reducedFx) {
+        el.style.transform = "";
+        return;
+      }
+      const box = el.getBoundingClientRect();
+      const x = (event.clientX - box.left) / box.width - .5;
+      const y = (event.clientY - box.top) / box.height - .5;
+      el.style.transform = `perspective(700px) rotateX(${-y * 5}deg) rotateY(${x * 7}deg) translateY(-5px) scale(1.025)`;
+    });
+    el.addEventListener("pointerleave", () => { el.style.transform = ""; });
+  }
+
+  function renderQuick() {
+    const section = $("quick-section");
+    if (!section || !games.length) return;
+    const slugs = [...favorites, ...recent.filter((slug) => !favorites.has(slug))];
+    const list = slugs.map((slug) => games.find((g) => g.slug === slug)).filter(Boolean).slice(0, 8);
+    section.hidden = list.length === 0;
+    const track = $("quick-track");
+    track.textContent = "";
+    list.forEach((game, index) => track.appendChild(tile(game, index, false)));
+  }
+
+  function renderGameFavorite() {
+    if (!selectedGame) return;
+    const on = favorites.has(selectedGame.slug);
+    const button = $("game-sheet-fav");
+    button.classList.toggle("on", on);
+    button.textContent = `${on ? "★" : "☆"} ${on ? "FAVORITED" : "FAVORITE"}`;
+  }
+
+  function openGameSheet(g) {
+    selectedGame = g;
+    $("game-sheet-art").innerHTML = GameArt.html(g, "game-art--hero");
+    $("game-sheet-category").textContent =
+      `${CAT_LABEL[g.category] || "GAME"} · ${MOODS[g.category] || "PLAY TOGETHER"}`;
+    $("game-sheet-title").textContent = g.title;
+    $("game-sheet-tagline").textContent = g.tagline || "";
+    $("game-sheet-description").textContent = g.blurb || "";
+    const meta = [
+      `👥 ${playersRange(g)}`,
+      TIMES[g.slug] || "10–20 min",
+      g.tv ? "📺 TV required" : "📱 phone play",
+      g.solo ? "solo ready" : null,
+      /\+\s*bots?/i.test(g.players || "") ? "bots available" : null,
+    ].filter(Boolean);
+    $("game-sheet-meta").innerHTML = meta.map((value) => `<span>${esc(value)}</span>`).join("");
+    const play = $("game-sheet-play");
+    play.href = launchUrl(g);
+    play.onclick = () => rememberGame(g);
+    renderGameFavorite();
+    $("game-sheet").hidden = false;
+    $("game-sheet-play").focus();
+    Hub.feedback.select(); Hub.feedback.haptic(14);
+  }
+
+  function closeGameSheet() {
+    $("game-sheet").hidden = true;
+    selectedGame = null;
+  }
+
+  function searchable(g) {
+    return [
+      g.slug, g.title, g.tagline, g.blurb, g.category, g.players,
+      MOODS[g.category], g.solo ? "solo single player just me" : "",
+      /\bbots?\b/i.test(g.players || "") ? "bots computer" : "",
+      TIMES[g.slug],
+    ].join(" ").toLowerCase();
+  }
+
+  function renderSearch() {
+    const query = $("game-search").value.trim().toLowerCase();
+    const words = query.split(/\s+/).filter(Boolean);
+    const list = games.filter((g) => words.every((word) => searchable(g).includes(word)));
+    const host = $("search-results");
+    host.textContent = "";
+    if (!list.length) {
+      host.innerHTML = '<p class="search-empty">No match. Try a player count, category or shorter title.</p>';
+      return;
+    }
+    list.forEach((g) => {
+      const link = document.createElement("a");
+      link.className = "search-result";
+      link.href = launchUrl(g);
+      link.innerHTML = `<span class="search-result-art">${GameArt.html(g)}</span>
+        <span class="search-result-copy"><b>${esc(g.title)}</b>
+          <span>${esc(g.tagline || g.blurb || "")}</span>
+          <small>${esc(CAT_LABEL[g.category] || "GAME")} · ${esc(playersRange(g))} players · ${esc(TIMES[g.slug] || "10–20 min")}</small>
+        </span><span class="search-result-go" aria-hidden="true">›</span>`;
+      link.onclick = () => rememberGame(g);
+      host.appendChild(link);
+    });
+  }
+
+  function openSearch() {
+    $("search-sheet").hidden = false;
+    $("game-search").value = "";
+    renderSearch();
+    setTimeout(() => $("game-search").focus(), 20);
+    Hub.feedback.tap();
+  }
+  function closeSearch() { $("search-sheet").hidden = true; }
+
   /* the LIVE badge sits at the top-left of the badges row */
   function setLiveBadge(el, text) {
+    el.classList.add("has-live");
     let row = el.querySelector(".tile-badges");
     if (!row) {
       row = document.createElement("div");
@@ -178,6 +353,7 @@
   function clearLiveBadge(el) {
     const b = el.querySelector(".tile-live");
     if (b) b.remove();
+    el.classList.remove("has-live");
   }
 
   function railEl(title, ico, list, isSoon) {
@@ -218,7 +394,11 @@
       b.className = "fchip" + (filter === fdef.key ? " sel" : "");
       b.innerHTML = `${esc(fdef.label)}<span class="fc-n">${n}</span>`;
       b.disabled = n === 0;
-      b.onclick = () => { filter = fdef.key; renderFilters(); renderRails(); };
+      b.onclick = () => {
+        filter = fdef.key;
+        Hub.feedback.tap(); Hub.feedback.haptic(10);
+        renderFilters(); renderRails();
+      };
       host.appendChild(b);
     }
   }
@@ -237,7 +417,9 @@
       const data = await (await fetch("/api/games")).json();
       ingest(data);
       renderFilters();
+      renderQuick();
       renderRails();
+      renderWelcome();
     } catch (e) {
       $("rails").innerHTML =
         `<p style="text-align:center;color:var(--muted);padding:40px">
@@ -257,8 +439,8 @@
         g.live = fresh.live;
         const after = liveText(g);
         if (before === after) continue;
-        const el = tileLive[g.slug];
-        if (el) { if (after) setLiveBadge(el, after); else clearLiveBadge(el); }
+        document.querySelectorAll(`.tile[data-slug="${CSS.escape(g.slug)}"]`)
+          .forEach((el) => { if (after) setLiveBadge(el, after); else clearLiveBadge(el); });
       }
     } catch { /* transient — next tick */ }
   }
@@ -276,7 +458,7 @@
 
   // D-pad / arrow-key roving focus across the game tiles
   function navTargets() {
-    return [...document.querySelectorAll("a.tile")];
+    return [...document.querySelectorAll("a.tile-launch")];
   }
   function spatialNav(dir) {
     const cur = document.activeElement;
@@ -315,6 +497,62 @@
                   ArrowDown: "down", ArrowUp: "up" }[e.key];
     if (!dir) return;
     if (spatialNav(dir)) e.preventDefault();
+  });
+
+  $("search-open").onclick = openSearch;
+  $("search-close").onclick = closeSearch;
+  $("search-sheet").addEventListener("click", (event) => {
+    if (event.target.id === "search-sheet") closeSearch();
+  });
+  $("game-search").addEventListener("input", renderSearch);
+  $("surprise-game").onclick = () => {
+    const rule = FILTERS.find((entry) => entry.key === filter)?.fn || (() => true);
+    const pool = games.filter(rule);
+    if (!pool.length) return;
+    const game = pool[Math.floor(Math.random() * pool.length)];
+    rememberGame(game);
+    Hub.feedback.success(); Hub.feedback.haptic([24, 30, 36]);
+    location.href = launchUrl(game);
+  };
+  $("game-sheet-close").onclick = closeGameSheet;
+  $("game-sheet").addEventListener("click", (event) => {
+    if (event.target.id === "game-sheet") closeGameSheet();
+  });
+  $("game-sheet-fav").onclick = () => selectedGame && toggleFavorite(selectedGame.slug);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      if (!$("search-sheet").hidden) closeSearch();
+      else if (!$("game-sheet").hidden) closeGameSheet();
+      else if (!$("install-sheet").hidden) $("install-sheet").hidden = true;
+      else if (!$("profile-sheet").hidden) closeProfile();
+      else if (!$("share-sheet").hidden) closeShare();
+      else if (!$("wifi-sheet").hidden) $("wifi-sheet").hidden = true;
+      return;
+    }
+    if (event.key === "/" && !/^(INPUT|TEXTAREA)$/.test(event.target?.tagName || "")
+        && document.querySelector(".modal:not([hidden])") === null) {
+      event.preventDefault(); openSearch();
+    }
+  });
+  // Keep keyboard focus inside whichever sheet is open. This is especially
+  // important on tablets with a hardware keyboard and for screen-reader users.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+    const open = [...document.querySelectorAll(".modal:not([hidden])")].at(-1);
+    if (!open) return;
+    const focusable = [...open.querySelectorAll(
+      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )].filter((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault(); first.focus();
+    }
   });
 
   /* ---------- one-scan phone onboarding (entirely local) ---------- */
@@ -359,7 +597,10 @@
       copied ? "" : "err");
   }
 
-  $("share-open").onclick = openShare;
+  $("share-open").onclick = (event) => {
+    event.stopPropagation();
+    openShare();
+  };
   $("share-close").onclick = closeShare;
   $("share-copy").onclick = copyJoinLink;
   $("share-sheet").addEventListener("click", (e) => {
@@ -394,6 +635,7 @@
     $("wifi-ready").hidden = !ready;
     $("wifi-setup").hidden = ready;
     $("wifi-sheet").hidden = false;
+    setTimeout(() => $("wifi-close").focus(), 20);
     if (!ready) return;
     const qr = $("wifi-qr"); qr.textContent = "";
     $("wifi-ssid").textContent = venueWifi.ssid || "";
@@ -402,7 +644,10 @@
     try { renderQR(qr, wifiQRString(venueWifi)); }
     catch (e) { qr.textContent = "QR unavailable"; }
   }
-  $("wifi-open").onclick = openWifi;
+  $("wifi-open").onclick = (event) => {
+    event.stopPropagation();
+    openWifi();
+  };
   $("wifi-close").onclick = () => { $("wifi-sheet").hidden = true; };
   $("wifi-sheet").addEventListener("click", (e) => {
     if (e.target.id === "wifi-sheet") $("wifi-sheet").hidden = true;
@@ -426,6 +671,26 @@
     Hub.fillAvatar($("hp-av"), pfMe());
     $("hp-name").textContent = Hub.identity.name || "SET UP";
   }
+  function renderWelcome() {
+    const card = $("welcome-card");
+    if (card) card.hidden = !!Hub.identity.name;
+  }
+  function renderProfileStats() {
+    $("pf-played").textContent = String(playTotal);
+    $("pf-faves").textContent = String(favorites.size);
+  }
+  function renderPrefs() {
+    const states = {
+      "pf-sound": Hub.prefs.sound,
+      "pf-haptics": Hub.prefs.haptics,
+      "pf-motion": !Hub.prefs.reducedFx,
+      "pf-contrast": Hub.prefs.contrast,
+    };
+    Object.entries(states).forEach(([id, on]) => {
+      $(id).classList.toggle("on", on);
+      $(id).setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
   function renderPfPreview() {
     Hub.fillAvatar($("pf-av"), pfMe());
     $("pf-photo-rm").hidden = !Hub.identity.pfp;
@@ -437,11 +702,15 @@
     $("pf-name").value = Hub.identity.name;
     Hub.buildAvatarGrid($("pf-grid"), pfAvatar, (a) => { pfAvatar = a; renderPfPreview(); });
     renderPfPreview();
+    renderProfileStats();
+    renderPrefs();
     $("profile-sheet").hidden = false;
+    setTimeout(() => $("pf-name").focus(), 20);
   }
   const closeProfile = () => { $("profile-sheet").hidden = true; };
 
   $("profile-chip").onclick = openProfile;
+  $("welcome-setup").onclick = openProfile;
   $("pf-close").onclick = closeProfile;
   $("profile-sheet").addEventListener("click", (e) => {
     if (e.target.id === "profile-sheet") closeProfile();
@@ -457,11 +726,32 @@
     Hub.identity.name = ($("pf-name").value || "").trim() || "PLAYER";
     Hub.identity.avatar = pfAvatar || Hub.identity.avatar;
     renderChip();
+    renderWelcome();
     closeProfile();
     Hub.toast("✓ profile saved");
+    Hub.feedback.success(); Hub.feedback.haptic([20, 25, 35]);
     reconnectChat();          // new identity on future messages
   };
+  $("pf-sound").onclick = () => { Hub.prefs.sound = !Hub.prefs.sound; renderPrefs(); Hub.feedback.select(); };
+  $("pf-haptics").onclick = () => {
+    Hub.prefs.haptics = !Hub.prefs.haptics; renderPrefs(); Hub.feedback.haptic(24);
+  };
+  $("pf-motion").onclick = () => { Hub.prefs.reducedFx = !Hub.prefs.reducedFx; renderPrefs(); };
+  $("pf-contrast").onclick = () => { Hub.prefs.contrast = !Hub.prefs.contrast; renderPrefs(); };
+  $("install-open").onclick = () => {
+    closeProfile();
+    $("install-sheet").hidden = false;
+    $("install-note").textContent = window.isSecureContext
+      ? "On supported browsers, the suite can launch full screen."
+      : "This private LAN uses HTTP, so your browser saves a home-screen shortcut rather than an offline app.";
+    setTimeout(() => $("install-close").focus(), 20);
+  };
+  $("install-close").onclick = () => { $("install-sheet").hidden = true; };
+  $("install-sheet").addEventListener("click", (event) => {
+    if (event.target.id === "install-sheet") $("install-sheet").hidden = true;
+  });
   renderChip();
+  renderWelcome();
 
   /* ---------- lobby chat ---------- */
   const EMOJI = ["😀","😂","🤣","😅","😍","😎","🤩","🥳","😜","🤪","😇","🙃",
@@ -503,15 +793,18 @@
     localStorage.setItem("lg-chat-open", c ? "0" : "1");
     if (!c) { setUnread(0); scrollDown(); }
   }
-  // restore persisted state (default: open — keeps the input reachable on load)
-  if (localStorage.getItem("lg-chat-open") === "0") setCollapsed(true);
+  // Games are the first task. Chat stays one tap away, but an empty 300px panel
+  // no longer owns half of the phone's opening screen.
+  if (localStorage.getItem("lg-chat-open") !== "1") setCollapsed(true);
   $("lc-head").onclick = () => setCollapsed(!isCollapsed());
   $("lc-head").addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setCollapsed(!isCollapsed()); }
   });
   $("chat-jump").onclick = () => {
     if (isCollapsed()) setCollapsed(false);
-    chatSection.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "end" });
+    chatSection.scrollIntoView({
+      behavior: Hub.prefs.reducedFx ? "auto" : "smooth", block: "end",
+    });
     setUnread(0);
   };
   // know when the chat is actually on screen (so we only badge unread when it's not)

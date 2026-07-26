@@ -20,6 +20,11 @@
     }
   },
 
+  "_route_aliases": "Optional old URL slug -> current registry slug. Useful after renaming a house game.",
+  "route_aliases": {
+    "old-family-feud": "famfeud"
+  },
+
   "wifi": {
     "_readme": [
       "Guest Wi-Fi for the hub's join-QR button. OMIT this whole block and the",

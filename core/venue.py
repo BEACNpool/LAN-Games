@@ -16,6 +16,7 @@ pre-push hook that mechanically blocks personal strings from being committed.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 VENUE_FILE = Path(__file__).resolve().parent.parent / "data" / "venue.json"
@@ -32,7 +33,12 @@ DEFAULTS = {
     },
     # No default Wi-Fi: absent means the hub hides the join-QR button.
     "wifi": None,
+    # Optional old-slug -> current-slug redirects. This keeps private venue
+    # nicknames/bookmarks compatible without hard-coding them in public source.
+    "route_aliases": {},
 }
+
+_SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 
 
 def _merge(base: dict, over: dict) -> dict:
@@ -73,3 +79,18 @@ def title_for(slug: str, default: str) -> str:
     is tracked and public.
     """
     return (brand().get("titles") or {}).get(slug, default)
+
+
+def route_aliases(known_slugs) -> dict[str, str]:
+    """Return safe aliases whose targets exist and do not shadow real games."""
+    known = set(known_slugs)
+    raw = load().get("route_aliases") or {}
+    if not isinstance(raw, dict):
+        return {}
+    return {
+        alias: target
+        for alias, target in raw.items()
+        if isinstance(alias, str) and isinstance(target, str)
+        and _SLUG.fullmatch(alias) and _SLUG.fullmatch(target)
+        and alias not in known and target in known and alias != target
+    }

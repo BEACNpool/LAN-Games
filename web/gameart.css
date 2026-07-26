@@ -1,0 +1,103 @@
+/* Studio key-art renderer. It deliberately uses only transform/opacity for
+   animation so the catalogue stays smooth on older phones. */
+.game-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ga);
+  background:
+    radial-gradient(90% 70% at 75% 16%, color-mix(in srgb, var(--ga) 38%, transparent), transparent 62%),
+    radial-gradient(80% 74% at 8% 84%, color-mix(in srgb, var(--ga2) 32%, transparent), transparent 65%),
+    linear-gradient(155deg, color-mix(in srgb, var(--ga) 20%, #060914) 0%, #080c18 68%, #04060c 100%);
+}
+.ga-svg { position: absolute; inset: -2%; width: 104%; height: 104%; overflow: visible; }
+.ga-ambient { position: absolute; width: 64%; aspect-ratio: 1; border-radius: 50%;
+  filter: blur(40px); opacity: .28; mix-blend-mode: screen; }
+.ga-ambient-a { top: -24%; right: -23%; background: var(--ga); }
+.ga-ambient-b { bottom: -35%; left: -28%; background: var(--ga2); }
+.ga-grain { position: absolute; inset: 0; opacity: .13; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"); }
+.ga-vignette { position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(4,6,12,.08), rgba(4,6,12,.04) 35%, rgba(4,6,12,.92) 100%),
+  radial-gradient(100% 85% at 50% 45%, transparent 42%, rgba(0,0,0,.38) 100%); }
+.ga-beam { fill: color-mix(in srgb, var(--ga) 8%, transparent); }
+.ga-grid { fill: none; stroke: rgba(226,232,255,.08); stroke-width: 1; }
+.ga-a, .ga-core { fill: var(--ga); }
+.ga-b { fill: var(--ga2); }
+.ga-panel { fill: color-mix(in srgb, var(--ga) 25%, #11182a); stroke: color-mix(in srgb, var(--ga) 46%, transparent); stroke-width: 2; }
+.ga-card { fill: #eef3ff; stroke: rgba(255,255,255,.55); stroke-width: 2; }
+.ga-card-b { fill: color-mix(in srgb, var(--ga2) 17%, #eef3ff); }
+.ga-hole, .ga-night { fill: #060914; }
+.ga-solid { stroke: none; }
+.ga-ring, .ga-line, .ga-a-stroke, .ga-b-stroke, .ga-cut-stroke {
+  fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ga-ring { stroke: var(--ga); stroke-width: 12; }
+.ga-line { stroke: rgba(226,232,255,.17); stroke-width: 2; }
+.ga-a-stroke { stroke: var(--ga); stroke-width: 25; }
+.ga-b-stroke { stroke: var(--ga2); stroke-width: 8; }
+.ga-cut-stroke { stroke: #07101d; stroke-width: 6; }
+.ga-cut { fill: #07101d; }
+.ga-streak { fill: none; stroke: var(--ga2); stroke-width: 8; stroke-linecap: round;
+  filter: drop-shadow(0 0 9px var(--ga2)); }
+.ga-label, .ga-ball-label, .ga-score, .ga-price, .ga-fallback {
+  font-family: "Sora", system-ui, sans-serif; font-weight: 850; fill: #07101d; }
+.ga-label { font-size: 24px; }
+.ga-ball-label { font-size: 38px; text-anchor: middle; font-style: italic; }
+.ga-ball-label.ga-dark { fill: #07101d; }
+.ga-score { font-size: 21px; fill: #f5f8ff; text-anchor: middle; }
+.ga-price { font-size: 62px; font-style: italic; fill: var(--ga); text-anchor: middle;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--ga) 70%, transparent)); }
+.ga-fallback { font-size: 72px; fill: var(--ga); }
+.ga-x { fill: none; stroke: var(--ga2); stroke-width: 9; stroke-linecap: round; }
+.ga-snake { filter: drop-shadow(0 0 14px color-mix(in srgb, var(--ga) 60%, transparent)); }
+
+.ga-float { transform-box: fill-box; transform-origin: center; animation: ga-float 4.8s ease-in-out infinite; }
+.ga-drift { transform-box: fill-box; transform-origin: center; animation: ga-drift 7s ease-in-out infinite; }
+.ga-spin { transform-box: fill-box; transform-origin: center; animation: ga-spin 18s linear infinite; }
+.ga-pulse { transform-box: fill-box; transform-origin: center; animation: ga-pulse 2.4s ease-in-out infinite; }
+@keyframes ga-float { 50% { transform: translateY(-8px) rotate(1.5deg); } }
+@keyframes ga-drift { 50% { transform: translate(5px, -4px); } }
+@keyframes ga-spin { to { transform: rotate(360deg); } }
+@keyframes ga-pulse { 50% { transform: scale(1.06); filter: drop-shadow(0 0 18px var(--ga)); } }
+
+.tile:hover .ga-svg, .tile:focus-visible .ga-svg, .tile.hot .ga-svg {
+  transform: scale(1.055); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.tile .ga-svg { transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+
+/* Shared join-screen art, injected by hubnet.js for every mounted game. */
+#scr-join { position: relative; overflow: hidden; background:
+  radial-gradient(90% 70% at 50% -12%, color-mix(in srgb, var(--game-accent, var(--cyan)) 17%, transparent), transparent 68%),
+  #070b14; }
+.join-stage-art { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .34; mask-image: linear-gradient(#000 0%, rgba(0,0,0,.72) 28%, transparent 72%); }
+.join-stage-art .game-art { inset: -18% -12% 16%; background: transparent; }
+#scr-join .join-wrap,
+#scr-join > :not(.join-stage-art):not(.suite-home) { position: relative; z-index: 1; }
+#scr-join > .suite-home { position: absolute; z-index: 12; }
+#scr-join .join-card {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border-color: color-mix(in srgb, var(--game-accent, var(--cyan)) 34%, var(--line));
+  box-shadow: 0 28px 80px rgba(0,0,0,.58),
+    0 0 44px -25px var(--game-accent, var(--cyan)),
+    inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(14px) saturate(1.15);
+}
+#scr-join .wm-b {
+  background: linear-gradient(135deg, var(--game-accent, var(--cyan)),
+    var(--game-accent-2, var(--violet)));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+#scr-join .btn-primary {
+  background: linear-gradient(135deg, var(--game-accent, var(--cyan)),
+    var(--game-accent-2, var(--violet)));
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--game-accent, var(--cyan)) 35%, transparent);
+}
+#scr-join .avatar-cell.sel { border-color: var(--game-accent, var(--cyan));
+  box-shadow: 0 0 0 1px var(--game-accent, var(--cyan)),
+    0 0 20px color-mix(in srgb, var(--game-accent, var(--cyan)) 38%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ga-float, .ga-drift, .ga-spin, .ga-pulse { animation: none !important; }
+  .tile .ga-svg { transition: none; }
+}

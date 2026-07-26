@@ -12,7 +12,11 @@ const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots/poker";
 fs.mkdirSync(OUT, { recursive: true });
 
-const PHONE = { width: 390, height: 844, deviceScaleFactor: 2 };
+const PHONE = {
+  width: Number(process.env.POKER_PHONE_WIDTH || 390),
+  height: Number(process.env.POKER_PHONE_HEIGHT || 844),
+  deviceScaleFactor: 2,
+};
 const DESK = { width: 1000, height: 820, deviceScaleFactor: 1 };
 const errors = [];
 let step = "boot";
@@ -87,7 +91,21 @@ try {
       showdown: !document.getElementById("showdown-banner").hidden,
       over: !document.getElementById("gameover").hidden,
     }));
-    if (!gotPreflop && info.barVisible) { await shot(pg, "02-preflop"); gotPreflop = true; }
+    if (!gotPreflop && info.barVisible) {
+      const layout = await pg.evaluate(() => {
+        const actions = document.getElementById("act-main").getBoundingClientRect();
+        return {
+          ownSeatCards: document.querySelectorAll(".seat.is-me .seat-cards .card").length,
+          pageOverflow: document.documentElement.scrollWidth > innerWidth,
+          actionsOnscreen: actions.left >= 0 && actions.right <= innerWidth
+            && actions.top >= 0 && actions.bottom <= innerHeight,
+        };
+      });
+      if (layout.ownSeatCards !== 0) fail("my hole cards are duplicated at my seat");
+      if (layout.pageOverflow) fail("phone table overflows horizontally");
+      if (!layout.actionsOnscreen) fail("phone action controls are offscreen");
+      await shot(pg, "02-preflop"); gotPreflop = true;
+    }
     if (!gotBoard && info.boardN >= 3) { await shot(pg, "03-board"); gotBoard = true; }
     // a real showdown = the banner is up AND community cards are on the board
     if (!gotShowdown && info.showdown && info.boardN >= 3) { await shot(pg, "04-showdown"); gotShowdown = true; }

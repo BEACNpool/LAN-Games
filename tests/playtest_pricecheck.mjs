@@ -60,6 +60,19 @@ try {
   const p1 = await phone("Ava", 0);
   const p2 = await phone("Ben", 5);
   await sleep(500);
+  const feedbackUI = await p1.evaluate(() => {
+    const mute = document.querySelector("#mute-btn");
+    const box = mute.getBoundingClientRect();
+    return { w: box.width, h: box.height, label: mute.getAttribute("aria-label"),
+      live: document.querySelector("#game-status")?.getAttribute("aria-live") };
+  });
+  if (feedbackUI.w < 44 || feedbackUI.h < 44 || !feedbackUI.label)
+    fail("mute control is not an accessible 44px touch target");
+  if (feedbackUI.live !== "polite") fail("missing polite game status live region");
+  await p1.click("#mute-btn");
+  if (await p1.evaluate(() => localStorage.getItem("wc-muted")) !== "1")
+    fail("shared mute preference was not persisted");
+  await p1.click("#mute-btn"); // restore sound for the playtest
 
   await clickText(p1, "#opt-rule button", "CLOSEST");
   await clickText(p1, "#opt-rounds button", "3");
@@ -75,6 +88,15 @@ try {
 
   // controller keypad shot
   if (!(await shown(p1, "#pc-guess"))) fail("guess panel not shown at start");
+  const keypadA11y = await p1.evaluate(() => {
+    const keys = [...document.querySelectorAll(".pc-key")];
+    return { count: keys.length, minH: Math.min(...keys.map((el) => el.getBoundingClientRect().height)),
+      labelled: keys.every((el) => el.hasAttribute("aria-label")),
+      gameMute: document.querySelector("#mute-btn2").getBoundingClientRect().height };
+  });
+  if (keypadA11y.count !== 12 || keypadA11y.minH < 44 || !keypadA11y.labelled)
+    fail("keypad accessibility/touch targets regressed: " + JSON.stringify(keypadA11y));
+  if (keypadA11y.gameMute < 44) fail("in-game mute target is too small");
   await p1.screenshot({ path: `${OUT}/65-pc-keypad.png` }); log("shot: keypad");
   await tv.screenshot({ path: `${OUT}/66-pc-tv-item.png` }); log("shot: TV item");
 

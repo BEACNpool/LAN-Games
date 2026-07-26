@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<link rel="manifest" href="/shared/app.webmanifest">
+<link rel="manifest" href="/app.webmanifest">
 <link rel="apple-touch-icon" sizes="180x180" href="/shared/app-icon-180.png">
 <title>WORDCLASH</title>
+<meta name="description" content="A fast, local multiplayer word battle for phones and the big screen.">
 <meta name="theme-color" content="#070b14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,15 +21,24 @@
   <!-- ============ JOIN ============ -->
   <section id="screen-join" class="screen" hidden>
     <div class="join-wrap">
-      <h1 class="wordmark"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></h1>
+      <div class="join-nav">
+        <a class="suite-link" href="/" aria-label="Return to all LAN Games">‹ <span>ALL GAMES</span></a>
+        <span class="join-edition">LIVE PARTY EDITION</span>
+      </div>
+      <div class="join-emblem" aria-hidden="true">
+        <span class="emblem-tile">W</span><span class="emblem-tile g">O</span>
+        <span class="emblem-tile y">R</span><span class="emblem-tile">D</span>
+      </div>
+      <h1 id="join-title" class="wordmark"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></h1>
       <p class="tagline">FIVE LETTERS. NO MERCY.</p>
-      <div class="join-card">
+      <div class="join-card" aria-labelledby="join-title">
         <label class="field-label" for="name-input">CALL SIGN</label>
-        <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
-        <label class="field-label">AVATAR</label>
-        <div id="avatar-grid" class="avatar-grid"></div>
+        <input id="name-input" type="text" maxlength="14" autocomplete="nickname" autocapitalize="words"
+               enterkeyhint="done" spellcheck="false" placeholder="your name">
+        <span id="avatar-label" class="field-label">CHOOSE YOUR PLAYER</span>
+        <div id="avatar-grid" class="avatar-grid" role="group" aria-labelledby="avatar-label"></div>
         <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
-        <button id="join-btn" class="btn btn-primary btn-big">ENTER LOBBY</button>
+        <button id="join-btn" class="btn btn-primary btn-big" type="button">ENTER LOBBY</button>
       </div>
       <p class="join-foot">local multiplayer &middot; no accounts &middot; no cloud</p>
     </div>
@@ -37,19 +47,20 @@
   <!-- ============ LOBBY ============ -->
   <section id="screen-lobby" class="screen" hidden>
     <header class="topbar">
-      <span class="wordmark-sm"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></span>
+      <a class="suite-link topbar-home" href="/" aria-label="Return to all LAN Games">‹ <span>GAMES</span></a>
+      <span class="wordmark-sm" aria-label="WordClash"><span class="wm-a">WORD</span><span class="wm-b">CLASH</span></span>
       <div class="topbar-right">
-        <button id="mute-btn" class="icon-btn" title="sound">🔊</button>
-        <button id="edit-profile-btn" class="icon-btn" title="profile">✏️</button>
+        <button id="mute-btn" class="icon-btn" type="button" title="sound" aria-label="Mute game sound">🔊</button>
+        <button id="edit-profile-btn" class="icon-btn" type="button" title="profile" aria-label="Edit player profile">✏️</button>
       </div>
     </header>
 
     <div class="lobby-body">
       <div class="lobby-sec">
         <div class="sec-head">
-          <h2>SQUAD</h2><span id="ready-count" class="sec-badge"></span>
+          <h2>SQUAD</h2><span id="ready-count" class="sec-badge" role="status" aria-live="polite"></span>
         </div>
-        <div id="player-grid" class="player-grid"></div>
+        <div id="player-grid" class="player-grid" role="list"></div>
       </div>
 
       <div class="lobby-sec">
@@ -58,59 +69,65 @@
         <div class="rounds-row">
           <span class="field-label">ROUNDS</span>
           <div class="stepper">
-            <button id="rounds-minus" class="step-btn">−</button>
-            <span id="rounds-val" class="step-val">3</span>
-            <button id="rounds-plus" class="step-btn">+</button>
+            <button id="rounds-minus" class="step-btn" type="button" aria-label="Fewer rounds">−</button>
+            <span id="rounds-val" class="step-val" aria-live="polite">3</span>
+            <button id="rounds-plus" class="step-btn" type="button" aria-label="More rounds">+</button>
           </div>
         </div>
         <div class="rounds-row" id="turn-row" hidden>
           <span class="field-label">TURN TIMER</span>
           <div class="stepper">
-            <button id="turn-minus" class="step-btn">−</button>
-            <span id="turn-val" class="step-val">15s</span>
-            <button id="turn-plus" class="step-btn">+</button>
+            <button id="turn-minus" class="step-btn" type="button" aria-label="Shorter turn timer">−</button>
+            <span id="turn-val" class="step-val" aria-live="polite">15s</span>
+            <button id="turn-plus" class="step-btn" type="button" aria-label="Longer turn timer">+</button>
           </div>
         </div>
       </div>
     </div>
 
     <footer class="lobby-foot">
-      <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
-      <button id="go-btn" class="btn btn-go btn-big" hidden>GO!</button>
-      <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+      <button id="ready-btn" class="btn btn-ready btn-big" type="button">READY UP</button>
+      <button id="go-btn" class="btn btn-go btn-big" type="button" hidden>START MATCH</button>
+      <p id="lobby-hint" class="lobby-hint" role="status">waiting for players…</p>
     </footer>
   </section>
 
   <!-- ============ GAME ============ -->
   <section id="screen-game" class="screen" hidden>
     <header class="hud">
+      <a class="hud-home" href="/" aria-label="Leave match and return to all games">‹</a>
       <span id="hud-round" class="hud-pill">R1/3</span>
-      <div id="hud-timer" class="hud-timer"><div id="hud-timer-fill"></div></div>
+      <div id="hud-timer" class="hud-timer" role="progressbar" aria-label="Time remaining"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="hud-timer-fill"></div></div>
       <span id="hud-clock" class="hud-clock">0:00</span>
     </header>
-    <div id="hud-scores" class="hud-scores"></div>
+    <div id="hud-scores" class="hud-scores" aria-label="Current scores"></div>
 
-    <div id="turn-banner" class="turn-banner" hidden>
+    <div id="turn-banner" class="turn-banner" role="status" aria-live="polite" hidden>
       <div class="turn-ring"><svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="19"/><circle id="ring-fg" class="ring-fg" cx="22" cy="22" r="19"/></svg><span id="turn-avatar">🦊</span></div>
       <div class="turn-text"><span id="turn-name">—</span><span id="turn-sub">is up</span></div>
     </div>
 
     <div id="opp-strip" class="opp-strip" hidden></div>
 
+    <div class="board-stage-head">
+      <span id="board-label">YOUR BOARD</span>
+      <span id="board-progress">0 / 6</span>
+    </div>
     <div id="board-scroll" class="board-scroll">
-      <div id="board" class="board"></div>
+      <div id="board" class="board" role="group" aria-labelledby="board-label"></div>
     </div>
 
     <div id="sabotage-bar" class="sabotage-bar" hidden>
-      <span id="sab-charges" class="sab-charges"></span>
-      <button class="sab-btn" data-sab="time">⏱ CUT<small>7s timer</small></button>
-      <button class="sab-btn" data-sab="ban">🚫 BAN<small>a letter</small></button>
-      <button class="sab-btn" data-sab="start">🎯 FORCE<small>a start</small></button>
+      <span id="sab-charges" class="sab-charges" aria-label="Sabotage charges"></span>
+      <button class="sab-btn" type="button" data-sab="time">⏱ CUT<small>7s timer</small></button>
+      <button class="sab-btn" type="button" data-sab="ban">🚫 BAN<small>a letter</small></button>
+      <button class="sab-btn" type="button" data-sab="start">🎯 FORCE<small>a start</small></button>
     </div>
 
-    <div id="pending-note" class="pending-note" hidden></div>
+    <div id="pending-note" class="pending-note" role="alert" hidden></div>
 
-    <div id="keyboard" class="keyboard"></div>
+    <div id="keyboard" class="keyboard" role="group" aria-label="Letter keyboard"></div>
 
     <div id="spectate-note" class="spectate-note" hidden>
       MATCH IN PROGRESS — you're in the next one
@@ -119,55 +136,63 @@
 
   <!-- ============ ROUND END ============ -->
   <section id="screen-roundend" class="screen" hidden>
-    <div class="roundend-wrap">
+    <div id="roundend-wrap" class="roundend-wrap">
+      <a class="suite-link result-home" href="/" aria-label="Return to all LAN Games">‹ <span>ALL GAMES</span></a>
+      <div id="re-emblem" class="result-emblem" aria-hidden="true">◆</div>
+      <p id="re-outcome" class="re-outcome">ROUND COMPLETE</p>
       <p id="re-reason" class="re-reason">TIME'S UP</p>
       <p class="re-label">the word was</p>
-      <div id="re-word" class="re-word"></div>
-      <div id="re-scores" class="re-scores"></div>
-      <p id="re-next" class="re-next"></p>
+      <div id="re-word" class="re-word" aria-label="The answer"></div>
+      <div id="re-scores" class="re-scores" aria-label="Round scores"></div>
+      <p id="re-next" class="re-next" role="status"></p>
     </div>
   </section>
 
   <!-- ============ PODIUM ============ -->
   <section id="screen-podium" class="screen" hidden>
     <div class="podium-wrap">
+      <a class="suite-link result-home" href="/" aria-label="Return to all LAN Games">‹ <span>ALL GAMES</span></a>
+      <p id="podium-kicker" class="podium-kicker">MATCH COMPLETE</p>
       <p class="podium-title">FINAL STANDINGS</p>
-      <div id="podium" class="podium"></div>
+      <div id="podium" class="podium" aria-label="Final standings"></div>
       <div id="podium-rest" class="podium-rest"></div>
-      <button id="rematch-btn" class="btn btn-primary btn-big">REMATCH</button>
-      <p id="podium-auto" class="lobby-hint"></p>
+      <button id="rematch-btn" class="btn btn-primary btn-big" type="button">PLAY AGAIN</button>
+      <p id="podium-auto" class="lobby-hint" role="status"></p>
     </div>
   </section>
 
 </main>
 
 <!-- letter picker modal (sabotage ban/force) -->
-<div id="letter-modal" class="modal" hidden>
+<div id="letter-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="letter-modal-title" hidden>
   <div class="modal-card">
     <p id="letter-modal-title" class="modal-title">PICK A LETTER</p>
     <div id="letter-grid" class="letter-grid"></div>
-    <button id="letter-cancel" class="btn btn-ghost">CANCEL</button>
+    <button id="letter-cancel" class="btn btn-ghost" type="button">CANCEL</button>
   </div>
 </div>
 
 <!-- profile modal -->
-<div id="profile-modal" class="modal" hidden>
+<div id="profile-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-title" hidden>
   <div class="modal-card">
-    <p class="modal-title">PROFILE</p>
+    <p id="profile-title" class="modal-title">PLAYER PROFILE</p>
     <label class="field-label" for="profile-name">CALL SIGN</label>
-    <input id="profile-name" maxlength="14" autocomplete="off" spellcheck="false">
-    <div id="profile-avatars" class="avatar-grid"></div>
+    <input id="profile-name" type="text" maxlength="14" autocomplete="nickname" autocapitalize="words"
+           enterkeyhint="done" spellcheck="false">
+    <div id="profile-avatars" class="avatar-grid" role="group" aria-label="Choose your player"></div>
     <button id="pfp-btn2" class="pfp-btn" type="button">📷 USE A PHOTO INSTEAD</button>
     <div class="modal-btns">
-      <button id="profile-cancel" class="btn btn-ghost">CANCEL</button>
-      <button id="profile-save" class="btn btn-primary">SAVE</button>
+      <button id="profile-cancel" class="btn btn-ghost" type="button">CANCEL</button>
+      <button id="profile-save" class="btn btn-primary" type="button">SAVE</button>
     </div>
   </div>
 </div>
 
 <div id="countdown-overlay" class="countdown-overlay" hidden><span id="countdown-num">3</span></div>
-<div id="toasts" class="toasts"></div>
-<div id="conn-banner" class="conn-banner" hidden>RECONNECTING…</div>
+<div id="toasts" class="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="conn-banner" class="conn-banner" role="alert" hidden>RECONNECTING…</div>
+<div id="wc-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="wc-alert" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 <canvas id="confetti"></canvas>
 
 <script src="brag.js"></script>

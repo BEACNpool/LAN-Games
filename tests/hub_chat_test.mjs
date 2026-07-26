@@ -32,6 +32,11 @@ async function member(name, token) {
   }, name, token);
   await pg.reload({ waitUntil: "networkidle2" });
   await pg.waitForSelector("#lc-msgs", { timeout: 5000 });
+  // The premium catalogue keeps chat compact by default so games appear in
+  // the opening viewport. Expand it explicitly for this chat-focused test.
+  if (await pg.$eval("#lc-head", (el) => el.getAttribute("aria-expanded") === "false")) {
+    await pg.click("#lc-head");
+  }
   return pg;
 }
 const msgTexts = (pg) =>

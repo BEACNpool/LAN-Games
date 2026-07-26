@@ -6,13 +6,14 @@
 const Hub = (() => {
   const AVATARS = ["🦊", "🐸", "🦖", "🐙", "🦉", "🐯", "🐼", "🦄",
                    "👾", "🤖", "🐲", "😈", "🦈", "🐝", "🦩", "🐢"];
+  const gameSlug = (location.pathname.match(/^\/games\/([^/]+)/) || [])[1] || "";
 
   // Every game loads this file, so nested game pages get the same home-screen
   // identity without copying manifest markup into every client.
   if (!document.querySelector('link[rel="manifest"]')) {
     const manifest = document.createElement("link");
     manifest.rel = "manifest";
-    manifest.href = "/shared/app.webmanifest";
+    manifest.href = "/app.webmanifest";
     document.head.appendChild(manifest);
   }
   if (!document.querySelector('link[rel="apple-touch-icon"]')) {
@@ -28,6 +29,25 @@ const Hub = (() => {
     favicon.type = "image/svg+xml";
     favicon.href = "/shared/app-icon.svg";
     document.head.appendChild(favicon);
+  }
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+    }, { once: true });
+  }
+
+  // The suite art direction is delivered from one shared runtime so every
+  // mounted game gets the same polish without duplicating it in 25 clients.
+  if (gameSlug && !document.querySelector('link[href="/shared/gameart.css"]')) {
+    const artCss = document.createElement("link");
+    artCss.rel = "stylesheet";
+    artCss.href = "/shared/gameart.css";
+    document.head.appendChild(artCss);
+  }
+  if (!document.querySelector('script[src="/shared/brand.js"]')) {
+    const brandScript = document.createElement("script");
+    brandScript.src = "/shared/brand.js";
+    document.head.appendChild(brandScript);
   }
 
   const identity = {
@@ -51,6 +71,67 @@ const Hub = (() => {
       return this.token;
     },
   };
+
+  const systemReduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const prefs = {
+    get sound() { return localStorage.getItem("wc-muted") !== "1"; },
+    set sound(v) { localStorage.setItem("wc-muted", v ? "0" : "1"); },
+    get haptics() { return localStorage.getItem("lg-haptics") !== "0"; },
+    set haptics(v) { localStorage.setItem("lg-haptics", v ? "1" : "0"); },
+    get reducedFx() {
+      const value = localStorage.getItem("lg-motion");
+      return value === "reduced" || (value !== "full" && systemReduced.matches);
+    },
+    set reducedFx(v) { localStorage.setItem("lg-motion", v ? "reduced" : "full"); applyPrefs(); },
+    get contrast() { return localStorage.getItem("lg-contrast") === "1"; },
+    set contrast(v) { localStorage.setItem("lg-contrast", v ? "1" : "0"); applyPrefs(); },
+  };
+
+  function applyPrefs() {
+    document.documentElement.classList.toggle("lg-reduced-fx", prefs.reducedFx);
+    document.documentElement.classList.toggle("lg-high-contrast", prefs.contrast);
+  }
+  applyPrefs();
+  systemReduced.addEventListener?.("change", applyPrefs);
+
+  // Existing games call navigator.vibrate directly. Respect the suite-level
+  // haptics setting without forcing every mature client to duplicate a guard.
+  if (typeof navigator.vibrate === "function" && !navigator.vibrate.__lanGamesWrapped) {
+    const nativeVibrate = navigator.vibrate.bind(navigator);
+    const wrapped = (pattern) => prefs.haptics ? nativeVibrate(pattern) : false;
+    wrapped.__lanGamesWrapped = true;
+    try { navigator.vibrate = wrapped; } catch (error) { /* readonly browser API */ }
+  }
+
+  const feedback = (() => {
+    let ctx = null;
+    const tone = (frequency, duration = .055, volume = .018, type = "sine", delay = 0) => {
+      if (!prefs.sound) return;
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const at = ctx.currentTime + delay;
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, at);
+        gain.gain.setValueAtTime(.0001, at);
+        gain.gain.exponentialRampToValueAtTime(volume, at + .01);
+        gain.gain.exponentialRampToValueAtTime(.0001, at + duration);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(at); osc.stop(at + duration + .02);
+      } catch (error) { /* audio is optional */ }
+    };
+    return {
+      tap() { tone(470); },
+      select() { tone(520, .07, .022); tone(740, .06, .016, "sine", .045); },
+      success() { tone(523, .18, .025); tone(659, .17, .022, "sine", .08); tone(784, .2, .02, "sine", .16); },
+      error() { tone(145, .18, .028, "sawtooth"); },
+      haptic(pattern = 18) {
+        try { if (prefs.haptics) navigator.vibrate?.(pattern); } catch (error) { /* optional */ }
+      },
+    };
+  })();
 
   /* render a player's avatar into `el`: custom photo if they have one,
      else their emoji. Sizing is em-based, so it scales with the host. */
@@ -348,6 +429,7 @@ const Hub = (() => {
 
   /* tiny confetti (canvas #confetti must exist) */
   function confettiBurst(n = 160) {
+    if (prefs.reducedFx) return;
     const cv = document.getElementById("confetti");
     if (!cv) return;
     if (!cv._parts) {
@@ -383,6 +465,41 @@ const Hub = (() => {
     }
   }
 
+  async function installGameShell() {
+    if (!gameSlug) return;
+
+    // A consistent escape hatch matters once the suite runs standalone from a
+    // home-screen icon: browser chrome is no longer there to rescue the user.
+    const join = document.getElementById("scr-join");
+    if (join && !join.querySelector(".suite-home")) {
+      const home = document.createElement("a");
+      home.className = "suite-home";
+      home.href = "/";
+      home.setAttribute("aria-label", "Back to all games");
+      home.innerHTML = '<span aria-hidden="true">‹</span><b>ALL GAMES</b>';
+      join.appendChild(home);
+    }
+
+    const decorate = async () => {
+      try {
+        const payload = await (await fetch("/api/games")).json();
+        const all = [...(payload.games || []), ...(payload.external || [])];
+        const game = all.find((entry) => entry.slug === gameSlug);
+        if (game && window.GameArt) window.GameArt.installJoinArt(game);
+      } catch (error) { /* the game remains fully usable without decoration */ }
+    };
+    if (window.GameArt) {
+      decorate();
+    } else {
+      const script = document.createElement("script");
+      script.src = "/shared/gameart.js";
+      script.onload = decorate;
+      document.head.appendChild(script);
+    }
+  }
+  queueMicrotask(installGameShell);
+
   return { AVATARS, identity, buildAvatarGrid, toast, connect, confettiBurst,
-           fillAvatar, uploadPfp, removePfp, editPhoto, wirePfpButton };
+           fillAvatar, uploadPfp, removePfp, editPhoto, wirePfpButton,
+           prefs, feedback, applyPrefs };
 })();

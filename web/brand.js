@@ -27,7 +27,9 @@
     const presents = brand.presents || DEFAULT_PRESENTS;
 
     // Title: replace only the wordmark segment, keep the page's own name.
-    if (name !== DEFAULT_NAME && document.title.includes(DEFAULT_NAME)) {
+    if (document.title.includes("GAMEHUB")) {
+      document.title = document.title.split("GAMEHUB").join(name);
+    } else if (name !== DEFAULT_NAME && document.title.includes(DEFAULT_NAME)) {
       document.title = document.title.split(DEFAULT_NAME).join(name);
     }
     for (const el of document.querySelectorAll("[data-brand]")) {
@@ -35,6 +37,17 @@
     }
     for (const el of document.querySelectorAll("[data-brand-presents]")) {
       el.textContent = presents;
+    }
+    for (const el of document.querySelectorAll("[data-brand-logo]")) {
+      const parts = [...el.querySelectorAll(".b1,.b2")];
+      if (parts.length < 2) {
+        el.textContent = name;
+        continue;
+      }
+      const words = name.includes(".") ? name.split(/\.(.+)/) : name.split(/\s+(.+)/);
+      parts[0].textContent = words[0] || name;
+      parts[1].textContent = words[1] || "";
+      el.setAttribute("aria-label", name);
     }
 
     // Per-game rename, e.g. {"famfeud": "SMITH FEUD"}. The page ships the

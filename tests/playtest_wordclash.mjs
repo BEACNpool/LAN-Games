@@ -65,6 +65,39 @@ async function shot(page, nm) {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+async function auditPhoneUi(page, label) {
+  const result = await page.evaluate(() => {
+    const visible = (el) => {
+      const r = el.getBoundingClientRect();
+      const s = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && s.display !== "none"
+        && s.visibility !== "hidden" && !el.closest("[hidden]");
+    };
+    const small = [...document.querySelectorAll("button, a, input")]
+      .filter(visible)
+      .map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          target: el.id || el.className || el.textContent.trim().slice(0, 18),
+          width: Math.round(r.width * 10) / 10,
+          height: Math.round(r.height * 10) / 10,
+        };
+      })
+      .filter((x) => x.width < 43.5 || x.height < 43.5);
+    return {
+      width: innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      small,
+    };
+  });
+  if (result.scrollWidth > result.width + 1) {
+    fail(`${label} overflows horizontally: ${result.scrollWidth}px > ${result.width}px`);
+  }
+  if (result.small.length) {
+    fail(`${label} has sub-44px controls: ${JSON.stringify(result.small)}`);
+  }
+}
+
 async function readyAll(pages) {
   for (const p of pages) {
     const isReady = await p.$eval("#ready-btn", (b) => b.classList.contains("is-ready"));
@@ -101,6 +134,7 @@ try {
     await p.setViewport(PHONE);
     await p.goto(BASE + "/", { waitUntil: "networkidle2" });
     await waitVis(p, "#screen-join");
+    await auditPhoneUi(p, "join");
     await shot(p, "01-join");
     await ctx.close();
   }
@@ -131,6 +165,7 @@ try {
   if (rv !== "1") fail(`settings didn't sync: rounds=${rv} on Rex's phone`);
   await readyAll(players);
   await sleep(300);
+  await auditPhoneUi(ava, "lobby");
   await shot(ava, "02-lobby-ready");
   await shot(tv, "03-tv-lobby");
 
@@ -146,6 +181,7 @@ try {
   await typeGuess(ava, WORDS[0]);
   await typeGuess(rex, WORDS[1]);
   await sleep(700);
+  await auditPhoneUi(ava, "duel");
   // masking: Rex's view of Ava's board must carry no letters
   const oppLetters = await rex.evaluate(() =>
     Array.from(document.querySelectorAll("#opp-strip .opp-card")).map((c) => c.innerText).join(" "));
@@ -164,12 +200,14 @@ try {
   step = "roundend";
   await waitVis(ava, "#screen-roundend", 15000);
   await sleep(900);
+  await auditPhoneUi(ava, "round end");
   await shot(ava, "06-roundend");
   await shot(tv, "07-tv-roundend");
 
   step = "podium";
   await waitVis(ava, "#screen-podium", 15000);
   await sleep(900);
+  await auditPhoneUi(ava, "podium");
   await shot(ava, "08-podium");
   await shot(tv, "09-tv-podium");
   // brag card renders from the podium
@@ -223,6 +261,7 @@ try {
   if (cur) {
     await cur.evaluate(() => document.querySelector('[data-sab="ban"]').click());
     await waitVis(cur, "#letter-modal", 4000);
+    await auditPhoneUi(cur, "sabotage modal");
     await shot(cur, "10-sabotage-modal");
     await cur.click("#letter-cancel");
     await cur.evaluate(() => document.querySelector('[data-sab="time"]').click());

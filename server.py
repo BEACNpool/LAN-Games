@@ -18,7 +18,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request, WebSocket
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from core import avatars, chatmedia, venue
@@ -48,6 +48,27 @@ for entry in REGISTRY:
         return ws_endpoint
 
     app.add_api_websocket_route("/games/%s/ws" % slug, _make_ws(binding))
+
+# Private venue aliases preserve old bookmarks after a game is renamed, while
+# the public repository remains generic. They are read at process start because
+# routes themselves are part of the FastAPI application.
+for old_slug, current_slug in venue.route_aliases(bindings).items():
+    app.add_api_websocket_route(
+        "/games/%s/ws" % old_slug, _make_ws(bindings[current_slug]),
+        name="legacy-ws-%s" % old_slug)
+
+    def _make_redirect(target_slug: str):
+        async def redirect_to_current():
+            return RedirectResponse("/games/%s/" % target_slug,
+                                    status_code=307)
+        return redirect_to_current
+
+    redirect = _make_redirect(current_slug)
+    app.add_api_route("/games/%s" % old_slug, redirect, methods=["GET"],
+                      name="legacy-%s" % old_slug, include_in_schema=False)
+    app.add_api_route("/games/%s/" % old_slug, redirect, methods=["GET"],
+                      name="legacy-slash-%s" % old_slug,
+                      include_in_schema=False)
 
 
 @app.get("/api/games")
@@ -161,6 +182,29 @@ async def health():
 @app.get("/")
 async def hub():
     return FileResponse(WEB / "hub.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/offline")
+async def offline():
+    return FileResponse(WEB / "offline.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/sw.js")
+async def service_worker():
+    return FileResponse(WEB / "sw.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache",
+                                 "Service-Worker-Allowed": "/"})
+
+
+@app.get("/app.webmanifest")
+async def app_manifest():
+    """Install metadata with this venue's private wordmark when configured."""
+    manifest = json.loads((WEB / "app.webmanifest").read_text(encoding="utf-8"))
+    name = str(venue.brand().get("name") or manifest["name"]).strip()
+    manifest["name"] = name
+    manifest["short_name"] = name
+    return JSONResponse(manifest, media_type="application/manifest+json",
+                        headers={"Cache-Control": "no-cache"})
 
 
 @app.middleware("http")

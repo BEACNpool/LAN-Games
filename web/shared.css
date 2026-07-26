@@ -33,6 +33,7 @@
   --mono: "JBMono", ui-monospace, "SF Mono", Menlo, monospace;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
+  color-scheme: dark;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -120,8 +121,12 @@ input::placeholder { color: var(--faint); font-weight: 400; }
 .avatar-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
 .avatar-cell {
   aspect-ratio: 1; display: grid; place-items: center; font-size: 21px;
-  background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
-  cursor: pointer; transition: transform 0.08s;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255,255,255,.07), transparent 42%),
+    linear-gradient(145deg, #11192b, var(--bg));
+  border: 1px solid var(--line); border-radius: 11px;
+  cursor: pointer; transition: transform 0.08s, border-color .15s, box-shadow .15s;
+  filter: drop-shadow(0 1px 1px rgba(255,255,255,.24));
 }
 .avatar-cell:active { transform: scale(0.92); }
 .avatar-cell.sel {
@@ -154,7 +159,7 @@ input::placeholder { color: var(--faint); font-weight: 400; }
 .pc-status.rdy { color: var(--green); }
 
 .toasts {
-  position: fixed; top: calc(12px + var(--sat)); left: 50%; transform: translateX(-50%);
+  position: fixed; top: calc(64px + var(--sat)); left: 50%; transform: translateX(-50%);
   z-index: 50; display: flex; flex-direction: column; gap: 6px; align-items: center;
   width: max-content; max-width: 92vw; pointer-events: none;
 }
@@ -205,6 +210,39 @@ input::placeholder { color: var(--faint); font-weight: 400; }
 .modal-btns .btn { flex: 1; }
 
 #confetti { position: fixed; inset: 0; z-index: 45; pointer-events: none; }
+
+/* Universal standalone-safe route back to the catalogue. hubnet.js injects it
+   on every join screen, including titles that predate the shared shell. */
+.suite-home {
+  position: absolute; z-index: 12; top: calc(12px + var(--sat)); left: 12px;
+  min-width: 44px; height: 44px; padding: 0 14px 0 10px;
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid rgba(139,150,179,.28); border-radius: 999px;
+  color: var(--muted); background: rgba(7,11,20,.72);
+  box-shadow: 0 8px 28px rgba(0,0,0,.28);
+  backdrop-filter: blur(12px); text-decoration: none;
+  font: 800 9px/1 var(--mono); letter-spacing: .12em;
+}
+.suite-home span { font: 400 26px/1 var(--font); margin-top: -2px; }
+.suite-home:hover, .suite-home:focus-visible {
+  color: var(--text); border-color: var(--game-accent, var(--cyan));
+  outline: none; box-shadow: 0 0 0 1px var(--game-accent, var(--cyan)),
+    0 8px 28px rgba(0,0,0,.35); }
+
+/* Player-level comfort settings are applied once by hubnet.js. */
+.lg-high-contrast {
+  --line: #506181;
+  --muted: #b7c1d9;
+  --faint: #8996b4;
+}
+.lg-high-contrast .btn, .lg-high-contrast .icon-btn,
+.lg-high-contrast input { border-width: 2px; }
+.lg-reduced-fx *, .lg-reduced-fx *::before, .lg-reduced-fx *::after {
+  animation-duration: .01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .01ms !important;
+  scroll-behavior: auto !important;
+}
 
 /* custom profile pictures — em-based so they scale with the host element */
 img.pfp {
@@ -263,6 +301,12 @@ img.pfp {
   .wordmark { font-size: clamp(32px, 10vw, 54px); letter-spacing: 0; }
   .avatar-grid { grid-template-columns: repeat(5, minmax(44px, 1fr)); }
   .modal, .crop-ov { padding: 12px; }
+}
+
+@media (max-width: 380px) {
+  .suite-home { width: 44px; padding: 0; justify-content: center; }
+  .suite-home b { position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; }
 }
 
 @media (pointer: coarse) {
