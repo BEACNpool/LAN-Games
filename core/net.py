@@ -26,8 +26,8 @@ from core import avatars
 
 log = logging.getLogger("gamehub.net")
 
-RATE_N, RATE_WINDOW = 20, 2.0   # generous: stepper-mashing kids must not
-                                # get their next real action dropped
+RATE_N, RATE_WINDOW = 30, 2.0   # generous: stepper-mashing kids must not get
+                                # throttled; realtime games send ~11Hz movement
 MAX_SOCKETS_PER_TOKEN = 4
 
 # Lobby verbs handled here for every game; anything else goes to game_action.

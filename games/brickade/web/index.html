@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>BRICKADE — LAN GAMES</title>
+<meta name="theme-color" content="#05060f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%2305060f"/><text x="32" y="46" font-size="34" text-anchor="middle">🧱</text></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="brickade.css">
+</head>
+<body>
+<div class="bg-fx brickade-atmosphere" aria-hidden="true">
+  <i></i><i></i><i></i>
+</div>
+
+<!-- ============ JOIN ============ -->
+<section id="scr-join" class="scr" hidden>
+  <div class="join-wrap">
+    <div class="brand-lockup">
+      <div class="brand-sigil" aria-hidden="true"><span></span></div>
+      <p class="brand-kicker"><span data-brand>LAN GAMES</span> // NEON NETWAR</p>
+      <h1 class="wordmark"><span class="wm-a">BRICK</span><span class="wm-b">ADE</span></h1>
+      <p class="tagline">DEFEND YOUR NET. WEAPONIZE THE BALL.</p>
+    </div>
+    <div class="join-card premium-panel">
+      <div class="join-card-head">
+        <div>
+          <span class="micro-label">PLAYER UPLINK</span>
+          <strong>Enter the arena</strong>
+        </div>
+        <span class="live-chip"><i></i> LIVE</span>
+      </div>
+      <label class="field-label" for="name-input">CALL SIGN</label>
+      <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+      <label class="field-label">AVATAR</label>
+      <div id="avatar-grid" class="avatar-grid"></div>
+      <button id="pfp-btn" class="pfp-btn" type="button">📷 OR USE A PHOTO</button>
+      <button id="join-btn" class="btn btn-primary btn-big">TAKE THE NET</button>
+    </div>
+    <div class="join-features" aria-label="Game features">
+      <span><b>01</b> SLIDE TO GUARD</span>
+      <span><b>02</b> BREAK TO CHARGE</span>
+      <span><b>03</b> TAP TO UNLEASH</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOBBY ============ -->
+<section id="scr-lobby" class="scr" hidden>
+  <header class="topbar lobby-topbar">
+    <a href="/" class="icon-btn hub-btn" title="Back to all games" aria-label="Back to all games">‹</a>
+    <span class="lobby-brand">
+      <span class="wordmark-sm"><span class="wm-a">BRICK</span><span class="wm-b">ADE</span></span>
+      <small>NEON NETWAR</small>
+    </span>
+    <span class="top-actions">
+      <button id="pfp-btn2" class="icon-btn" title="your photo" aria-label="Change player photo">📷</button>
+      <button id="mute-btn" class="icon-btn" aria-label="Toggle sound">🔊</button>
+    </span>
+  </header>
+  <div class="lobby-body">
+    <div class="arena-brief premium-panel">
+      <div class="brief-mark" aria-hidden="true">✦</div>
+      <div>
+        <span class="micro-label">MISSION</span>
+        <strong>LAST NET STANDING</strong>
+        <small>Every return makes the ball faster. Your shots cannot damage your own net.</small>
+      </div>
+    </div>
+    <div class="lobby-sec roster-sec">
+      <div class="sec-head"><h2>KEEPERS</h2><span id="ready-count" class="sec-badge"></span></div>
+      <div id="player-grid" class="player-grid"></div>
+      <p class="seat-note" id="seat-note"></p>
+    </div>
+    <div class="lobby-sec rules-sec premium-panel">
+      <div class="sec-head"><h2>MATCH RULES</h2></div>
+      <div class="opt-row"><span class="field-label">ARENA</span><div id="opt-players" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">LIVES</span><div id="opt-lives" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">BOTS</span><div id="opt-diff" class="seg"></div></div>
+      <div class="opt-row"><span class="field-label">BRICKS</span><div id="opt-layout" class="seg"></div></div>
+      <div class="how-grid">
+        <div><b>DRAG</b><span>Slide anywhere to guard your net</span></div>
+        <div><b>SMASH ✦</b><span>Special bricks arm a power-up</span></div>
+        <div><b>FIRE</b><span>Tap the charged badge to attack</span></div>
+      </div>
+      <p class="rules-note">DUEL is pure head-to-head. Three or more keepers form a rotating polygon arena.
+      The ball only scores in <em>other</em> goals — and accelerates every time it is saved.</p>
+    </div>
+  </div>
+  <footer class="lobby-foot">
+    <button id="ready-btn" class="btn btn-ready btn-big">READY UP</button>
+    <button id="go-btn" class="btn btn-go btn-big" hidden>START MATCH</button>
+    <p id="lobby-hint" class="lobby-hint">waiting for players…</p>
+  </footer>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="scr-game" class="scr" hidden>
+  <canvas id="cv"></canvas>
+  <div class="arena-vignette" aria-hidden="true"></div>
+  <div id="game-chrome" class="game-chrome">
+    <header class="match-hud">
+      <div class="match-brand">
+        <span class="match-logo"><b>BRICK</b>ADE</span>
+        <span id="match-mode">DUEL</span>
+      </div>
+      <div class="match-status" aria-live="polite">
+        <span class="status-dot"></span>
+        <strong id="alive-count">2 NETS</strong>
+        <small id="ball-speed">BALL 1.0×</small>
+      </div>
+      <button id="game-mute-btn" class="hud-icon-btn" type="button" aria-label="Toggle sound">🔊</button>
+    </header>
+    <div id="event-banner" class="event-banner" hidden aria-live="polite">
+      <strong id="event-title">CLUTCH SAVE</strong>
+      <span id="event-sub">RETURN FIRE</span>
+    </div>
+    <aside id="tutorial-card" class="tutorial-card" hidden>
+      <button id="tutorial-close" type="button" aria-label="Dismiss instructions">×</button>
+      <span class="micro-label">QUICK CONTROL</span>
+      <div class="tutorial-steps">
+        <span><i class="swipe-icon">↔</i><b>DRAG TO GUARD</b></span>
+        <span><i>✦</i><b>BREAK TO CHARGE</b></span>
+        <span><i>⚡</i><b>TAP SMASH TO FIRE</b></span>
+      </div>
+    </aside>
+    <footer class="player-hud">
+      <div class="identity-rail">
+        <span id="hud-color" class="hud-color"></span>
+        <div>
+          <small>YOUR NET</small>
+          <strong id="hud-name">KEEPER</strong>
+        </div>
+      </div>
+      <div id="health-pips" class="health-pips" aria-label="Net health"></div>
+    </footer>
+    <button id="power-btn" class="power-btn is-empty" type="button" aria-label="Power-up not charged" aria-disabled="true">
+      <span class="power-orbit" aria-hidden="true"></span>
+      <span id="power-icon" class="power-icon">✦</span>
+      <span id="power-label" class="power-label">SMASH</span>
+      <small id="power-state">BREAK ✦ BRICKS</small>
+    </button>
+  </div>
+</section>
+
+<!-- game over -->
+<div id="gameover" class="modal" hidden>
+  <div class="modal-card go-card premium-panel">
+    <span class="micro-label">MATCH COMPLETE</span>
+    <p class="go-crown">🏆</p>
+    <p id="go-title" class="go-title">WINNER</p>
+    <p id="go-line" class="go-line"></p>
+    <button id="rematch-btn" class="btn btn-primary btn-big">BACK TO LOBBY</button>
+    <p id="go-auto" class="lobby-hint"></p>
+  </div>
+</div>
+
+<div id="countdown-overlay" class="countdown-overlay brickade-countdown" hidden>
+  <div class="countdown-ring">
+    <span id="countdown-num">3</span>
+  </div>
+  <strong>LOCK YOUR NET</strong>
+  <small>DRAG TO MOVE · BREAK ✦ TO CHARGE</small>
+</div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="brickade.js"></script>
+</body>
+</html>

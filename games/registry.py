@@ -35,11 +35,43 @@ from games.famfeud.game import FamFeudSession
 from games.bingo.game import BingoSession
 from games.pricecheck.game import PriceCheckSession
 from games.wordrush.game import WordRushSession
+from games.dodgeball.game import DodgeballSession
+from games.brickade.game import BrickadeSession
 from games._template.game import HighCardSession
 
 GAMES_DIR = Path(__file__).parent
 
 REGISTRY = [
+    {
+        "slug": "brickade",
+        "category": "battle", "accent": "#a855f7",
+        "tagline": "Pong-royale meets Breakout. Own the ball.",
+        "min_p": 1, "max_p": 8, "solo": True,
+        "title": "BRICKADE",
+        "icon": "🧱",
+        "blurb": "Defend your goal, smash the bricks, grab power-ups — one "
+                 "bouncing ball everyone fights to own. 2 players is Pong; 3–8 "
+                 "makes a polygon arena where you each guard a wall. Last standing wins.",
+        "players": "1–8 + bots",
+        "session": BrickadeSession,
+        "web": GAMES_DIR / "brickade" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "dodgeball",
+        "category": "battle", "accent": "#f97316",
+        "tagline": "Run, throw, dodge. Last one standing.",
+        "min_p": 1, "max_p": 8, "solo": True,
+        "title": "DODGEBALL",
+        "icon": "🏐",
+        "blurb": "Real-time arena dodgeball on your phone — floating joystick, "
+                 "slingshot aim, dash to dodge, catch to send them out. Bots fill "
+                 "the court. Solo or up to 8, free-for-all or teams.",
+        "players": "1–8 + bots",
+        "session": DodgeballSession,
+        "web": GAMES_DIR / "dodgeball" / "web",
+        "hidden": False,
+    },
     # ---- BIG SCREEN: one shared display, every phone is a controller -------
     {
         "slug": "smelterskelter",
