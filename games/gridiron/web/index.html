@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRIDIRON — LAN GAMES</title>
+<meta name="theme-color" content="#07110d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%2307110d"/><path d="M13 43c-6-12 4-28 23-31 13-2 20 4 15 16-5 13-25 24-38 15Z" fill="%23b96b35" stroke="%23f5e4bf" stroke-width="2"/><path d="m24 20 16 17m-15-9 9-8m-6 12 9-8" stroke="%23f5e4bf" stroke-width="2.5" stroke-linecap="round"/></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="gridiron.css">
+<script src="/shared/brand.js" defer></script>
+</head>
+<body class="gridiron-phone">
+<div class="stadium-bg" aria-hidden="true">
+  <span></span><span></span><span></span>
+</div>
+
+<main id="phone-app">
+  <section id="scr-join" class="phone-screen join-screen" hidden>
+    <a class="suite-home" href="/" aria-label="Back to all games"><span aria-hidden="true">‹</span><b>ALL GAMES</b></a>
+    <div class="join-scroll">
+      <div class="gridiron-lockup">
+        <div class="football-mark" aria-hidden="true"><i></i><b></b></div>
+        <p class="eyebrow">BIG SCREEN FOOTBALL</p>
+        <h1><span>GRID</span><b>IRON</b></h1>
+        <p class="join-tag">CALL THE PLAY. LOOK UP. MAKE THE MOMENT.</p>
+      </div>
+
+      <article class="field-card join-card">
+        <label class="field-label" for="name-input">PLAYER NAME</label>
+        <input id="name-input" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+        <label class="field-label">PICK YOUR HELMET</label>
+        <div id="avatar-grid" class="avatar-grid"></div>
+        <button id="pfp-btn" class="pfp-btn" type="button">📷 USE A PROFILE PHOTO</button>
+
+        <div class="motion-quick">
+          <button class="motion-btn" data-enable-motion type="button">
+            <span aria-hidden="true">⌁</span>
+            <b>ENABLE MOTION</b>
+          </button>
+          <p data-motion-note>Optional. Touch controls always work.</p>
+        </div>
+
+        <button id="join-btn" class="grid-btn primary" type="button">SUIT UP</button>
+        <a class="tv-launch" href="tv.html" target="_blank" rel="noopener">
+          <span aria-hidden="true">▣</span> OPEN THE FIELD ON THE TV
+        </a>
+      </article>
+      <p class="join-foot">1–8 PHONES · BOTS FILL THE ROSTER · ONE TV</p>
+    </div>
+  </section>
+
+  <section id="scr-lobby" class="phone-screen lobby-screen" hidden>
+    <header class="phone-topbar">
+      <a href="/" class="top-icon" aria-label="Back to all games">‹</a>
+      <div class="mini-lockup"><b>GRIDIRON</b><small>LOCKER ROOM</small></div>
+      <button id="pfp-btn2" class="top-icon" type="button" aria-label="Change profile photo">◎</button>
+    </header>
+
+    <div class="lobby-scroll">
+      <a class="tv-nudge field-card" href="tv.html" target="_blank" rel="noopener">
+        <span class="tv-icon" aria-hidden="true">▣</span>
+        <p><b>PUT THE FIELD ON A TV</b><small>Your assignment stays private on this phone.</small></p>
+        <em>OPEN ↗</em>
+      </a>
+
+      <div class="motion-lobby field-card">
+        <span class="motion-pip" data-motion-pip aria-hidden="true"></span>
+        <p><b data-motion-title>MOTION IS OPTIONAL</b><small data-motion-note>Enable it once, or use the full touch controls.</small></p>
+        <button class="mini-action" data-enable-motion type="button">ENABLE</button>
+      </div>
+
+      <div class="section-head"><span>ACTIVE ROSTER</span><b id="ready-count">0 READY</b></div>
+      <div id="player-grid" class="player-grid roster-grid"></div>
+      <p id="roster-note" class="lobby-note">You can play solo. Bots fill both sides.</p>
+
+      <article class="how-card field-card" aria-label="How GRIDIRON works">
+        <div><b>1</b><span>CALL</span><small>pick in secret</small></div>
+        <div><b>2</b><span>SNAP</span><small>hold steady</small></div>
+        <div><b>3</b><span>PLAY</span><small>watch the TV</small></div>
+      </article>
+
+      <article class="settings-card field-card">
+        <div class="setting-row">
+          <span><b>POSSESSIONS</b><small id="possessions-note">a 10–12 minute game</small></span>
+          <div id="opt-possessions" class="seg" role="group" aria-label="Number of possessions"></div>
+        </div>
+        <div class="setting-row">
+          <span><b>ASSISTS</b><small id="assist-note">generous timing windows</small></span>
+          <div id="opt-assist" class="seg" role="group" aria-label="Assist level"></div>
+        </div>
+      </article>
+    </div>
+
+    <footer class="lobby-actions">
+      <button id="ready-btn" class="grid-btn secondary" type="button">READY UP</button>
+      <button id="start-btn" class="grid-btn primary" type="button" hidden>KICK OFF THE GAME</button>
+      <p id="lobby-hint" aria-live="polite">waiting for the roster…</p>
+    </footer>
+  </section>
+
+  <section id="scr-game" class="phone-screen game-screen" hidden>
+    <header class="score-head">
+      <div class="team-score home">
+        <small id="home-label">HOME</small><b id="home-score">0</b>
+      </div>
+      <div class="game-situation">
+        <small id="possession-label">POSSESSION 1 / 6</small>
+        <b id="down-label">1ST &amp; 10</b>
+        <span id="play-clock">—</span>
+      </div>
+      <div class="team-score away">
+        <small id="away-label">AWAY</small><b id="away-score">0</b>
+      </div>
+    </header>
+
+    <div id="phase-ribbon" class="phase-ribbon huddle">
+      <i aria-hidden="true"></i>
+      <span id="phase-label">HUDDLE</span>
+      <b id="phase-note">CALL IT IN SECRET</b>
+    </div>
+
+    <div class="game-scroll">
+      <article id="assignment-card" class="assignment-card field-card">
+        <header>
+          <span id="team-chip" class="team-chip">OFFENSE</span>
+          <small>YOUR ASSIGNMENT</small>
+        </header>
+        <div class="role-row">
+          <div id="role-icon" class="role-icon" aria-hidden="true">◆</div>
+          <div>
+            <h2 id="role-title">QUARTERBACK</h2>
+            <p id="role-copy">Call the play. Pick the open receiver.</p>
+          </div>
+        </div>
+        <p id="role-instruction" class="role-instruction">Keep this card private. The other team cannot see it.</p>
+      </article>
+
+      <article id="motion-game-card" class="motion-game field-card">
+        <span class="motion-pip" data-motion-pip aria-hidden="true"></span>
+        <div>
+          <b data-motion-title>ENABLE MOTION</b>
+          <small data-motion-note>Tilt and raise gestures are optional.</small>
+        </div>
+        <button class="mini-action" data-enable-motion type="button">ENABLE</button>
+        <button id="recenter-btn" class="mini-action ghost" type="button" hidden>RECENTER</button>
+      </article>
+
+      <section id="phase-huddle" class="phase-panel huddle-panel">
+        <div class="panel-heading">
+          <div><small>PRIVATE PLAYBOOK</small><h2 id="playbook-title">CALL YOUR PLAY</h2></div>
+          <b id="huddle-clock">12</b>
+        </div>
+        <p id="huddle-copy" class="panel-copy">Only your side can see these cards.</p>
+        <div id="play-cards" class="play-cards"></div>
+        <div id="play-locked" class="play-locked" hidden>
+          <span aria-hidden="true">✓</span>
+          <p><b id="locked-play-name">PLAY LOCKED</b><small>Look up. The formation is coming to the TV.</small></p>
+        </div>
+        <button id="swap-open-btn" class="swap-open" type="button">⇄ HUDDLE ROLE SWAP</button>
+        <div id="swap-panel" class="swap-panel" hidden>
+          <header><b>SWAP ASSIGNMENTS</b><button id="swap-close-btn" type="button" aria-label="Close role swap">×</button></header>
+          <p>Trade with a teammate for this possession.</p>
+          <div id="swap-targets" class="swap-targets"></div>
+        </div>
+      </section>
+
+      <section id="phase-setup" class="phase-panel setup-panel" hidden>
+        <div class="setup-count" aria-hidden="true"><span></span><b id="setup-clock">3</b></div>
+        <p class="eyebrow">BREAK THE HUDDLE</p>
+        <h2 id="setup-title">HOLD YOUR PHONE LEVEL</h2>
+        <p id="setup-copy">Your steering center is being captured at the snap.</p>
+        <div class="look-up-callout"><span aria-hidden="true">▣</span><b>LOOK AT THE TV</b><small>The play lasts only a few seconds.</small></div>
+      </section>
+
+      <section id="phase-live" class="phase-panel live-panel" hidden>
+        <div id="live-cue" class="live-cue">
+          <span aria-hidden="true">●</span>
+          <p><small>TV CUE</small><b id="live-cue-copy">BALL IS LIVE</b></p>
+        </div>
+        <div id="control-host" class="control-host"></div>
+        <p class="tv-first-note"><span aria-hidden="true">▣</span> WATCH THE TV · YOUR PHONE IS THE CONTROLLER</p>
+      </section>
+
+      <section id="phase-whistle" class="phase-panel whistle-panel" hidden>
+        <div id="whistle-mark" class="whistle-mark" aria-hidden="true">◉</div>
+        <p class="eyebrow">WHISTLE</p>
+        <h2 id="whistle-title">PLAY OVER</h2>
+        <p id="whistle-copy">The chains are moving.</p>
+        <div class="play-result field-card">
+          <span><small>RESULT</small><b id="result-yards">+0 YDS</b></span>
+          <span><small>NEXT</small><b id="result-next">2ND &amp; 10</b></span>
+        </div>
+        <p class="look-tv-small">Replay and tackle credit are on the big screen.</p>
+      </section>
+
+      <section id="phase-sideline" class="phase-panel sideline-panel" hidden>
+        <div class="sideline-mark" aria-hidden="true">▣</div>
+        <p class="eyebrow">GAME IN PROGRESS</p>
+        <h2>YOU’RE ON THE SIDELINE</h2>
+        <p>You joined after the opening snap. Watch this game, then you’re in for the rematch.</p>
+        <a class="grid-btn primary tv-watch" href="tv.html" target="_blank" rel="noopener">WATCH ON THE TV</a>
+      </section>
+    </div>
+    <p id="game-status" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></p>
+  </section>
+</main>
+
+<div id="countdown-overlay" class="countdown-overlay grid-countdown" hidden>
+  <small>GAME STARTS IN</small><span id="countdown-num">3</span><b>GET TO THE HUDDLE</b>
+</div>
+
+<div id="gameover" class="modal gameover" hidden>
+  <div class="modal-card result-card">
+    <div id="winner-mark" class="winner-mark" aria-hidden="true">🏆</div>
+    <p class="eyebrow">FINAL</p>
+    <h2 id="gameover-title">HOME WINS</h2>
+    <p id="gameover-score">21–14</p>
+    <div id="gameover-rows" class="gameover-rows"></div>
+    <button id="rematch-btn" class="grid-btn primary" type="button">RUN IT BACK</button>
+    <a class="result-tv-link" href="tv.html" target="_blank" rel="noopener">▣ KEEP THE FINAL ON TV</a>
+    <a class="result-home-link" href="/">BACK TO ALL GAMES</a>
+    <p id="gameover-auto"></p>
+  </div>
+</div>
+
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/brag.js"></script>
+<script src="gridiron.js"></script>
+</body>
+</html>

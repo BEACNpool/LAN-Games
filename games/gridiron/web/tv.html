@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRIDIRON · Big Screen</title>
+<meta name="theme-color" content="#06130d">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="/shared/bigscreen.css">
+<link rel="stylesheet" href="tv.css">
+<script src="/shared/brand.js" defer></script>
+</head>
+<body class="gridiron-tv">
+<main id="tv-app">
+  <section id="tv-lobby" class="tv-scene lobby-scene" hidden>
+    <div class="lobby-copy">
+      <p class="league-kicker" data-brand-presents>LAN GAMES PRESENTS</p>
+      <h1 class="gridiron-mark"><span>GRID</span><b>IRON</b></h1>
+      <p class="lobby-pitch">YOUR PHONE IS YOUR POSITION.<br>THE TV IS THE FIELD.</p>
+
+      <div class="drive-steps" aria-label="How to play">
+        <div><b>1</b><span>HUDDLE<small>GET YOUR ASSIGNMENT</small></span></div>
+        <i>→</i>
+        <div><b>2</b><span>SNAP<small>LOOK UP AT THE FIELD</small></span></div>
+        <i>→</i>
+        <div><b>3</b><span>MAKE THE PLAY<small>TILT · CATCH · TACKLE</small></span></div>
+      </div>
+
+      <div id="tv-lobby-roster" class="lobby-roster"></div>
+      <p id="tv-lobby-hint" class="lobby-hint">SCAN TO SUIT UP · READY ON YOUR PHONE</p>
+    </div>
+
+    <aside class="join-panel">
+      <p>SCAN WITH YOUR PHONE</p>
+      <div id="tv-qr" class="tv-qr"></div>
+      <b id="tv-url"></b>
+      <span>NO APP · SAME NETWORK</span>
+      <em id="tv-online">CONNECTING…</em>
+    </aside>
+  </section>
+
+  <section id="tv-field" class="tv-scene field-scene" hidden>
+    <canvas id="field-canvas" width="1600" height="900" aria-label="Shared football field"></canvas>
+
+    <header class="scorebug" aria-label="Scoreboard">
+      <div id="team-a-scorebox" class="team-score team-a">
+        <span id="team-a-possession" class="possession-arrow">◆</span>
+        <div><small id="team-a-name">BLUE</small><b id="team-a-score">0</b></div>
+      </div>
+      <div class="drive-board">
+        <span id="phase-bug" class="phase-bug">HUDDLE</span>
+        <b id="down-distance">1ST &amp; 10</b>
+        <small id="field-position">BALL ON 50</small>
+      </div>
+      <div id="team-b-scorebox" class="team-score team-b">
+        <div><small id="team-b-name">RED</small><b id="team-b-score">0</b></div>
+        <span id="team-b-possession" class="possession-arrow">◆</span>
+      </div>
+      <div id="tv-clock" class="play-clock">:12</div>
+    </header>
+
+    <aside id="team-a-roster" class="sideline sideline-a" aria-label="Blue team roster"></aside>
+    <aside id="team-b-roster" class="sideline sideline-b" aria-label="Red team roster"></aside>
+
+    <div id="assignment-strip" class="assignment-strip" hidden>
+      <span>ASSIGNMENTS LOCKED</span><b>SET…</b>
+    </div>
+
+    <div id="moment-cue" class="moment-cue" hidden>
+      <small id="moment-eyebrow">TIMING WINDOW</small>
+      <b id="moment-label">CATCH!</b>
+      <span id="moment-sub">HANDS UP NOW</span>
+    </div>
+
+    <div id="whistle-card" class="whistle-card" hidden>
+      <small>WHISTLE</small>
+      <b id="whistle-headline">TACKLED</b>
+      <span id="whistle-detail">GAIN OF 6</span>
+    </div>
+
+    <footer class="broadcast-lower">
+      <div class="brand-bug"><span>GRID</span><b>IRON</b></div>
+      <p id="play-callout">PICK YOUR PLAY ON YOUR PHONE</p>
+      <div id="possession-track" class="possession-track" aria-label="Possessions"></div>
+    </footer>
+  </section>
+
+  <section id="tv-results" class="tv-scene results-scene" hidden>
+    <p class="league-kicker">FINAL</p>
+    <h1 id="winner-name">GRIDIRON CHAMPIONS</h1>
+    <div class="final-score">
+      <div class="final-team team-a"><span id="final-a-name">BLUE</span><b id="final-a-score">0</b></div>
+      <i>—</i>
+      <div class="final-team team-b"><b id="final-b-score">0</b><span id="final-b-name">RED</span></div>
+    </div>
+    <p id="result-detail">SIX POSSESSIONS. ONE WINNER.</p>
+    <div id="result-roster" class="result-roster"></div>
+  </section>
+</main>
+
+<button id="tv-curtain" class="tv-curtain" type="button">
+  <span class="curtain-ball" aria-hidden="true">◆</span>
+  <b>START GRIDIRON</b>
+  <small>enables stadium sound · keeps this screen awake</small>
+</button>
+
+<div id="snap-flash" class="snap-flash" hidden>SNAP!</div>
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/qr.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

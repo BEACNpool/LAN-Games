@@ -24,6 +24,7 @@ from games.orbitriot.game import OrbitRiotSession
 from games.buzzboard.game import BuzzBoardSession
 from games.smelterskelter.game import SmelterSkelterSession
 from games.fifthsignal.game import FifthSignalSession
+from games.gridiron.game import GridironSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -107,6 +108,23 @@ REGISTRY = [
         "players": "3–5 + TV",
         "session": FifthSignalSession,
         "web": GAMES_DIR / "fifthsignal" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "gridiron",
+        "category": "bigscreen", "accent": "#84cc16", "tv": True,
+        "tagline": "Call the play. Make the catch. Own the field.",
+        "min_p": 1, "max_p": 8, "solo": True,
+        "title": "GRIDIRON",
+        "icon": "🏈",
+        "art": "🏈",
+        "blurb": "Two teams turn every phone into a football position. "
+                 "Call hidden plays, tilt to break into the open field, "
+                 "raise your hands for the catch, and time the game-saving "
+                 "tackle while the whole drive unfolds on the TV.",
+        "players": "1–8 + bots + TV",
+        "session": GridironSession,
+        "web": GAMES_DIR / "gridiron" / "web",
         "hidden": False,
     },
     {
