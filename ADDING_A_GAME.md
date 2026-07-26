@@ -5,6 +5,11 @@ platform. The server listens on **port 8096**, so once it's running the hub is
 live at `http://<host>:8096` on your LAN. A fresh context should be able to read
 this top to bottom and ship a new game that matches every existing one.
 
+If your deployment serves the hub over **HTTPS** (a real certificate, not
+self-signed), a whole class of phone hardware — gyro/tilt, camera, screen wake
+lock, orientation lock — becomes available to games. That's **§12**; read it
+before designing any game whose controls are physical.
+
 **Golden rule:** a new game plugs in through ONE registry entry + ONE game
 directory. You never edit the core, and you never touch another game's files.
 Copy the closest existing game and adapt it.
@@ -241,7 +246,10 @@ and **390×844** and verify:
 - `touch-action:none` is scoped only to the board/drag surface, never the whole
   scrollable screen;
 - a rotate, background/foreground cycle, WebSocket reconnect, and full reload
-  do not strand or skip the player.
+  do not strand or skip the player;
+- if the game reads **device sensors** (§12): permission is requested from a
+  visible tap, a denial leaves the game fully playable through on-screen
+  controls, and a full reload re-gates cleanly instead of silently going dead.
 
 The shared stylesheet already supplies safe-area variables, reduced-motion
 handling, phone-sized avatar cells, scrollable modals, and 44px shared buttons.
@@ -577,3 +585,104 @@ in-app numeric keypad (avoids the iOS keyboard/zoom entirely) are the patterns.
 socket in addition to per-player pushes — it must be pure and must never raise
 in any phase/mode (the freeze-the-whole-room class of bug). Test it: call
 `state_for(None)` in every stage (BINGO's `test_state_never_crashes_any_phase`).
+
+---
+
+## 12. Secure context — device sensors & phone hardware
+
+Games can use phone hardware (tilt, camera, haptic-adjacent APIs, wake lock)
+**only when the hub is served from a secure context** — i.e. real HTTPS with a
+certificate the phone already trusts. Browsers gate these APIs on the origin,
+not on the network. On a plain `http://` LAN origin they don't prompt and
+don't error usefully; they're simply absent or return nulls forever, which
+reads exactly like a broken game.
+
+"Real HTTPS" means a CA the device trusts out of the box. A self-signed cert
+that you click through does **not** reliably grant these capabilities, and it
+makes every guest phone throw a scary interstitial. Get a proper certificate
+for a domain you control (a DNS-01 challenge works fine for a LAN-only box —
+it needs no inbound connectivity and no public A record).
+
+### What a secure context unlocks
+
+| API | Use in a game | Notes |
+|---|---|---|
+| `DeviceMotionEvent` / `DeviceOrientationEvent` | tilt steering, shake, swing, aim | **iOS needs an explicit permission call — see below** |
+| `navigator.wakeLock.request("screen")` | stop the phone sleeping mid-round | released automatically when the tab hides — **re-acquire on `visibilitychange`** |
+| `screen.orientation.lock("landscape")` | force a landscape controller | needs fullscreen first; **iOS Safari doesn't support it** — design so portrait still works |
+| `getUserMedia` | camera join (scan the TV's QR), photo avatars, mic | prompts every origin once |
+| Gamepad API | real controllers | secure-context gated in Chrome |
+| `navigator.share` | share the win/brag card natively | needs a user gesture too |
+| `navigator.clipboard` | copy a room code | |
+| Service Worker | offline play, real installable PWA | the install prompt needs this |
+| Web Bluetooth / WebHID | exotic physical controllers | rarely worth it |
+
+**`navigator.vibrate()` is the exception** — it is *not* secure-context gated,
+but **iOS Safari does not support it at all**, at any version. Haptics on
+iPhone are simply unavailable; treat vibration as a progressive enhancement on
+Android and never as feedback the game depends on.
+
+### The permission gate (the part that actually bites)
+
+iOS requires `requestPermission()` for motion/orientation, and it must be
+called **from inside a real user gesture** — a tap handler. Not on load, not
+after an `await` that has already consumed the activation. This is current
+iPhone behavior, not a legacy quirk: skip it and motion events never fire on
+any iPhone, silently.
+
+Feature-detect the method; never sniff the platform. Android Chrome has no
+`requestPermission` and you just attach the listener.
+
+```js
+// Call this FROM A TAP. Returns true if sensors are live.
+async function enableTilt() {
+  const need = [window.DeviceMotionEvent, window.DeviceOrientationEvent]
+    .filter(E => E && typeof E.requestPermission === "function");   // iOS only
+  for (const E of need) {
+    let res;
+    try { res = await E.requestPermission(); }
+    catch { return false; }              // throws if not from a gesture
+    if (res !== "granted") return false; // user said no, or Settings blocks it
+  }
+  window.addEventListener("deviceorientation", onTilt);
+  return true;
+}
+
+document.getElementById("enable-tilt")
+  .addEventListener("click", async () => {
+    if (!await enableTilt()) showTouchControls();   // fallback, not a dead end
+  });
+```
+
+Rules that follow from this:
+
+1. **Every sensor game opens with a visible "Enable tilt" button.** There is no
+   way to auto-start sensors on iPhone. Make it the first screen, not a buried
+   setting.
+2. **A denial is a normal state, not an error.** Ship on-screen touch controls
+   that make the game fully playable, per the §6 checklist. Players share these
+   phones; someone will decline.
+3. **Re-gate on reload.** The grant does not reliably survive a full page load
+   in Safari. Check on boot and show the button again rather than assuming.
+4. **If it's always denied without prompting**, the phone has *Settings →
+   Safari → Motion & Orientation Access* turned off. That's device-level; your
+   code cannot override it. Say so in the UI instead of retrying.
+5. **Never gate a whole game on a sensor.** Tilt is a control scheme, not a
+   requirement — the hub's whole point is that any phone in the house can join.
+
+### Server side
+
+Nothing changes. Sensors are purely client-side: read them, then send normal
+game actions over the existing WebSocket (§6). Do **not** stream raw sensor
+frames at device rate — coalesce to your tick like any other realtime input,
+or you'll flood the socket.
+
+### Testing
+
+Desktop Chrome's devtools sensor emulation does **not** exercise the iOS
+permission path, so a headless playtest can't prove this works. Sensor games
+need one real-iPhone pass: grant, deny, and reload-after-grant. Keep the
+`playtest_<slug>.mjs` covering the touch-fallback path, which *is* automatable.
+
+If a second game needs sensors, promote the helper above to `/shared/sensors.js`
+rather than copy-pasting it — same rule as the rest of the shared kit.
