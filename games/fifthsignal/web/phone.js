@@ -665,10 +665,16 @@ async function enableTilt(console) {
   S.tilt.role = console.role;
   renderControl(console);
   try {
-    const Orientation = window.DeviceOrientationEvent;
-    if (typeof Orientation.requestPermission === "function") {
-      const permission = await Orientation.requestPermission();
-      if (permission !== "granted") throw new Error("Motion permission was not granted. Touch still works.");
+    const permissionGates = [
+      window.DeviceMotionEvent,
+      window.DeviceOrientationEvent,
+    ].filter((SensorEvent) =>
+      SensorEvent && typeof SensorEvent.requestPermission === "function");
+    for (const SensorEvent of permissionGates) {
+      const permission = await SensorEvent.requestPermission();
+      if (permission !== "granted") {
+        throw new Error("Motion permission was not granted. Touch still works.");
+      }
     }
     S.tilt.listener = (event) => {
       if (document.hidden || S.st?.phase !== "crisis" || S.activeRole !== console.role) {
