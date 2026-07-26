@@ -370,28 +370,69 @@ launched via `browser.close()` or kill it by exact PID.
 
 ## 8. Deploy & verify
 
-Typical setup: you develop on a workstation and the games run on an always-on
-box on the LAN (`$HOST` below), served by a long-running process — a
-`systemctl --user` unit, a system service, or a container, whichever you set up.
-Adapt the commands to yours.
+Do not hand-write a production `rsync --delete` command. Excluding only avatars
+is not enough: chat uploads, `data/venue.json`, Git metadata, virtualenvs, and
+caches are all server-owned state. Use the release script, which protects the
+entire `data/` tree and every environment/cache path.
+
+Start from a committed, clean, fully tested tree:
 
 ```bash
-git add -A && git commit -m "Add <GAME>: …"
-rsync -a --delete --exclude .venv --exclude __pycache__ --exclude .git \
-      --exclude data/avatars ./ "$HOST":~/gamehub/
-# Python changed (new/edited .py)  -> restart the service:
-ssh "$HOST" 'systemctl --user restart gamehub && sleep 2 && systemctl --user is-active gamehub'
-# UI-ONLY change (html/css/js)     -> NO restart needed: StaticFiles serves web/ off disk.
-# verify live over the LAN:
-curl -s -o /dev/null -w "%{http_code}\n" "http://$HOST:8096/games/<slug>/"
-node tests/playtest_<slug>.mjs "http://$HOST:8096"       # optional: playtest live
+git add -A
+git commit -m "Add <GAME>: …"
+
+# PASS 1 — mandatory dry-run. Read every proposed update and deletion.
+ops/deploy.sh \
+  --host game-host \
+  --dest /home/you/projects/gamehub
+
+# PASS 2 — repeat the plan, create backups, apply, restart if needed, verify.
+ops/deploy.sh \
+  --host game-host \
+  --dest /home/you/projects/gamehub \
+  --apply
 ```
-Notes: `data/avatars` is excluded so user uploads on the server aren't wiped.
+
+The apply pass:
+
+1. reruns the privacy gate and full Python suite;
+2. performs a remote preflight;
+3. shows the exact `rsync` dry-run again;
+4. creates an off-tree code rollback point plus permission-restricted
+   archives of `data/` and `.git`;
+5. fingerprints `data/`, `.git`, `.venv`, and `venv` before and after sync;
+6. restarts the `systemctl --user` unit only for Python changes; and
+7. polls `/health`, automatically restoring old code if health never returns.
+
+Uploaded avatars, chat media, the private venue configuration, Git metadata,
+virtualenvs, Node/Python caches, and logs are never copied over or deleted.
+Future runtime files placed under `data/` inherit the same protection.
+
+If `requirements.txt` changed, inspect it and add `--install-deps`; the script
+updates the existing production `.venv` instead of replacing it. Use
+`--restart` to force a restart for an unusual static release, or `--no-restart`
+to assert that a release must be static-only.
+
+Every successful deploy prints the exact rollback command. You can also inspect
+one without changing production:
+
+```bash
+ops/rollback.sh \
+  --host game-host \
+  --dest /home/you/projects/gamehub \
+  --backup /home/you/projects/.lan-games-backups/gamehub/<release-id>
+```
+
+Add `--apply` only after reviewing that rollback plan. Rollback restores code,
+then restarts and health-checks the user service; it deliberately does not
+restore runtime data. A `runtime-data.tar.gz` copy exists inside the rollback
+point for disaster recovery, but restoring private data is a separate,
+intentional operation.
+
 `systemctl --user status gamehub` in the **system** scope wrongly reads
-`inactive` — always use `--user`. New pip deps → install into the server's venv.
-If you front the games with a reverse proxy (optional), map :80 →
-:8096 with WebSocket upgrade headers (already configured; no nginx work needed
-for a new game — it rides the same proxy).
+`inactive` — always use `--user` as the account that owns the unit. If you
+front the games with a reverse proxy (optional), map :80 → :8096 with WebSocket
+upgrade headers; a new game rides the existing proxy.
 
 ---
 
@@ -457,7 +498,7 @@ for a new game — it rides the same proxy).
     blurb/players/min_p/max_p/solo/session/web (+ art if the emoji is dark)
 [ ] tests/test_<slug>.py green; full suite `.venv/bin/python -m pytest -q` green
 [ ] tests/playtest_<slug>.mjs PASS against http://127.0.0.1:8096
-[ ] deployed (rsync); restarted gamehub if Python changed; verified over the LAN
+[ ] reviewed `ops/deploy.sh` dry-run; applied; health + live browser checks green
 ```
 
 ---

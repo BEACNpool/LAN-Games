@@ -1,8 +1,9 @@
 # LAN Games
 
-A self-hosted **game hub for your local network**. One page, 24 games, bots to
-fill empty seats, shared identity across every game. Everyone plays from their
-own phone/laptop on the same Wi‑Fi — **no accounts, no cloud, no build step.**
+A self-hosted **game hub for your local network**. One premium lobby, 27 games,
+bots to fill empty seats, and one identity across the entire arcade. Everyone
+plays from their own phone/laptop on the same Wi‑Fi — **no accounts, no cloud,
+no build step.**
 
 Run it on any always-on box on your LAN (a spare laptop, a Raspberry Pi, a home
 server), open the URL on everyone's phones, and you've got game night.
@@ -23,20 +24,33 @@ https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
 
 - **Big Screen** (one TV, every phone is a controller) — Smelter Skelter
   (live hook-and-reel pendulum physics), Buzz Board (clue picking, buzzing,
-  and secret wagers), Bingo, Price Check, Orbit Riot (simultaneous cosmic
-  billiards + pinball physics)
+  and secret wagers), Orbit Riot (simultaneous cosmic billiards + pinball
+  physics)
 - **Cards** — Texas Hold'em (No‑Limit, real side pots & all‑in showdowns),
   Spades, Hearts, Euchre, Rummikub
-- **Board** — Chess, Checkers, Backgammon, Connect Four (real rules engines)
-- **Party** (same room, phones as controllers) — Charades, Trivia Buzzer,
-  Category Blitz, Werewolf, Fam Feud
-- **Battle** — Battleship, Tanks (2D artillery), Fort Fling (two-player
-  slingshot weapons), Snake Arena
+- **Board** — Chess, Checkers, Backgammon (real rules engines)
+- **Party** (same room, phones as controllers) — Bingo, Price Check,
+  Word Rush, Charades, Trivia Buzzer, Category Blitz, Werewolf, Fam Feud.
+  Bingo, Price Check, and Word Rush also include optional room-distance TV
+  views.
+- **Battle & Arcade** — Brickade (neon Pong-royale meets Breakout), Dodgeball
+  (real-time arena action), Battleship, Tanks (2D artillery), Fort Fling
+  (two-player slingshot weapons), Snake Arena, Connect Four
 - **Word** — WordClash (multiplayer Wordle: duel / relay / sabotage)
 
 Many card, board, and action games include **bots**, so small groups can fill a
 table with AI. Social games and dedicated human duels clearly show the players
 they require.
+
+### A lobby built for game night
+
+- **Custom game art and live status** instead of a wall of repeated emoji cards
+- **Instant search, filters, favorites, recent games, and Surprise Me**
+- **Compact room chat**, photo sharing, guest Wi‑Fi QR, and one-tap invite QR
+- **Game detail sheets** that explain player count, format, and TV support
+- **Saved accessibility preferences** for sound, haptics, motion, and contrast
+- **Phone-first controls** with a universal All Games escape hatch in every
+  game
 
 ---
 
@@ -96,6 +110,7 @@ cp venue.example.json data/venue.json   # then edit it
 - **`brand.name`** replaces the wordmark in page titles.
 - **`brand.presents`** is the big-screen splash kicker.
 - **`brand.titles`** renames individual games, keyed by registry slug.
+- **`route_aliases`** keeps old game URLs working after a private rename.
 - **`wifi`** fills in the 📶 button on the hub, which shows a QR that joins your
   network — guests scan it, then scan the games QR. Set `"hidden": true` for a
   non-broadcast SSID, or phones won't join from the scan.
@@ -133,6 +148,29 @@ That way a personalization can't reach the public repo by accident.
   “Install app” prompt; a home-screen bookmark still works on a plain LAN.
 - Set your name, character, and optional photo once on the hub. That profile is
   reused by every game on that device.
+
+---
+
+## Updating a production host safely
+
+`ops/deploy.sh` is deliberately a dry run unless you pass `--apply`. It tests
+the exact source tree, shows every planned file change, creates an off-tree
+rollback point, and protects all runtime data, Git metadata, virtualenvs,
+caches, and logs from `rsync --delete`.
+
+```bash
+# 1. Review only — production is untouched.
+ops/deploy.sh --host game-host --dest /home/you/projects/gamehub
+
+# 2. Apply only after the plan is clean.
+ops/deploy.sh --host game-host --dest /home/you/projects/gamehub --apply
+```
+
+The protected `data/` tree includes uploaded avatars, chat media, and the
+private venue configuration. Python changes trigger a service restart and
+health check; static-only releases do not. A failed health check automatically
+restores the pre-deploy code snapshot. See `ops/deploy.sh --help` and
+`ops/rollback.sh --help`.
 
 ---
 
@@ -178,10 +216,15 @@ copy `games/_template/` (HIGH CARD, the smallest complete game) to start.
 ## Tests
 
 ```bash
-pip install pytest
-python -m pytest -q                                  # unit tests for every game
-node tests/playtest_<game>.mjs http://127.0.0.1:8096 # headless browser playtest
+pip install -r requirements-dev.txt
+npm ci
+python -m pytest -q                                    # rules + server suite
+npm run check:syntax                                   # every JS + shell file
+node tests/playtest_<game>.mjs http://127.0.0.1:8096   # real browser playtest
 ```
+
+GitHub Actions runs the Python suite, privacy guard, static syntax checks, and
+the deployment-preservation fixture on every pull request.
 
 ## License
 

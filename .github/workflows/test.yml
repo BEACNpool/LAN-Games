@@ -1,0 +1,51 @@
+name: Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python rules and privacy
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Public-repository privacy gate
+        run: python tests/test_no_private_data.py
+      - name: Rules and server test suite
+        run: python -m pytest -q
+
+  static:
+    name: Static syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install browser-playtest driver
+        run: npm ci --ignore-scripts
+      - name: Check shell and JavaScript syntax
+        run: npm run check:syntax
+      - name: Prove deployment preserves runtime state
+        run: bash ops/test_release_safety.sh

@@ -1,0 +1,15 @@
+{
+  "name": "lan-games-playtests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reproducible browser-playtest tooling for LAN Games",
+  "scripts": {
+    "check:syntax": "bash ops/check_static.sh"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "devDependencies": {
+    "puppeteer-core": "25.3.0"
+  }
+}
