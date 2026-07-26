@@ -24,6 +24,15 @@ lan_games_validate_path() {
     || lan_games_die "target path is suspiciously short: $path"
 }
 
+lan_games_rsync_content_change() {
+  # Itemized rsync output beginning with "." is metadata-only (commonly a
+  # timestamp from the frozen worktree). Transfers and deletions change code.
+  case "$1" in
+    \<f*|\>f*|\*deleting) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 lan_games_rsync_args() {
   # Protect + exclude is deliberate belt-and-suspenders behavior:
   #   exclude = never copy over it

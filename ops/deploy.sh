@@ -166,6 +166,8 @@ rsync "${LAN_GAMES_RSYNC_ARGS[@]}" --dry-run "$release_source/" "$host:$dest/" |
 python_changed=0
 requirements_changed=0
 while IFS= read -r line; do
+  item="${line%% *}"
+  lan_games_rsync_content_change "$item" || continue
   path="${line##* }"
   case "$path" in
     server.py|core/*.py|games/*.py|games/**/*.py) python_changed=1 ;;

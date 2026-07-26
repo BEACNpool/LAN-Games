@@ -19,6 +19,13 @@ if (lan_games_validate_path "/srv/gamehub/../other" >/dev/null 2>&1); then
   lan_games_die "path traversal validation failed"
 fi
 lan_games_validate_path "/srv/lan-games"
+lan_games_rsync_content_change "<fcst......" \
+  || lan_games_die "content transfer was not detected"
+lan_games_rsync_content_change "*deleting" \
+  || lan_games_die "deletion was not detected"
+if lan_games_rsync_content_change ".f..t......"; then
+  lan_games_die "metadata-only change was treated as content"
+fi
 
 source_tree="$fixture/source"
 target_tree="$fixture/target"
