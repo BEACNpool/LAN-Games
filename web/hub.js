@@ -69,7 +69,8 @@
 
   const TIMES = {
     brickade: "5–10 min", dodgeball: "5–10 min", smelterskelter: "8–12 min",
-    buzzboard: "20–35 min", bingo: "10–25 min", pricecheck: "10–15 min",
+    fifthsignal: "6–10 min", buzzboard: "20–35 min", bingo: "10–25 min",
+    pricecheck: "10–15 min",
     orbitriot: "8–12 min", poker: "20–45 min", spades: "25–45 min",
     hearts: "15–25 min", euchre: "15–25 min", charades: "10–20 min",
     trivia: "15–30 min", blitz: "10–15 min", werewolf: "20–35 min",

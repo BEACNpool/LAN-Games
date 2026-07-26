@@ -1,6 +1,6 @@
 # LAN Games
 
-A self-hosted **game hub for your local network**. One premium lobby, 27 games,
+A self-hosted **game hub for your local network**. One premium lobby, 28 games,
 bots to fill empty seats, and one identity across the entire arcade. Everyone
 plays from their own phone/laptop on the same Wi‑Fi — **no accounts, no cloud,
 no build step.**
@@ -22,10 +22,11 @@ https://github.com/user-attachments/assets/a2978668-e6b8-43a6-a720-2ccf3a6e20d0
 
 ## The games
 
-- **Big Screen** (one TV, every phone is a controller) — Smelter Skelter
-  (live hook-and-reel pendulum physics), Buzz Board (clue picking, buzzing,
-  and secret wagers), Orbit Riot (simultaneous cosmic billiards + pinball
-  physics)
+- **Big Screen** (one TV, every phone is a controller) — The Fifth Signal
+  (three-to-five-player cooperative crisis with private role consoles),
+  Smelter Skelter (live hook-and-reel pendulum physics), Buzz Board (clue
+  picking, buzzing, and secret wagers), Orbit Riot (simultaneous cosmic
+  billiards + pinball physics)
 - **Cards** — Texas Hold'em (No‑Limit, real side pots & all‑in showdowns),
   Spades, Hearts, Euchre, Rummikub
 - **Board** — Chess, Checkers, Backgammon (real rules engines)

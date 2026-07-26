@@ -23,6 +23,7 @@ from games.fortfling.game import FortFlingSession
 from games.orbitriot.game import OrbitRiotSession
 from games.buzzboard.game import BuzzBoardSession
 from games.smelterskelter.game import SmelterSkelterSession
+from games.fifthsignal.game import FifthSignalSession
 from games.hearts.game import HeartsSession
 from games.euchre.game import EuchreSession
 from games.battleship.game import BattleshipSession
@@ -88,6 +89,24 @@ REGISTRY = [
         "players": "2–8 + TV",
         "session": SmelterSkelterSession,
         "web": GAMES_DIR / "smelterskelter" / "web",
+        "hidden": False,
+    },
+    {
+        "slug": "fifthsignal",
+        "category": "bigscreen", "accent": "#5ee7f7", "tv": True,
+        "tagline": "Five consoles. One signal. Nobody has the whole answer.",
+        "min_p": 3, "max_p": 5, "solo": False,
+        "title": "THE FIFTH SIGNAL",
+        "icon": "📡",
+        "art": "⌁",
+        "blurb": "A cooperative space-station crisis built for your crew. "
+                 "Every phone becomes a different private console with one "
+                 "piece of the solution. Relay codes, stabilize systems, and "
+                 "lock the signal together. Three to five players; missing "
+                 "stations fuse into balanced dual-role consoles.",
+        "players": "3–5 + TV",
+        "session": FifthSignalSession,
+        "web": GAMES_DIR / "fifthsignal" / "web",
         "hidden": False,
     },
     {

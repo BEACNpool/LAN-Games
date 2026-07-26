@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE FIFTH SIGNAL · LAN GAMES</title>
+<meta name="theme-color" content="#030713">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="%23030713"/><circle cx="32" cy="32" r="22" fill="none" stroke="%233ff4ff" stroke-width="3"/><circle cx="32" cy="32" r="13" fill="none" stroke="%23a785ff" stroke-width="3"/><circle cx="32" cy="32" r="4" fill="%23ffffff"/></svg>'>
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="fifthsignal.css">
+<script src="/shared/brand.js" defer></script>
+</head>
+<body class="signal-phone">
+<div class="signal-space" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main id="phone-app">
+  <section id="scr-join" class="phone-screen join-screen" hidden>
+    <a class="suite-home" href="/" aria-label="Back to all games"><span aria-hidden="true">‹</span><b>ALL GAMES</b></a>
+    <div class="join-scroll">
+      <div class="signal-lockup">
+        <div class="signal-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><b>5</b>
+        </div>
+        <p class="signal-kicker">A FIVE-CONSOLE COOPERATIVE MISSION</p>
+        <h1>THE <b>FIFTH</b><br>SIGNAL</h1>
+        <p class="signal-tag">DIFFERENT SCREENS. ONE CREW. NO ONE GETS HOME ALONE.</p>
+      </div>
+
+      <div class="signal-card join-card">
+        <label class="field-label" for="name-input">CREW CALL SIGN</label>
+        <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="your name">
+        <label class="field-label">IDENTITY BEACON</label>
+        <div id="avatar-grid" class="avatar-grid"></div>
+        <button id="pfp-btn" class="pfp-btn" type="button">📷 USE YOUR PROFILE PHOTO</button>
+        <button id="join-btn" class="signal-btn primary" type="button">BOARD THE AURORA</button>
+        <a class="tv-launch" href="tv.html" target="_blank" rel="noopener">
+          <span>▣</span> OPEN MISSION CONTROL ON THE TV
+        </a>
+      </div>
+      <p class="join-foot">3–5 PHONES · ONE TV · EVERY CONSOLE MATTERS</p>
+    </div>
+  </section>
+
+  <section id="scr-lobby" class="phone-screen lobby-screen" hidden>
+    <header class="phone-topbar">
+      <a href="/" class="top-icon" aria-label="Back to all games">‹</a>
+      <div class="mini-lockup"><b>THE FIFTH SIGNAL</b><small>CREW ASSEMBLY</small></div>
+      <button id="pfp-btn2" class="top-icon" type="button" aria-label="Change profile photo">◎</button>
+    </header>
+
+    <div class="lobby-scroll">
+      <a class="tv-nudge signal-card" href="tv.html" target="_blank" rel="noopener">
+        <span class="tv-icon">▣</span>
+        <p><b>PUT MISSION CONTROL ON A TV</b><small>Your phone carries private intel. Keep it close.</small></p>
+        <em>OPEN ↗</em>
+      </a>
+
+      <div class="section-head"><span>ACTIVE CREW</span><b id="ready-count">0 READY</b></div>
+      <div id="crew-grid" class="crew-grid"></div>
+      <p id="crew-note" class="lobby-note">Three crew members are required to launch.</p>
+
+      <div class="role-preview signal-card" aria-label="Five ship systems">
+        <div style="--role:#22d3ee"><span>🧭</span><small>HELM</small></div>
+        <div style="--role:#f5b301"><span>⚡</span><small>CORE</small></div>
+        <div style="--role:#ec4899"><span>📡</span><small>RELAY</small></div>
+        <div style="--role:#34d399"><span>✚</span><small>LIFE</small></div>
+        <div style="--role:#a78bfa"><span>◫</span><small>OPS</small></div>
+      </div>
+      <p class="fusion-note"><b>SHORT A CREW MEMBER?</b> With 3–4 players, some phones run two consoles. Role tabs keep them separate.</p>
+
+      <div class="settings-card signal-card">
+        <div class="setting-row">
+          <span><b>MISSION LENGTH</b><small id="length-note">about 3–6 minutes</small></span>
+          <div id="opt-length" class="seg" role="group" aria-label="Mission length"></div>
+        </div>
+        <div class="setting-row">
+          <span><b>DIFFICULTY</b><small id="difficulty-note">for a first flight</small></span>
+          <div id="opt-difficulty" class="seg" role="group" aria-label="Difficulty"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="lobby-actions">
+      <button id="ready-btn" class="signal-btn secondary" type="button">READY FOR ASSIGNMENT</button>
+      <button id="start-btn" class="signal-btn primary" type="button" hidden>LAUNCH THE MISSION</button>
+      <p id="lobby-hint" aria-live="polite">waiting for crew…</p>
+    </footer>
+  </section>
+
+  <section id="scr-briefing" class="phone-screen briefing-screen" hidden>
+    <header class="mission-head">
+      <span class="live-pip"><i></i> MISSION LIVE</span>
+      <b id="brief-mission-id">AURORA // 001</b>
+    </header>
+    <div class="briefing-scroll">
+      <div class="brief-signal" aria-hidden="true"><span></span><span></span><b>5</b></div>
+      <p class="signal-kicker">INCOMING DISTRESS PATTERN</p>
+      <h2 id="brief-title">MISSION ASSIGNMENT</h2>
+      <p id="brief-copy">Every phone sees a different part of the truth. Speak clearly. Trust your crew.</p>
+      <div class="section-head"><span>YOUR CONSOLES</span><b id="brief-role-count">1 ROLE</b></div>
+      <div id="brief-roles" class="brief-roles"></div>
+      <div id="brief-crew" class="brief-crew signal-card"></div>
+      <p class="look-up-note"><span>▣</span><b>LOOK AT MISSION CONTROL</b><small>The first crisis is loading on the TV.</small></p>
+    </div>
+  </section>
+
+  <section id="scr-console" class="phone-screen console-screen" hidden>
+    <header class="console-head">
+      <div>
+        <small id="console-round">CRISIS 1 / 5</small>
+        <b id="console-mission">AURORA</b>
+      </div>
+      <div class="ship-meter">
+        <span>HULL <b id="phone-hull">100</b></span>
+        <i><em id="phone-hull-fill"></em></i>
+      </div>
+      <div id="phone-signal" class="signal-score">0</div>
+    </header>
+
+    <nav id="role-tabs" class="role-tabs" aria-label="Your assigned consoles"></nav>
+
+    <div class="console-scroll">
+      <article class="crisis-card signal-card">
+        <div class="crisis-top"><span id="crisis-class">ACTIVE CRISIS</span><b id="crisis-clock">—</b></div>
+        <h2 id="crisis-title">Awaiting telemetry</h2>
+        <p id="crisis-public">Mission Control is synchronizing your private console.</p>
+      </article>
+
+      <article id="private-console" class="private-console signal-card">
+        <header class="private-head">
+          <span id="role-icon" class="role-icon">◇</span>
+          <p><small id="role-label">YOUR CONSOLE</small><b id="role-title">HELM</b></p>
+          <i id="role-status" class="status-chip">LIVE</i>
+        </header>
+        <div class="prompt-block">
+          <small>PRIVATE DIRECTIVE</small>
+          <p id="console-prompt">Stand by.</p>
+        </div>
+
+        <aside id="relay-card" class="relay-card" hidden>
+          <span>↗ RELAY TO <b id="relay-target">ENGINEERING</b></span>
+          <p id="relay-text"></p>
+          <strong id="relay-value"></strong>
+          <small>SAY THIS OUT LOUD — THEIR SCREEN DOES NOT HAVE IT.</small>
+        </aside>
+
+        <section id="backup-relays" class="backup-relays" hidden>
+          <header><span>⚠</span><p><b>EMERGENCY RELAY RECOVERY</b><small>A crew signal was lost. Read every recovered clue aloud.</small></p></header>
+          <div id="backup-relay-list" class="backup-relay-list"></div>
+        </section>
+
+        <div id="control-host" class="control-host"></div>
+
+        <div id="console-complete" class="console-complete" hidden>
+          <span>✓</span><b>CONSOLE LOCKED</b><small>Keep talking. Your crew may still need your clue.</small>
+        </div>
+      </article>
+    </div>
+    <p id="game-status" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></p>
+  </section>
+
+  <section id="scr-resolution" class="phone-screen resolution-screen" hidden>
+    <header class="mission-head">
+      <span class="live-pip"><i></i> INCIDENT REPORT</span>
+      <b id="resolution-count">1 / 5</b>
+    </header>
+    <div class="resolution-center">
+      <div id="resolution-mark" class="resolution-mark">✓</div>
+      <p id="resolution-kicker" class="signal-kicker">CRISIS CONTAINED</p>
+      <h2 id="resolution-title">THE SHIP HELD</h2>
+      <p id="resolution-copy">All systems answered in time.</p>
+      <div id="resolution-crew" class="resolution-crew"></div>
+      <div class="resolution-stats signal-card">
+        <span><small>HULL</small><b id="resolution-hull">100%</b></span>
+        <span><small>SIGNAL</small><b id="resolution-signal">+1</b></span>
+      </div>
+      <p class="look-up-note"><span>▣</span><b>NEXT SIGNAL INCOMING</b><small>Mission Control will brief the crew.</small></p>
+    </div>
+  </section>
+
+  <section id="scr-spectator" class="phone-screen spectator-screen" hidden>
+    <header class="mission-head">
+      <span class="live-pip"><i></i> OBSERVER LINK</span>
+      <b id="spectator-phase">MISSION UNDERWAY</b>
+    </header>
+    <div class="spectator-scroll">
+      <div class="spectator-orbit" aria-hidden="true"><span></span><b>◉</b></div>
+      <p class="signal-kicker">YOU ARRIVED AFTER LAUNCH</p>
+      <h2 id="spectator-title">MISSION UNDERWAY</h2>
+      <p id="spectator-copy">The active consoles are already assigned. You can still follow the crew from Mission Control.</p>
+      <article class="spectator-status signal-card">
+        <div>
+          <small>HULL</small>
+          <b id="spectator-hull">100%</b>
+        </div>
+        <div>
+          <small>CONSOLES</small>
+          <b id="spectator-progress">0/5</b>
+        </div>
+      </article>
+      <div class="section-head"><span>ACTIVE CREW</span><b>LIVE</b></div>
+      <div id="spectator-crew" class="spectator-crew"></div>
+      <a class="spectator-tv signal-btn primary" href="tv.html" target="_blank" rel="noopener">▣ WATCH ON MISSION CONTROL</a>
+      <p class="spectator-note">Your phone is in observer mode. You’ll get a console in the next mission.</p>
+      <a class="end-home" href="/">BACK TO ALL GAMES</a>
+    </div>
+  </section>
+
+  <section id="scr-sync" class="phone-screen sync-screen" hidden>
+    <header class="mission-head">
+      <span class="live-pip danger"><i></i> FINAL TRANSMISSION</span>
+      <b id="sync-hull">HULL 20%</b>
+    </header>
+    <div class="sync-center">
+      <div class="sync-rings" aria-hidden="true"><span></span><span></span><b>5</b></div>
+      <p class="signal-kicker">THE FIFTH SIGNAL IS YOU</p>
+      <h2 id="sync-title">HOLD TOGETHER</h2>
+      <p id="sync-copy">Every living console must hold the carrier wave at the same time.</p>
+      <div id="sync-crew" class="sync-crew"></div>
+      <button id="sync-btn" class="sync-button" type="button"
+              aria-label="Hold to link your signal with the crew"
+              aria-describedby="sync-note" aria-pressed="false">
+        <span class="sync-progress"></span>
+        <b>HOLD SIGNAL</b><small>finger, Space, or Enter</small>
+      </button>
+      <p id="sync-note">0 / 5 signals linked</p>
+    </div>
+  </section>
+
+  <section id="scr-end" class="phone-screen end-screen" hidden>
+    <div class="end-scroll">
+      <div id="end-mark" class="end-mark"><span></span><b>5</b></div>
+      <p id="end-kicker" class="signal-kicker">TRANSMISSION COMPLETE</p>
+      <h2 id="end-title">THE AURORA CAME HOME</h2>
+      <p id="end-copy">Five signals entered the dark. One family answered.</p>
+      <div id="end-crew" class="end-crew"></div>
+      <div id="end-stats" class="end-stats signal-card"></div>
+      <button id="again-btn" class="signal-btn primary" type="button">ANSWER ANOTHER SIGNAL</button>
+      <a class="end-home" href="/">BACK TO ALL GAMES</a>
+    </div>
+  </section>
+</main>
+
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="phone.js"></script>
+</body>
+</html>

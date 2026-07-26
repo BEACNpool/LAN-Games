@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE FIFTH SIGNAL · Mission Control</title>
+<meta name="theme-color" content="#02040b">
+<link rel="stylesheet" href="/shared/shared.css">
+<link rel="stylesheet" href="fifthsignal.css">
+<script src="/shared/brand.js" defer></script>
+</head>
+<body class="signal-tv">
+<div class="signal-space tv-space" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main id="tv-app">
+  <section id="tv-lobby" class="tv-scene tv-lobby" hidden>
+    <div class="tv-lobby-main">
+      <p class="tv-kicker" data-brand-presents>LAN GAMES PRESENTS</p>
+      <div class="tv-title-lockup">
+        <div class="signal-mark" aria-hidden="true"><span></span><span></span><span></span><b>5</b></div>
+        <h1>THE <b>FIFTH</b><br>SIGNAL</h1>
+      </div>
+      <h2>FIVE CONSOLES. FIVE PIECES OF THE TRUTH.<br><b>ONE CREW COMES HOME.</b></h2>
+      <div class="tv-how">
+        <div><span>01</span><p><b>READ</b><small>YOUR PRIVATE CONSOLE</small></p></div>
+        <div><span>02</span><p><b>RELAY</b><small>WHAT ONLY YOU CAN SEE</small></p></div>
+        <div><span>03</span><p><b>ACT</b><small>BEFORE THE SIGNAL DIES</small></p></div>
+      </div>
+      <div id="tv-lobby-crew" class="tv-lobby-crew"></div>
+      <p id="tv-lobby-hint" class="tv-lobby-hint">SCAN TO JOIN · 3–5 CREW</p>
+    </div>
+    <aside class="tv-join-panel">
+      <p>JOIN THE CREW</p>
+      <div id="tv-qr" class="tv-qr"></div>
+      <b id="tv-url"></b>
+      <span>NO APP · SAME WI-FI</span>
+    </aside>
+  </section>
+
+  <section id="tv-briefing" class="tv-scene tv-briefing" hidden>
+    <header class="tv-mission-head">
+      <div class="tv-mini-brand">THE <b>FIFTH SIGNAL</b></div>
+      <span id="tv-brief-id">MISSION // 001</span>
+      <i>CREW ASSIGNMENT</i>
+    </header>
+    <div class="tv-brief-main">
+      <div class="brief-grid" aria-hidden="true"></div>
+      <p>INCOMING DISTRESS PATTERN</p>
+      <h1 id="tv-brief-title">THE AURORA</h1>
+      <h2>EVERY CREW MEMBER HAS A DIFFERENT PIECE OF THE TRUTH.</h2>
+      <div id="tv-assignment-grid" class="tv-assignment-grid"></div>
+      <small>CHECK YOUR PHONE · DO NOT SHOW YOUR PRIVATE DIRECTIVE</small>
+    </div>
+  </section>
+
+  <section id="tv-crisis" class="tv-scene tv-crisis" hidden>
+    <header class="tv-mission-head">
+      <div class="tv-mini-brand">THE <b>FIFTH SIGNAL</b></div>
+      <span id="tv-crisis-count">CRISIS 1 / 5</span>
+      <i id="tv-clock">—</i>
+    </header>
+    <div class="tv-crisis-layout">
+      <section class="tv-crisis-copy">
+        <div class="tv-threat"><i></i><span id="tv-crisis-class">PRIORITY ALERT</span></div>
+        <h1 id="tv-crisis-title">UNKNOWN SIGNAL</h1>
+        <p id="tv-crisis-public">Crew consoles are receiving private telemetry.</p>
+        <div class="ship-readouts">
+          <div class="hull-readout">
+            <span>HULL INTEGRITY <b id="tv-hull-number">100%</b></span>
+            <i><em id="tv-hull-fill"></em></i>
+          </div>
+          <div class="signal-readout"><small>SIGNALS RECOVERED</small><b id="tv-signal-number">0</b></div>
+        </div>
+      </section>
+      <aside>
+        <p class="console-eyebrow">CREW CONSOLES</p>
+        <div id="tv-console-grid" class="tv-console-grid"></div>
+      </aside>
+    </div>
+    <footer class="tv-command-line"><span>PRIVATE INTEL STAYS ON PHONES</span><b id="tv-command-copy">TALK TO YOUR CREW</b></footer>
+  </section>
+
+  <section id="tv-resolution" class="tv-scene tv-resolution" hidden>
+    <div id="tv-resolution-flare" class="tv-resolution-flare"></div>
+    <p id="tv-resolution-kicker">CRISIS CONTAINED</p>
+    <h1 id="tv-resolution-title">THE SHIP HELD</h1>
+    <p id="tv-resolution-copy">All five systems answered.</p>
+    <div id="tv-resolution-crew" class="tv-resolution-crew"></div>
+    <div class="tv-resolution-stats">
+      <span><small>HULL</small><b id="tv-resolution-hull">100%</b></span>
+      <span><small>SIGNAL</small><b id="tv-resolution-signal">+1</b></span>
+    </div>
+  </section>
+
+  <section id="tv-sync" class="tv-scene tv-sync" hidden>
+    <header class="tv-mission-head">
+      <div class="tv-mini-brand">THE <b>FIFTH SIGNAL</b></div>
+      <span>FINAL TRANSMISSION</span>
+      <i id="tv-sync-clock">LINK NOW</i>
+    </header>
+    <div id="tv-sync-main" class="tv-sync-main">
+      <div class="tv-sync-core" aria-hidden="true"><span></span><span></span><i></i><b>5</b></div>
+      <p>THE FIFTH SIGNAL IS YOU</p>
+      <h1 id="tv-sync-title">HOLD TOGETHER</h1>
+      <h2 id="tv-sync-copy">Every crew member: hold the carrier wave on your phone.</h2>
+      <div id="tv-sync-crew" class="tv-sync-crew"></div>
+      <strong id="tv-sync-note">0 / 5 SIGNALS LINKED</strong>
+    </div>
+  </section>
+
+  <section id="tv-end" class="tv-scene tv-end" hidden>
+    <div id="tv-end-signal" class="tv-end-signal"><span></span><span></span><b>5</b></div>
+    <p id="tv-end-kicker">TRANSMISSION COMPLETE</p>
+    <h1 id="tv-end-title">THE AURORA CAME HOME</h1>
+    <h2 id="tv-end-copy">Five signals entered the dark. One crew answered.</h2>
+    <div id="tv-end-crew" class="tv-end-crew"></div>
+    <div id="tv-end-stats" class="tv-end-stats"></div>
+    <small>START ANOTHER MISSION FROM ANY PHONE</small>
+  </section>
+</main>
+
+<button id="tv-curtain" class="tv-curtain" type="button">
+  <div class="curtain-signal" aria-hidden="true"><span></span><span></span><b>5</b></div>
+  <p>MISSION CONTROL OFFLINE</p>
+  <strong>ACTIVATE THE FIFTH SIGNAL</strong>
+  <small>enables sound · keeps this display awake</small>
+</button>
+
+<div id="tv-flash" class="tv-flash" hidden></div>
+<div id="toasts" class="toasts"></div>
+<canvas id="confetti"></canvas>
+<script src="/shared/hubnet.js"></script>
+<script src="/shared/qr.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

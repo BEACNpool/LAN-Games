@@ -49,6 +49,22 @@ window.GameArt = (() => {
       <path class="ga-streak" d="M151 28v118"/>
       <circle class="ga-core ga-pulse" cx="151" cy="150" r="13"/>
       <path class="ga-b ga-solid" d="M116 322h70l24 32h-118z"/>`,
+    fifthsignal: `
+      <g class="ga-spin">
+        <circle class="ga-ring" cx="150" cy="191" r="111"/>
+        <circle class="ga-b-stroke ga-ring" cx="150" cy="191" r="72"/>
+        <path class="ga-line" d="M150 80v222M39 191h222M70 120l160 142M230 120L70 262"/>
+      </g>
+      <g class="ga-drift">
+        <circle class="ga-panel" cx="150" cy="72" r="22"/>
+        <circle class="ga-b" cx="257" cy="157" r="22"/>
+        <circle class="ga-panel" cx="216" cy="287" r="22"/>
+        <circle class="ga-b" cx="84" cy="287" r="22"/>
+        <circle class="ga-panel" cx="43" cy="157" r="22"/>
+      </g>
+      <circle class="ga-core ga-pulse" cx="150" cy="191" r="38"/>
+      <path class="ga-cut-stroke" d="M121 191h13l8-18 14 37 9-19h15"/>
+      <path class="ga-streak" d="M45 337Q150 300 255 337"/>`,
     buzzboard: `
       <g class="ga-drift">${[0, 1, 2].map((r) => [0, 1, 2].map((c) =>
         tile(39 + c * 76, 72 + r * 66, 61, 48, c === 1 && r === 1 ? "?" : `${(r + 1) * 2}00`,
