@@ -1,10 +1,9 @@
 // tests/_resolve.mjs — portable dependency resolution for the browser playtests.
 //
-// The .mjs playtests drive a real browser through puppeteer-core, which is NOT
-// vendored in this repo (there is no package.json here — the server is Python).
-// Two ways to satisfy it:
+// The .mjs playtests drive a real browser through puppeteer-core. It is declared
+// as a reproducible dev dependency, but is not vendored. Two ways to satisfy it:
 //
-//   1. Install it locally:      npm i puppeteer-core         (in the repo root)
+//   1. Install the lockfile:    npm ci                       (in the repo root)
 //   2. Reuse an existing copy:  export GAMEHUB_NODE_MODULES=/path/to/other/project
 //      — handy if you already keep one shared puppeteer install for several
 //      projects. Point it at the project directory or straight at its

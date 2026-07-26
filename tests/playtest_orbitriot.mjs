@@ -6,7 +6,7 @@ import os from "os";
 import fs from "fs";
 
 import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
-const BASE = process.argv[2] || "http://127.0.0.1:8797";
+const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/orbitriot-shots";
 fs.mkdirSync(OUT, { recursive: true });
 

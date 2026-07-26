@@ -5,7 +5,7 @@ import os from "os";
 import fs from "fs";
 import { puppeteer, CHROME_PATH } from "./_resolve.mjs";
 
-const BASE = process.argv[2] || "http://127.0.0.1:8097";
+const BASE = process.argv[2] || "http://127.0.0.1:8096";
 const OUT = process.argv[3] || os.homedir() + "/tmp/gamehub-shots";
 fs.mkdirSync(OUT, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

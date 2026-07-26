@@ -18,8 +18,6 @@ import re
 import subprocess
 from pathlib import Path
 
-import pytest
-
 REPO = Path(__file__).resolve().parent.parent
 
 # Values that are plainly stand-ins rather than someone's real network. Used by
